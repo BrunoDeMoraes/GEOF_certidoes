@@ -39,5 +39,5 @@ for emp in fornecedores:
         index += 1
     print(empresadic)
     empresasdic[emp] = empresadic
-
-#comentei
+for emp in empresasdic:
+    print(f'{emp} - {empresasdic[emp]}')
