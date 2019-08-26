@@ -103,10 +103,7 @@ class Uniao(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        if data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento:
-            return True
-        else:
-            return False
+        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Tst(Certidao):
     def __init__(self, dia, mes, ano):
@@ -138,10 +135,7 @@ class Tst(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        if data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento:
-            return True
-        else:
-            return False
+        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Fgts(Certidao):
     def __init__(self, dia, mes, ano):
@@ -171,10 +165,7 @@ class Fgts(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        if data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento:
-            return True
-        else:
-            return False
+        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Gdf(Certidao):
     def __init__(self, dia, mes, ano):
@@ -214,8 +205,4 @@ class Gdf(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        if data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento:
-            return True
-        else:
-            return False
-
+        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
