@@ -220,3 +220,4 @@ class Gdf(Certidao):
             return False
 
         #qualquer comentário
+        #qualquer comentário
