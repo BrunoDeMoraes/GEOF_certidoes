@@ -47,7 +47,7 @@ class Certidao:
                 os.makedirs(self.pdf_dir + str(emp) + '\Vencidas')
                 os.makedirs(self.pdf_dir + str(emp) + '\Imagens')
                 novos_dir.append(emp)
-        print(f'Foram criadas {len(novos_dir)} novas pastas {novos_dir}.')
+        print(f'Número de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
 
     def certidoes_n_encontradas(self, fornecedores, orgaos):
         total_faltando = 0
