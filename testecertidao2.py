@@ -40,4 +40,4 @@ for emp in fornecedores:
     print(empresadic)
     empresasdic[emp] = empresadic
 
-
+#comentei
