@@ -50,6 +50,7 @@ class Certidao:
         print(f'Foram criadas {len(novos_dir)} novas pastas {novos_dir}.')
 
     def certidoes_n_encontradas(self, fornecedores, orgaos):
+        total_faltando = 0
         for emp in fornecedores:
             itens = []
             faltando = []
@@ -61,6 +62,9 @@ class Certidao:
                     faltando.append(orgao)
             if faltando != []:
                 print(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
+                total_faltando += 1
+        if total_faltando != 0:
+            raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
 
     def pdf_para_jpg(self, fornecedores, orgaos):
         for emp in fornecedores:
