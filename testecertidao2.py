@@ -37,7 +37,9 @@ for emp in fornecedores:
         else:
             empresadic[orgaos[index]] = 'Certidão não compreende data de pagamento'
         index += 1
-    print(empresadic)
     empresasdic[emp] = empresadic
+print('Resultado da conferência:')
+numerador = 0
 for emp in empresasdic:
-    print(f'{emp} - {empresasdic[emp]}')
+    print(f'{numerador} - {emp} - {empresasdic[emp]}')
+    numerador += 1

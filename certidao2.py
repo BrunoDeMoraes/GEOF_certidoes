@@ -94,13 +94,10 @@ class Uniao(Certidao):
         texto = []
         padrao = re.compile('do dia (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        print(emissao_string.group())
         texto.append(emissao_string.group().split()[2])
         padrao = re.compile('Válida até (\d\d)/(\d\d)/(\d\d\d\d)')
         vencimento_string = padrao.search(certidao)
-        print(vencimento_string.group())
         texto.append(vencimento_string.group().split()[2])
-        print(texto)
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
@@ -126,13 +123,10 @@ class Tst(Certidao):
         texto = []
         padrao = re.compile('Expedição: (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        print(emissao_string.group())
         texto.append(emissao_string.group().split()[1])
         padrao = re.compile('Validade: (\d\d)/(\d\d)/(\d\d\d\d)')
         vencimento_string = padrao.search(certidao)
-        print(vencimento_string.group())
         texto.append(vencimento_string.group().split()[1])
-        print(texto)
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
@@ -158,11 +152,9 @@ class Fgts(Certidao):
         texto = []
         padrao = re.compile('(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        print(emissao_string.group())
         texto.append(emissao_string.group().split()[0])
         vencimento_string = padrao.search(certidao)
         texto.append(vencimento_string.group().split()[2])
-        print(texto)
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
@@ -191,18 +183,15 @@ class Gdf(Certidao):
         padrao = re.compile('Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
                             '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        print(emissao_string.group())
         datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
                      emissao_string.group().split()[5]]
         texto.append('/'.join(datasplit))
         padrao = re.compile('Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
                             '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
         vencimento_string = padrao.search(certidao)
-        print(vencimento_string.group())
         datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
                      vencimento_string.group().split()[6]]
         texto.append('/'.join(datasplit2))
-        print(texto)
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
