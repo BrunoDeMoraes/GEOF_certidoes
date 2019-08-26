@@ -219,5 +219,3 @@ class Gdf(Certidao):
         else:
             return False
 
-        #qualquer comentário
-        #qualquer comentário
