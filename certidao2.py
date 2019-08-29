@@ -11,7 +11,7 @@ class Certidao:
         self.dia = dia
         self.mes = mes
         self.ano = ano
-        self.wb = openpyxl.load_workbook(r'D:\Leiturapdf\Matrix PDPAS 2019 - HRG.xlsx')
+        self.wb = openpyxl.load_workbook(r'D:\Leiturapdf\atua.xlsx')
         self.pag = self.wb['PAGAMENTO']
         self.listareferencia = []
         self.referencia = 0
@@ -34,7 +34,10 @@ class Certidao:
         linha = int(referencia[1:])
         while self.pag[coluna + str(linha + desloca)].value != None:
             empresa = self.pag[coluna + str(linha + desloca)].value.split()
-            self.empresas.append(empresa[0])
+            if len(empresa) > 2:
+                self.empresas.append(' '.join(empresa[0:len(empresa) - 1]))
+            else:
+                self.empresas.append(empresa[0])
             desloca += 1
         return self.empresas
 
