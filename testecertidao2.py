@@ -1,6 +1,6 @@
 from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 
-dia = '06'
+dia = '26'
 mes = '08'
 ano = '2019'
 orgaos = ['UNIAO', 'TST', 'FGTS', 'GDF']
@@ -31,6 +31,7 @@ for emp in fornecedores:
     index = 0
     for objeto in lista_objetos:
         cert = objeto.pega_string(emp)
+        print(f'Tudo certo até aqui {emp} {objeto}')
         val = objeto.confere_data(cert)
         if val == True:
             empresadic[orgaos[index]] = 'OK'
