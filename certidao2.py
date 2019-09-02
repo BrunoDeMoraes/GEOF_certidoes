@@ -5,6 +5,7 @@ import os
 import pytesseract
 import re
 import time
+import datetime
 
 class Certidao:
     def __init__(self, dia, mes, ano):
@@ -18,6 +19,12 @@ class Certidao:
         self.datapag = 'CERTIDÕES PARA {}/{}/{}'.format(self.dia, self.mes, self.ano)
         self.empresas = []
         self.pdf_dir = r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\\'
+
+    def mensagem_log(self, mensagem):
+        with open('//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{}-{}-{}.txt'.format(self.dia, self.mes, self.ano),
+                  'a') as log:
+            momento = datetime.datetime.now()
+            log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}")
 
     def pega_referencia(self):
         for linha in self.pag['A1':'P1000']:
