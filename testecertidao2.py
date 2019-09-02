@@ -1,7 +1,7 @@
 from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 
-dia = '26'
-mes = '08'
+dia = '02'
+mes = '09'
 ano = '2019'
 orgaos = ['UNIAO', 'TST', 'FGTS', 'GDF']
 empresasdic = {}
@@ -16,7 +16,11 @@ elif len(lis_ref_cel) > 1:
           f'\nApague os valores duplicados e execute o programa novamente.')
 else:
     ref_cel = lis_ref_cel[0]
+    obj1.mensagem_log(f'Referência encontrada na céclula {lis_ref_cel[0]}')
 fornecedores = obj1.pega_fornecedores(ref_cel)
+obj1.mensagem_log('\n\nFornecedores analisados:')
+for emp in fornecedores:
+    obj1.mensagem_log(f'\n{emp}')
 obj1.cria_diretorio(fornecedores)
 obj1.certidoes_n_encontradas(fornecedores, orgaos)
 obj1.pdf_para_jpg(fornecedores, orgaos)
@@ -32,6 +36,7 @@ for emp in fornecedores:
     for objeto in lista_objetos:
         cert = objeto.pega_string(emp)
         print(f'Tudo certo até aqui {emp} {objeto}')
+        objeto.mensagem_log(f'\npra {emp}')
         val = objeto.confere_data(cert)
         if val == True:
             empresadic[orgaos[index]] = 'OK'
