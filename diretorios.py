@@ -14,8 +14,9 @@ class Diretorio:
 
     def lista_arquivos(self, lista_de_pastas):
         for caminho in lista_de_pastas:
-            for arquivo in os.listdir(caminho):
-                self.lista_de_arquivos.append(f'{caminho}/{arquivo}')
+            if os.path.isdir(caminho):
+                for arquivo in os.listdir(caminho):
+                    self.lista_de_arquivos.append(f'{caminho}/{arquivo}')
         return self.lista_de_arquivos
 
     def renomeia_arquivos(self, lista_de_arquivos, data):
