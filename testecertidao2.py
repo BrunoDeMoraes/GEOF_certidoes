@@ -8,10 +8,13 @@ empresasdic = {}
 
 
 obj1 = Certidao(dia, mes, ano)
+obj1.mensagem_log('\nInício da execução')
 lis_ref_cel = obj1.pega_referencia()
 if len(lis_ref_cel) == 0:
+    obj1.mensagem_log('\nData específicada não encontrada')
     raise Exception('Data não encontrada!')
 elif len(lis_ref_cel) > 1:
+    obj1.mensagem_log('Data informada em multiplicidade')
     raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
           f'\nApague os valores duplicados e execute o programa novamente.')
 else:
