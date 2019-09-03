@@ -24,7 +24,12 @@ class Certidao:
         with open('//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{}-{}-{}.txt'.format(self.dia, self.mes, self.ano),
                   'a') as log:
             momento = datetime.datetime.now()
-            log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}")
+            log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}\n")
+
+    def mensagem_log_sem_horario(self, mensagem):
+        with open('//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{}-{}-{}.txt'.format(self.dia, self.mes, self.ano),
+                  'a') as log:
+            log.write(f"{mensagem}\n")
 
     def pega_referencia(self):
         for linha in self.pag['A1':'P1000']:
@@ -57,7 +62,8 @@ class Certidao:
                 os.makedirs(self.pdf_dir + str(emp) + '\Vencidas')
                 os.makedirs(self.pdf_dir + str(emp) + '\Imagens')
                 novos_dir.append(emp)
-        return (f'Número de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
+        self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
+        print(f'Número de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
 
 
     def certidoes_n_encontradas(self, fornecedores, orgaos):
@@ -73,8 +79,10 @@ class Certidao:
                     faltando.append(orgao)
             if faltando != []:
                 print(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
+                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
                 total_faltando += 1
         if total_faltando != 0:
+            self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
             raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
 
     def pdf_para_jpg(self, fornecedores, orgaos):
@@ -86,6 +94,7 @@ class Certidao:
                     pdf_file = pdf_file[:-4]
                     for page in pages:
                         page.save("{}.jpg".format(pdf_file), "JPEG")
+        self.mensagem_log('\nImagens criadas com sucesso')
 
 
 class Uniao(Certidao):
@@ -115,6 +124,7 @@ class Uniao(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
+        self.mensagem_log(f'União - emissão {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Tst(Certidao):
@@ -144,6 +154,7 @@ class Tst(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
+        self.mensagem_log(f'TST - emissão {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Fgts(Certidao):
@@ -172,6 +183,7 @@ class Fgts(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
+        self.mensagem_log(f'FGTS - emissão {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Gdf(Certidao):
@@ -209,4 +221,5 @@ class Gdf(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
+        self.mensagem_log(f'GDF - emissão {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
