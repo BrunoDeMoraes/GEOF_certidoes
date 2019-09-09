@@ -50,12 +50,12 @@ for emp in fornecedores:
             empresadic[orgaos[index]] = 'Certidão não compreende data de pagamento'
         index += 1
     empresasdic[emp] = empresadic
-print('Resultado da conferência:')
-obj1.mensagem_log_sem_horario('\nResultado da conferência:')
+print('RESULTADO DA CONFERÊNCIA:')
+obj1.mensagem_log_sem_horario('\nRESULTADO DA CONFERÊNCIA:')
 numerador = 0
 for emp in empresasdic:
-    print(f'{numerador + 1} - {emp} - {empresasdic[emp]}')
-    obj1.mensagem_log(f'{numerador + 1} - {emp} - {empresasdic[emp]}')
+    print(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}')
+    obj1.mensagem_log_sem_horario(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}\n')
     numerador += 1
 tempo_final = time.time()
 tempo_de_execução = int((tempo_final - tempo_inicial))
