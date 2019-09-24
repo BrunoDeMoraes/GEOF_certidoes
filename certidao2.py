@@ -18,7 +18,7 @@ class Certidao:
         self.referencia = 0
         self.datapag = 'CERTIDÕES PARA {}/{}/{}'.format(self.dia, self.mes, self.ano)
         self.empresas = []
-        self.pdf_dir = r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\\'
+        self.pdf_dir = r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\\'
 
     def mensagem_log(self, mensagem):
         with open('//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{}-{}-{}.txt'.format(self.dia, self.mes, self.ano),
@@ -106,7 +106,7 @@ class Uniao(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'UNIAO':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\{}\{}'.format(emp, imagem)),
+                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
                     lang='por')
                 return certidao
 
@@ -136,7 +136,7 @@ class Tst(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'TST':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\{}\{}'.format(emp, imagem)),
+                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
                     lang='por')
                 return certidao
 
@@ -166,7 +166,7 @@ class Fgts(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'FGTS':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\{}\{}'.format(emp, imagem)),
+                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
                     lang='por')
                 return certidao
 
@@ -195,7 +195,7 @@ class Gdf(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'GDF':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões - Bruno_teste\{}\{}'.format(emp, imagem)),
+                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
                     lang='por')
                 return certidao
 
