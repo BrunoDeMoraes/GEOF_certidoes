@@ -10,8 +10,6 @@ dia = '31'
 mes = '10'
 ano = '2019'
 orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
-empresasdic = {}
-
 
 obj1 = Certidao(dia, mes, ano)
 lis_ref_cel = obj1.pega_referencia()
@@ -25,25 +23,16 @@ else:
 fornecedores = obj1.pega_fornecedores(ref_cel)
 print(fornecedores)
 
-pasta_mae = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
-for emp in fornecedores:
-    os.chdir(f'{pasta_mae}/{emp}')
-    os.makedirs(f'{pasta_mae}/0 - Renomear/{emp}')
-    for arquivo in os.listdir(f'{pasta_mae}/{emp}'):
-        if arquivo.endswith('pdf'):
-            shutil.copy(f'{pasta_mae}/{emp}/{arquivo}', f'{pasta_mae}/0 - Renomear/{emp}/{arquivo}')
-
-pasta_mae2 = '//hrg-74977/GEOF/CERTIDÕES/Certidões2/0 - Renomear'
-for empresa in os.listdir(pasta_mae2):
+pasta_mae2 = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
+for empresa in fornecedores:
     origem = f'{pasta_mae2}/{empresa}'
     print(empresa)
     os.chdir(origem)
     for imagem in os.listdir(origem):
         if imagem.endswith(".pdf"):
-            pages = convert_from_path(imagem, 300)
+            pages = convert_from_path(imagem, 300, last_page=1)
             imagem = imagem[:-4]
-            for page in pages:
-                page.save(f"{imagem}.jpg", "JPEG")
+            pages[0].save(f"{imagem}.jpg", "JPEG")
     for imagem in os.listdir(origem):
         if imagem.endswith(".jpg"):
             certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang = 'por')
