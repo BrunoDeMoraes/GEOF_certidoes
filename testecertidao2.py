@@ -2,10 +2,10 @@ from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 import time
 
 tempo_inicial = time.time()
-dia = '30'
-mes = '09'
+dia = '31'
+mes = '10'
 ano = '2019'
-orgaos = ['UNIAO', 'TST', 'FGTS', 'GDF']
+orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
 empresasdic = {}
 
 
@@ -57,6 +57,7 @@ for emp in empresasdic:
     print(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}')
     obj1.mensagem_log_sem_horario(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}\n')
     numerador += 1
+obj1.apaga_imagem(fornecedores)
 tempo_final = time.time()
 tempo_de_execução = int((tempo_final - tempo_inicial))
 obj1.mensagem_log(f'\nTempo total de execução: {tempo_de_execução // 60} minutos e {tempo_de_execução % 60} segundos.')
