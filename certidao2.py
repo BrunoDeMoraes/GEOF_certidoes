@@ -12,13 +12,13 @@ class Certidao:
         self.dia = dia
         self.mes = mes
         self.ano = ano
-        self.wb = openpyxl.load_workbook(r'D:\Leiturapdf\atua.xlsx')
+        self.wb = openpyxl.load_workbook('//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx')
         self.pag = self.wb['PAGAMENTO']
         self.listareferencia = []
         self.referencia = 0
         self.datapag = 'CERTIDÕES PARA {}/{}/{}'.format(self.dia, self.mes, self.ano)
         self.empresas = []
-        self.pdf_dir = r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\\'
+        self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2/'
 
     def mensagem_log(self, mensagem):
         with open('//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{}-{}-{}.txt'.format(self.dia, self.mes, self.ano),
@@ -59,8 +59,8 @@ class Certidao:
             if os.path.isdir(self.pdf_dir + str(emp)):
                 continue
             else:
-                os.makedirs(self.pdf_dir + str(emp) + '\Vencidas')
-                os.makedirs(self.pdf_dir + str(emp) + '\Imagens')
+                os.makedirs(self.pdf_dir + str(emp) + '/Vencidas')
+                os.makedirs(self.pdf_dir + str(emp) + '/Imagens')
                 novos_dir.append(emp)
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
         print(f'Número de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
@@ -90,12 +90,17 @@ class Certidao:
             os.chdir(self.pdf_dir + str(emp))
             for pdf_file in os.listdir(self.pdf_dir + str(emp)):
                 if pdf_file.endswith(".pdf") and pdf_file.split()[0] in orgaos:
-                    pages = convert_from_path(pdf_file, 300)
+                    pages = convert_from_path(pdf_file, 300, last_page = 1)
                     pdf_file = pdf_file[:-4]
-                    for page in pages:
-                        page.save("{}.jpg".format(pdf_file), "JPEG")
+                    pages[0].save(f"{pdf_file}.jpg", "JPEG")
         self.mensagem_log('\nImagens criadas com sucesso')
 
+    def apaga_imagem(self, fornercedores):
+        for emp in fornercedores:
+            os.chdir(self.pdf_dir + str(emp))
+            for arquivo in os.listdir(self.pdf_dir + str(emp)):
+                if arquivo.endswith(".jpg"):
+                    os.unlink(self.pdf_dir + str(emp) + f'/{arquivo}')
 
 class Uniao(Certidao):
     def __init__(self, dia, mes, ano):
@@ -104,9 +109,9 @@ class Uniao(Certidao):
     def pega_string(self, emp):
         os.chdir(self.pdf_dir + str(emp))
         for imagem in os.listdir(self.pdf_dir + str(emp)):
-            if imagem.endswith(".jpg") and imagem.split()[0] == 'UNIAO':
+            if imagem.endswith(".jpg") and imagem.split()[0] == 'UNIÃO':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
+                    Image.open(f'//hrg-74977/GEOF/CERTIDÕES/Certidões2/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -136,7 +141,7 @@ class Tst(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'TST':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
+                    Image.open(f'//hrg-74977/GEOF/CERTIDÕES/Certidões2/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -166,7 +171,7 @@ class Fgts(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'FGTS':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
+                    Image.open(f'//hrg-74977/GEOF/CERTIDÕES/Certidões2/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -195,7 +200,7 @@ class Gdf(Certidao):
         for imagem in os.listdir(self.pdf_dir + str(emp)):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'GDF':
                 certidao = pytesseract.image_to_string(
-                    Image.open(r'\\hrg-74977\GEOF\CERTIDÕES\Certidões\{}\{}'.format(emp, imagem)),
+                    Image.open(f'//hrg-74977/GEOF/CERTIDÕES/Certidões2/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
