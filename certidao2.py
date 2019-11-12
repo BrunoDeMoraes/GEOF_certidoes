@@ -6,6 +6,7 @@ import pytesseract
 import re
 import time
 import datetime
+import shutil
 
 class Certidao:
     def __init__(self, dia, mes, ano):
@@ -93,6 +94,48 @@ class Certidao:
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
         self.mensagem_log('\nImagens criadas com sucesso')
+
+    def pdf_para_jpg_renomear(self, fornecedores):
+        for emp in fornecedores:
+            os.chdir(f'{self.pdf_dir}/{str(emp)}')
+            for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+                if pdf_file.endswith(".pdf"):
+                    pages = convert_from_path(pdf_file, 300, last_page=1)
+                    pdf_file = pdf_file[:-4]
+                    pages[0].save(f"{pdf_file}.jpg", "JPEG")
+
+    def gera_nome(self, fornecedores):
+        for emp in fornecedores:
+            os.chdir(f'{self.pdf_dir}/{(emp)}')
+            origem = f'{self.pdf_dir}/{emp}'
+            for imagem in os.listdir(origem):
+                if imagem.endswith(".jpg"):
+                    certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang='por')
+                    padroes = ['FGTS - CRF', 'JUNTO AO GDF', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA']
+                    valores = {'FGTS - CRF': 'FGTS', 'JUNTO AO GDF': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
+                               'MINISTÉRIO DA FAZENDA': 'UNIÃO'}
+                    datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
+                             'JUNTO AO GDF': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                             '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
+                             'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
+                             'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)'}
+                    for frase in padroes:
+                        if frase in certidao:
+                            print(f'certidão {valores[frase]}')
+                            data = re.compile(datas[frase])
+                            procura = data.search(certidao)
+                            datanome = procura.group()
+                            print(datanome)
+                            separa = datanome.split('/')
+                            junta = '-'.join(separa)
+                            print(junta)
+                            if ':' in junta:
+                                retira = junta.split(':')
+                                volta = ' '.join(retira)
+                                print(volta)
+                                junta = volta
+                                print(f'tst junta = {junta}')
+                            shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
 
     def apaga_imagem(self, fornercedores):
         for emp in fornercedores:
