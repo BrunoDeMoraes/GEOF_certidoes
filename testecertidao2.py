@@ -2,12 +2,11 @@ from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 import time
 
 tempo_inicial = time.time()
-dia = '31'
-mes = '10'
+dia = '01'
+mes = '12'
 ano = '2019'
 orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
 empresasdic = {}
-
 
 obj1 = Certidao(dia, mes, ano)
 obj1.mensagem_log('Início da execução')
