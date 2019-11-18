@@ -22,18 +22,18 @@ class Certidao:
         self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
 
     def mensagem_log(self, mensagem):
-        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.dia}-{self.mes}-{self.ano}.txt',
+        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}\n")
 
     def mensagem_log_sem_horario(self, mensagem):
-        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.dia}-{self.mes}-{self.ano}.txt',
+        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             log.write(f"{mensagem}\n")
 
     def pega_referencia(self):
-        for linha in self.pag['A1':'P1000']:
+        for linha in self.pag['A1':'F500']:
             for celula in linha:
                 if celula.value != self.datapag:
                     continue
