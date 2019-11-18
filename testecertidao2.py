@@ -2,8 +2,8 @@ from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 import time
 
 tempo_inicial = time.time()
-dia = '01'
-mes = '12'
+dia = '27'
+mes = '08'
 ano = '2019'
 orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
 empresasdic = {}
