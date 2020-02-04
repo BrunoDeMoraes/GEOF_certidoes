@@ -2,9 +2,9 @@ from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 import time
 
 tempo_inicial = time.time()
-dia = '27'
-mes = '08'
-ano = '2019'
+dia = '31'
+mes = '01'
+ano = '2020'
 orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
 empresasdic = {}
 
@@ -46,14 +46,15 @@ for emp in fornecedores:
         if val == True:
             empresadic[orgaos[index]] = 'OK'
         else:
-            empresadic[orgaos[index]] = 'Certidão não compreende data de pagamento'
+            empresadic[orgaos[index]] = 'INCOMPATÍVEL'
         index += 1
     empresasdic[emp] = empresadic
 print('RESULTADO DA CONFERÊNCIA:')
 obj1.mensagem_log_sem_horario('\nRESULTADO DA CONFERÊNCIA:')
 numerador = 0
 for emp in empresasdic:
-    print(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}')
+    print(f'{numerador + 1 :>2} - {emp}')
+    print(f'{empresasdic[emp]}')
     obj1.mensagem_log_sem_horario(f'{numerador + 1 :>2} - {emp :^30} - {empresasdic[emp]}\n')
     numerador += 1
 obj1.apaga_imagem(fornecedores)
