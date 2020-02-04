@@ -1,8 +1,8 @@
 from certidao2 import Certidao
 
-dia = '27'
-mes = '08'
-ano = '2019'
+dia = '31'
+mes = '01'
+ano = '2020'
 
 obj1 = Certidao(dia, mes, ano)
 lis_ref_cel = obj1.pega_referencia()
