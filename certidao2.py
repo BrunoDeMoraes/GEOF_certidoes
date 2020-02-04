@@ -20,12 +20,19 @@ class Certidao:
         self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
         self.empresas = []
         self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
+        self.percentual = 0
 
     def mensagem_log(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}\n")
+
+    def mensagem_log_sem_data(self, mensagem):
+        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
+                  'a') as log:
+            momento = datetime.datetime.now()
+            log.write(f"{mensagem} - {momento.strftime('%H:%M:%S')}\n")
 
     def mensagem_log_sem_horario(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
@@ -64,7 +71,7 @@ class Certidao:
                 os.makedirs(f'{self.pdf_dir}/{str(emp)}/Imagens')
                 novos_dir.append(emp)
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
-        print(f'Número de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
+        print(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
 
     def certidoes_n_encontradas(self, fornecedores, orgaos):
         total_faltando = 0
@@ -78,7 +85,7 @@ class Certidao:
                 if orgao not in itens:
                     faltando.append(orgao)
             if faltando != []:
-                print(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
+                print(f'Para a empresa {emp} não foram encontradas as certidões {faltando}\n')
                 self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
                 total_faltando += 1
         if total_faltando != 0:
@@ -111,14 +118,16 @@ class Certidao:
             for imagem in os.listdir(origem):
                 if imagem.endswith(".jpg"):
                     certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang='por')
-                    padroes = ['FGTS - CRF', 'JUNTO AO GDF', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA']
-                    valores = {'FGTS - CRF': 'FGTS', 'JUNTO AO GDF': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
-                               'MINISTÉRIO DA FAZENDA': 'UNIÃO'}
+                    padroes = ['FGTS - CRF', 'Brasília,', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA', 'GOVERNO DO DISTRITO FEDERAL']
+                    valores = {'FGTS - CRF': 'FGTS', 'Brasília,': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
+                               'MINISTÉRIO DA FAZENDA': 'UNIÃO', 'GOVERNO DO DISTRITO FEDERAL':'GDF'}
                     datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'JUNTO AO GDF': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                             'Brasília,': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
                                              '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
                              'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)'}
+                             'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
+                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(Abril)?(maio)?(junho)?'
+                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
                     for frase in padroes:
                         if frase in certidao:
                             print(f'certidão {valores[frase]}')
@@ -171,7 +180,8 @@ class Uniao(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log(f'União - emissão {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'UNIÃO - emissão: {emissao}; válida até: {vencimento}')
+        print(f'    UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Tst(Certidao):
@@ -201,7 +211,8 @@ class Tst(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log(f'TST - emissão {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'TST   - emissão: {emissao}; válida até: {vencimento}')
+        print((f'    TST   - emissão: {emissao}; válida até: {vencimento}'))
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Fgts(Certidao):
@@ -230,7 +241,8 @@ class Fgts(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log(f'FGTS - emissão {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'FGTS  - emissão: {emissao}; válida até: {vencimento}')
+        print(f'    FGTS  - emissão: {emissao}; válida até: {vencimento}')
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
 
 class Gdf(Certidao):
@@ -250,23 +262,38 @@ class Gdf(Certidao):
         texto = []
         meses = {'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04', 'Maio': '05', 'Junho': '06',
                  'Julho': '07', 'Agosto': '08', 'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'}
-        padrao = re.compile('Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
-                            '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
-        emissao_string = padrao.search(certidao)
-        datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
-                     emissao_string.group().split()[5]]
-        texto.append('/'.join(datasplit))
-        padrao = re.compile('Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
-                            '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
-        vencimento_string = padrao.search(certidao)
-        datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
-                     vencimento_string.group().split()[6]]
-        texto.append('/'.join(datasplit2))
+        meses2 = {'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04', 'maio': '05', 'junho': '06',
+                 'julho': '07', 'agosto': '08', 'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'}
+        if "GOVERNO" not in certidao:
+            padrao = re.compile('Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
+                                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+            emissao_string = padrao.search(certidao)
+            datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
+                         emissao_string.group().split()[5]]
+            texto.append('/'.join(datasplit))
+            padrao = re.compile(
+                'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
+                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+            vencimento_string = padrao.search(certidao)
+            datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
+                          vencimento_string.group().split()[6]]
+            texto.append('/'.join(datasplit2))
+        else:
+            padrao = re.compile('Certidão emitida via internet em (\d\d)/(\d\d)/(\d\d\d\d)')
+            emissao_string = padrao.search(certidao)
+            texto.append(emissao_string.group().split()[5])
+            padrao = re.compile('Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+                                '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
+            vencimento_string = padrao.search(certidao)
+            datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
+                         vencimento_string.group().split()[6]]
+            texto.append('/'.join(datasplit2))
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log(f'GDF - emissão {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'GDF   - emissão: {emissao}; válida até: {vencimento}')
+        print((f'    GDF   - emissão: {emissao}; válida até: {vencimento}'))
         return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
