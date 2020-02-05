@@ -15,6 +15,7 @@ class Certidao:
         self.ano = ano
         self.wb = openpyxl.load_workbook('//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx')
         self.pag = self.wb['PAGAMENTO']
+        self.forn = self.wb['FORNECEDORES']
         self.listareferencia = []
         self.referencia = 0
         self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
@@ -61,6 +62,29 @@ class Certidao:
             desloca += 1
         return self.empresas
 
+    def pega_cnpj(self, empresas_a_atualizar):
+        for emp in empresas_a_atualizar:
+            for linha in self.forn['A6':'A500']:
+                for celula in linha:
+                    if celula.value == None:
+                        continue
+                    else:
+                        empresa = celula.value.split()
+                        nome_da_empresa = ''
+                        if len(empresa) > 2:
+                            nome_da_empresa = ' '.join(empresa[0:len(empresa) - 1])
+                        else:
+                            nome_da_empresa = empresa[0]
+                        if nome_da_empresa != emp:
+                            continue
+                        else:
+                            cnpj_formatado = str(self.forn['F' + str(celula.row)].value)
+                            cnpj_tratado = ''
+                            for digito in cnpj_formatado:
+                                if digito in '0123456789':
+                                    cnpj_tratado += digito
+                            empresas_a_atualizar[emp].append(cnpj_tratado)
+
     def cria_diretorio(self, fornecedores):
         novos_dir = []
         for emp in fornecedores:
@@ -100,9 +124,10 @@ class Certidao:
                     pages = convert_from_path(pdf_file, 300, last_page = 1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
-        self.mensagem_log('\nImagens criadas com sucesso')
+
 
     def pdf_para_jpg_renomear(self, fornecedores):
+        print('CRIANDO IMAGENS:\n')
         for emp in fornecedores:
             os.chdir(f'{self.pdf_dir}/{str(emp)}')
             for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
@@ -110,8 +135,14 @@ class Certidao:
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
+                    self.percentual += (25 / len(fornecedores))
+                    print(f'Total de imagens criadas: {self.percentual}%')
+        self.mensagem_log('\nIMAGENS CRIADAS COM SUCESSO!')
+        self.percentual = 0
+
 
     def gera_nome(self, fornecedores):
+        print('\nRENOMEANDO CERTIDÕES:\n\n')
         for emp in fornecedores:
             os.chdir(f'{self.pdf_dir}/{(emp)}')
             origem = f'{self.pdf_dir}/{emp}'
@@ -130,21 +161,19 @@ class Certidao:
                                              '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
                     for frase in padroes:
                         if frase in certidao:
-                            print(f'certidão {valores[frase]}')
+                            self.percentual += (25 / len(fornecedores))
+                            print(f'{emp} - certidão {valores[frase]} renomeada - Total executado: {self.percentual}%\n')
                             data = re.compile(datas[frase])
                             procura = data.search(certidao)
                             datanome = procura.group()
-                            print(datanome)
                             separa = datanome.split('/')
                             junta = '-'.join(separa)
-                            print(junta)
                             if ':' in junta:
                                 retira = junta.split(':')
                                 volta = ' '.join(retira)
-                                print(volta)
                                 junta = volta
-                                print(f'tst junta = {junta}')
                             shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
+        print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
 
     def apaga_imagem(self, fornercedores):
         for emp in fornercedores:
