@@ -157,17 +157,33 @@ class Certidao:
                                              '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
                              'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
                              'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(Abril)?(maio)?(junho)?'
+                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
+                    datas2 = {'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
                                              '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
                     for frase in padroes:
                         if frase in certidao:
                             self.percentual += (25 / len(fornecedores))
                             print(f'{emp} - certidão {valores[frase]} renomeada - Total executado: {self.percentual}%\n')
-                            data = re.compile(datas[frase])
-                            procura = data.search(certidao)
-                            datanome = procura.group()
-                            separa = datanome.split('/')
-                            junta = '-'.join(separa)
+                            if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                                try:
+                                    data = re.compile(datas2[frase])
+                                    procura = data.search(certidao)
+                                    datanome = procura.group()
+                                    separa = datanome.split('/')
+                                    junta = '-'.join(separa)
+                                except AttributeError:
+                                    data = re.compile(datas[frase])
+                                    procura = data.search(certidao)
+                                    datanome = procura.group()
+                                    separa = datanome.split('/')
+                                    junta = '-'.join(separa)
+                            else:
+                                data = re.compile(datas[frase])
+                                procura = data.search(certidao)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
                             if ':' in junta:
                                 retira = junta.split(':')
                                 volta = ' '.join(retira)
@@ -311,14 +327,25 @@ class Gdf(Certidao):
             padrao = re.compile('Certidão emitida via internet em (\d\d)/(\d\d)/(\d\d\d\d)')
             emissao_string = padrao.search(certidao)
             texto.append(emissao_string.group().split()[5])
-            padrao = re.compile('Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
-                                '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
-            vencimento_string = padrao.search(certidao)
-            datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
-                         vencimento_string.group().split()[6]]
+            try:
+                padrao = re.compile('Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+                                    '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
+                vencimento_string = padrao.search(certidao)
+                datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
+                             vencimento_string.group().split()[6]]
+            except AttributeError:
+                padrao = re.compile('Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+                                    '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
+                vencimento_string = padrao.search(certidao)
+                datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
+                             vencimento_string.group().split()[6]]
             texto.append('/'.join(datasplit2))
         emissao = texto[0]
-        vencimento = texto[1]
+        vencimento = 0
+        if len(texto[1]) != 10:
+            vencimento = f'0{texto[1]}'
+        else:
+            vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
