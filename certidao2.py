@@ -120,6 +120,12 @@ class Certidao:
         for emp in fornecedores:
             os.chdir(f'{self.pdf_dir}/{str(emp)}')
             for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+                if '00.MERGE' in pdf_file:
+                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
+                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                    else:
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
                 if pdf_file.endswith(".pdf") and pdf_file.split()[0] in orgaos:
                     pages = convert_from_path(pdf_file, 300, last_page = 1)
                     pdf_file = pdf_file[:-4]
@@ -131,7 +137,14 @@ class Certidao:
         for emp in fornecedores:
             os.chdir(f'{self.pdf_dir}/{str(emp)}')
             for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
-                if pdf_file.endswith(".pdf"):
+                if '00.MERGE' in pdf_file:
+                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
+                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                    else:
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+            
+                elif pdf_file.endswith(".pdf"):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
@@ -157,10 +170,12 @@ class Certidao:
                                              '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
                              'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
                              'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                             '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
                                              '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
                     datas2 = {'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
-                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
+                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                             '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
                     for frase in padroes:
                         if frase in certidao:
                             self.percentual += (25 / len(fornecedores))
@@ -308,17 +323,20 @@ class Gdf(Certidao):
         meses = {'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04', 'Maio': '05', 'Junho': '06',
                  'Julho': '07', 'Agosto': '08', 'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'}
         meses2 = {'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04', 'maio': '05', 'junho': '06',
-                 'julho': '07', 'agosto': '08', 'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12'}
+                 'julho': '07', 'agosto': '08', 'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12', 'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04', 'Maio': '05', 'Junho': '06',
+                 'Julho': '07', 'Agosto': '08', 'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'}
         if "GOVERNO" not in certidao:
             padrao = re.compile('Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
-                                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+                                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
             emissao_string = padrao.search(certidao)
             datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
                          emissao_string.group().split()[5]]
             texto.append('/'.join(datasplit))
             padrao = re.compile(
                 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
-                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
             vencimento_string = padrao.search(certidao)
             datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
                           vencimento_string.group().split()[6]]
@@ -328,13 +346,15 @@ class Gdf(Certidao):
             emissao_string = padrao.search(certidao)
             texto.append(emissao_string.group().split()[5])
             try:
-                padrao = re.compile('Válida até (\d\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+                padrao = re.compile('Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
+                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
                                     '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
                 vencimento_string = padrao.search(certidao)
                 datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
                              vencimento_string.group().split()[6]]
             except AttributeError:
-                padrao = re.compile('Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+                padrao = re.compile('Válida até (\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
+                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
                                     '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
                 vencimento_string = padrao.search(certidao)
                 datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
