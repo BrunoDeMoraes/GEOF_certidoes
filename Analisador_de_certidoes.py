@@ -5,7 +5,7 @@ import time
 tela = Tk()
 tela.resizable(False, False)
 tela.title('GEOF - Analisador de certidões')
-tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
+#tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
 
 def executa():
     global variavel
@@ -37,10 +37,12 @@ def executa():
     fornecedores = obj1.pega_fornecedores(ref_cel)
     obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
     print('\nFornecedores analisados:')
+    #obj1.apaga_imagem(fornecedores)
     for emp in fornecedores:
         print(f'{emp}')
         obj1.mensagem_log_sem_horario(f'{emp}')
     obj1.cria_diretorio(fornecedores)
+    obj1.apaga_imagem(fornecedores)
     obj1.certidoes_n_encontradas(fornecedores, orgaos)
     obj1.pdf_para_jpg(fornecedores, orgaos)
     objUniao = Uniao(dia, mes, ano)
@@ -115,6 +117,7 @@ def renomeia():
     else:
         ref_cel = lis_ref_cel[0]
     fornecedores = obj1.pega_fornecedores(ref_cel)
+    obj1.apaga_imagem(fornecedores)
     obj1.pdf_para_jpg_renomear(fornecedores)
     obj1.gera_nome(fornecedores)
     obj1.apaga_imagem(fornecedores)
