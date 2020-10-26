@@ -122,6 +122,26 @@ def renomeia():
     obj1.gera_nome(fornecedores)
     obj1.apaga_imagem(fornecedores)
 
+def transfere_certidoes():
+    global variavel
+    global variavel2
+    global variavel3
+    dia = variavel.get()
+    mes = variavel2.get()
+    ano = variavel3.get()
+    global obj1
+    obj1 = Certidao(dia, mes, ano)
+    lis_ref_cel = obj1.pega_referencia()
+    if len(lis_ref_cel) == 0:
+        raise Exception('Data não encontrada!')
+    elif len(lis_ref_cel) > 1:
+        raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
+                        f'\nApague os valores duplicados e execute o programa novamente.')
+    else:
+        ref_cel = lis_ref_cel[0]
+    fornecedores = obj1.pega_fornecedores(ref_cel)
+    obj1.certidoes_para_pagamento(fornecedores)
+
 frame_mestre = LabelFrame(tela, padx=0, pady=0)
 frame_mestre.pack(padx=1, pady=1)
 
@@ -177,9 +197,15 @@ botao_analisar = Button(frame_mestre, text='Analisar\ncertidões', command=execu
                         fg='green', font=('Helvetica', 10, 'bold'), bd=1)
 
 titulo_renomear = Label(frame_mestre, text ='''Adequar os nomes das
-certidoes atualizadas''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+certidões atualizadas''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
 
 botao_renomear = Button(frame_mestre, text='Renomear\ncertidões', command=renomeia, padx=20, pady=10, bg='white',
+                        fg='green', font=('Helvetica', 10, 'bold'), bd=1)
+
+titulo_transfere_arquivos = Label(frame_mestre, text ='''Criar pasta contendo
+certidões para pagamento''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+
+botao_transfere_arquivos = Button(frame_mestre, text='Transferir\ncertidões', command=transfere_certidoes, padx=20, pady=10, bg='white',
                         fg='green', font=('Helvetica', 10, 'bold'), bd=1)
 
 roda_pe = Label(frame_mestre, text ="SRSSU/DA/GEOF", pady=0, padx=0, bg='green', fg='white',
@@ -196,6 +222,8 @@ titulo_analisar.grid(row=3, column=4, columnspan=1, padx = 15, pady=10, ipadx=10
 botao_analisar.grid(row=3, column=5, padx=0, pady=30)
 titulo_renomear.grid(row=4, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
 botao_renomear.grid(row=4, column=5, padx=0,pady=30)
-roda_pe.grid(row=5, column=1, columnspan=10, pady=5, sticky=W+E)
+titulo_transfere_arquivos.grid(row=5, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
+botao_transfere_arquivos.grid(row=5, column=5, padx=0,pady=30)
+roda_pe.grid(row=6, column=1, columnspan=10, pady=5, sticky=W+E)
 
 tela.mainloop()
