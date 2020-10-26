@@ -97,7 +97,6 @@ class Certidao:
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
         print(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
 
-
     def certidoes_para_pagamento(self, fornecedores):
         pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
         if os.path.exists(f'{pagamento_por_data}'):
