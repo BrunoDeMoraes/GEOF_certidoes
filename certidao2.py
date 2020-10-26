@@ -97,6 +97,22 @@ class Certidao:
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
         print(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
 
+
+    def certidoes_para_pagamento(self, fornecedores):
+        pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
+        if os.path.exists(f'{pagamento_por_data}'):
+            print('Já existe pasta para pagamento na data informada')
+        else:
+            os.makedirs(pagamento_por_data)
+            for emp in fornecedores:
+                pasta_da_empresa = f'{self.pdf_dir}/{str(emp)}'
+                os.makedirs(f'{pagamento_por_data}/{emp}')
+                os.chdir(f'{pasta_da_empresa}')
+                for pdf_file in os.listdir(f'{pasta_da_empresa}'):
+                    if pdf_file.endswith(".pdf"):
+                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{pagamento_por_data}/{emp}/{pdf_file}')
+
+
     def certidoes_n_encontradas(self, fornecedores, orgaos):
         total_faltando = 0
         for emp in fornecedores:
