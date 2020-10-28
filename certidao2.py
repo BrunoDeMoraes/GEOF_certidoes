@@ -7,6 +7,7 @@ import re
 import time
 import datetime
 import shutil
+import PyPDF2
 
 class Certidao:
     def __init__(self, dia, mes, ano):
@@ -167,6 +168,41 @@ class Certidao:
                     print(f'Total de imagens criadas: {self.percentual}%')
         self.mensagem_log('\nIMAGENS CRIADAS COM SUCESSO!')
         self.percentual = 0
+
+    def merge(self, fornecedores):
+        pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
+        if os.path.exists(f'{pasta_de_trabalho}/Merge'):
+            print('Já existe pasta para mesclagem na data informada')
+        else:
+            os.makedirs(f'{pasta_de_trabalho}/Merge')
+        os.chdir(pasta_de_trabalho)
+        for arquivo_pdf in os.listdir(pasta_de_trabalho):
+            os.chdir(pasta_de_trabalho)
+            if arquivo_pdf.endswith(".pdf"):
+                for emp in fornecedores:
+                    if emp in arquivo_pdf:
+                        pdf_temporário = PyPDF2.PdfFileWriter()
+                        print(arquivo_pdf)
+                        pagamento = open(arquivo_pdf, 'rb')
+                        pagamento_lido = PyPDF2.PdfFileReader(pagamento)
+                        for página in range(pagamento_lido.numPages):
+                            objeto_pagina = pagamento_lido.getPage(página)
+                            pdf_temporário.addPage(objeto_pagina)
+                        pasta_da_empresa = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}/{emp}'
+                        os.chdir(pasta_da_empresa)
+                        for arquivo_certidão in os.listdir(pasta_da_empresa):
+                            if '00.MERGE' not in arquivo_certidão:
+                                certidão = open(arquivo_certidão, 'rb')
+                                certidão_lida = PyPDF2.PdfFileReader(certidão)
+                                for página_da_certidão in range(certidão_lida.numPages):
+                                    objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
+                                    pdf_temporário.addPage(objeto_pagina_da_certidão)
+                        compilado = open(f'{pasta_de_trabalho}/Merge/mesclado_{arquivo_pdf}','wb')
+                        pdf_temporário.write(compilado)
+                        compilado.close()
+                        pagamento.close()
+                        certidão.close()
+
 
 
     def gera_nome(self, fornecedores):
