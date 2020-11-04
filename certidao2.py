@@ -42,6 +42,12 @@ class Certidao:
             log.write(f"{mensagem}\n")
 
     def pega_referencia(self):
+        pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
+        if os.path.exists(f'{pasta_de_trabalho}'):
+            print('Já existe pasta para inclusão de arquivos de pagamento')
+        else:
+            os.makedirs(f'{pasta_de_trabalho}')
+            print('Pasta para inclusão de arquivos de pagamento')
         for linha in self.pag['A1':'F500']:
             for celula in linha:
                 if celula.value != self.datapag:
@@ -197,7 +203,7 @@ class Certidao:
                                 for página_da_certidão in range(certidão_lida.numPages):
                                     objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
                                     pdf_temporário.addPage(objeto_pagina_da_certidão)
-                        compilado = open(f'{pasta_de_trabalho}/Merge/mesclado_{arquivo_pdf}','wb')
+                        compilado = open(f'{pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
                         pdf_temporário.write(compilado)
                         compilado.close()
                         pagamento.close()
