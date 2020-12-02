@@ -20,9 +20,10 @@ class Certidao:
         self.listareferencia = []
         self.referencia = 0
         self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
-        self.empresas = []
+        self.empresas = {}
         self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
         self.percentual = 0
+        self.lista_de_cnpj = {}
 
     def mensagem_log(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
@@ -63,11 +64,38 @@ class Certidao:
         while self.pag[coluna + str(linha + desloca)].value != None:
             empresa = self.pag[coluna + str(linha + desloca)].value.split()
             if len(empresa) > 2:
-                self.empresas.append(' '.join(empresa[0:len(empresa) - 1]))
+                self.empresas[' '.join(empresa[0:len(empresa) - 1])] = [' '.join(empresa)]
             else:
-                self.empresas.append(empresa[0])
+                self.empresas[empresa[0]] = [' '.join(empresa)]
             desloca += 1
         return self.empresas
+
+    def inclui_cnpj_em_fornecedores(self,fornecedores):
+        for emp in fornecedores:
+            for linha in self.forn['A6':'A500']:
+                for celula in linha:
+                    if celula.value != self.empresas[emp][0]:
+                        continue
+                    else:
+                        self.empresas[emp].append(self.forn[f'F{celula.row}'].value)
+                        cnpj_formatado = self.empresas[emp][1]
+                        cnpj_tratado = ''
+                        for digito in cnpj_formatado:
+                            if digito in '0123456789':
+                                cnpj_tratado += digito
+                        self.empresas[emp].append(cnpj_tratado)
+            return self.empresas
+
+    def listar_cnpjs(self, fornecedores):
+        for emp in fornecedores:
+            for linha in self.forn['F6':'F500']:
+                for celula in linha:
+                    if celula.value == None:
+                        continue
+                    else:
+                        nome_da_empresa = self.forn[f'A{celula.row}'].value.split()
+                        self.lista_de_cnpj[celula.value] = ' '.join(nome_da_empresa[0:len(nome_da_empresa) - 1])
+        return self.lista_de_cnpj
 
     def pega_cnpj(self, empresas_a_atualizar):
         for emp in empresas_a_atualizar:
@@ -131,8 +159,8 @@ class Certidao:
                 if orgao not in itens:
                     faltando.append(orgao)
             if faltando != []:
-                print(f'Para a empresa {emp} não foram encontradas as certidões {faltando}\n')
-                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando}')
+                print(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}\n')
+                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
                 total_faltando += 1
         if total_faltando != 0:
             self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
@@ -271,8 +299,9 @@ class Certidao:
                     os.unlink(f'{self.pdf_dir}/{str(emp)}/{arquivo}')
 
 class Uniao(Certidao):
-    def __init__(self, dia, mes, ano):
+    def __init__(self, dia, mes, ano, fornecedores):
         super().__init__(dia, mes, ano)
+        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -284,6 +313,9 @@ class Uniao(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
+        self.listar_cnpjs(self.fornecedores)
+        padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
+        validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
         padrao = re.compile('do dia (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
@@ -299,11 +331,16 @@ class Uniao(Certidao):
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
         self.mensagem_log_sem_data(f'UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         print(f'    UNIÃO - emissão: {emissao}; válida até: {vencimento}')
-        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
+        if validação_de_cnpj in self.lista_de_cnpj:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+        else:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+        return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Tst(Certidao):
-    def __init__(self, dia, mes, ano):
+    def __init__(self, dia, mes, ano, fornecedores):
         super().__init__(dia, mes, ano)
+        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -315,6 +352,9 @@ class Tst(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
+        self.listar_cnpjs(self.fornecedores)
+        padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
+        validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
         padrao = re.compile('Expedição: (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
@@ -330,11 +370,16 @@ class Tst(Certidao):
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
         self.mensagem_log_sem_data(f'TST   - emissão: {emissao}; válida até: {vencimento}')
         print((f'    TST   - emissão: {emissao}; válida até: {vencimento}'))
-        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
+        if validação_de_cnpj in self.lista_de_cnpj:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+        else:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+        return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Fgts(Certidao):
-    def __init__(self, dia, mes, ano):
+    def __init__(self, dia, mes, ano, fornecedores):
         super().__init__(dia, mes, ano)
+        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -346,6 +391,9 @@ class Fgts(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
+        self.listar_cnpjs(self.fornecedores)
+        padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
+        validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
         padrao = re.compile('(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
@@ -360,11 +408,16 @@ class Fgts(Certidao):
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
         self.mensagem_log_sem_data(f'FGTS  - emissão: {emissao}; válida até: {vencimento}')
         print(f'    FGTS  - emissão: {emissao}; válida até: {vencimento}')
-        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
+        if validação_de_cnpj in self.lista_de_cnpj:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+        else:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+        return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Gdf(Certidao):
-    def __init__(self, dia, mes, ano):
+    def __init__(self, dia, mes, ano, fornecedores):
         super().__init__(dia, mes, ano)
+        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -376,6 +429,9 @@ class Gdf(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
+        self.listar_cnpjs(self.fornecedores)
+        padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
+        validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
         meses = {'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04', 'Maio': '05', 'Junho': '06',
                  'Julho': '07', 'Agosto': '08', 'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'}
@@ -429,4 +485,8 @@ class Gdf(Certidao):
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
         self.mensagem_log_sem_data(f'GDF   - emissão: {emissao}; válida até: {vencimento}')
         print((f'    GDF   - emissão: {emissao}; válida até: {vencimento}'))
-        return data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento
+        if validação_de_cnpj in self.lista_de_cnpj:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+        else:
+            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+        return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
