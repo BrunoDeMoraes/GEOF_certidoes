@@ -35,6 +35,9 @@ def executa():
         ref_cel = lis_ref_cel[0]
         obj1.mensagem_log(f'\nReferência encontrada na célula {lis_ref_cel[0]}')
     fornecedores = obj1.pega_fornecedores(ref_cel)
+    fornecedores_cnpj = obj1.inclui_cnpj_em_fornecedores(fornecedores)
+    print(fornecedores)
+    lista_cnpj_completa = obj1.listar_cnpjs(fornecedores)
     obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
     print('\nFornecedores analisados:')
     #obj1.apaga_imagem(fornecedores)
@@ -45,10 +48,10 @@ def executa():
     obj1.apaga_imagem(fornecedores)
     obj1.certidoes_n_encontradas(fornecedores, orgaos)
     obj1.pdf_para_jpg(fornecedores, orgaos)
-    objUniao = Uniao(dia, mes, ano)
-    objTst = Tst(dia, mes, ano)
-    objFgts = Fgts(dia, mes, ano)
-    objGdf = Gdf(dia, mes, ano)
+    objUniao = Uniao(dia, mes, ano, fornecedores)
+    objTst = Tst(dia, mes, ano, fornecedores)
+    objFgts = Fgts(dia, mes, ano, fornecedores)
+    objGdf = Gdf(dia, mes, ano, fornecedores)
     lista_objetos = [objUniao, objTst, objFgts, objGdf]
     obj1.mensagem_log('\nInicio da conferência de datas de emissão e vencimento:')
     print('\nInicio da conferência de datas de emissão e vencimento:')
@@ -62,9 +65,11 @@ def executa():
             cert = objeto.pega_string(emp)
             obj1.percentual += (25 / len(fornecedores))
             print(f'\n    Total executado: {obj1.percentual}%')
-            val = objeto.confere_data(cert)
-            if val == True:
+            val, cnpj_para_comparação = objeto.confere_data(cert)
+            if val == True and cnpj_para_comparação == fornecedores[emp][1]:
                 empresadic[orgaos[index]] = 'OK'
+            elif val == True and cnpj_para_comparação != fornecedores[emp][1]:
+                empresadic[orgaos[index]] = 'CNPJ-ERRO'
             else:
                 empresadic[orgaos[index]] = 'INCOMPATÍVEL'
             index += 1
