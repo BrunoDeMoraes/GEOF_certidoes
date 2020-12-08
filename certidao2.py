@@ -45,10 +45,10 @@ class Certidao:
     def pega_referencia(self):
         pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
         if os.path.exists(f'{pasta_de_trabalho}'):
-            print('Já existe pasta para inclusão de arquivos de pagamento')
+            print('Já existe pasta para inclusão de arquivos de pagamento.')
         else:
             os.makedirs(f'{pasta_de_trabalho}')
-            print('Pasta para inclusão de arquivos de pagamento')
+            print('Pasta para inclusão de arquivos de pagamento criada com sucesso.')
         for linha in self.pag['A1':'F500']:
             for celula in linha:
                 if celula.value != self.datapag:
@@ -84,7 +84,7 @@ class Certidao:
                             if digito in '0123456789':
                                 cnpj_tratado += digito
                         self.empresas[emp].append(cnpj_tratado)
-            return self.empresas
+        return self.empresas
 
     def listar_cnpjs(self, fornecedores):
         for emp in fornecedores:
@@ -329,12 +329,14 @@ class Uniao(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'UNIÃO - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'\n   UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         print(f'    UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
         else:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Tst(Certidao):
@@ -368,12 +370,14 @@ class Tst(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'TST   - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'\n   TST   - emissão: {emissao}; válida até: {vencimento}')
         print((f'    TST   - emissão: {emissao}; válida até: {vencimento}'))
         if validação_de_cnpj in self.lista_de_cnpj:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
         else:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Fgts(Certidao):
@@ -406,12 +410,14 @@ class Fgts(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'FGTS  - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'\n   FGTS  - emissão: {emissao}; válida até: {vencimento}')
         print(f'    FGTS  - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
         else:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Gdf(Certidao):
@@ -483,10 +489,12 @@ class Gdf(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'GDF   - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'\n   GDF   - emissão: {emissao}; válida até: {vencimento}')
         print((f'    GDF   - emissão: {emissao}; válida até: {vencimento}'))
         if validação_de_cnpj in self.lista_de_cnpj:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
         else:
             print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
