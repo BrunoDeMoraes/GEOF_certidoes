@@ -36,11 +36,9 @@ def executa():
         obj1.mensagem_log(f'\nReferência encontrada na célula {lis_ref_cel[0]}')
     fornecedores = obj1.pega_fornecedores(ref_cel)
     fornecedores_cnpj = obj1.inclui_cnpj_em_fornecedores(fornecedores)
-    print(fornecedores)
     lista_cnpj_completa = obj1.listar_cnpjs(fornecedores)
     obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
     print('\nFornecedores analisados:')
-    #obj1.apaga_imagem(fornecedores)
     for emp in fornecedores:
         print(f'{emp}')
         obj1.mensagem_log_sem_horario(f'{emp}')
@@ -68,7 +66,7 @@ def executa():
             val, cnpj_para_comparação = objeto.confere_data(cert)
             if val == True and cnpj_para_comparação == fornecedores[emp][1]:
                 empresadic[orgaos[index]] = 'OK'
-            elif val == True and cnpj_para_comparação != fornecedores[emp][1]:
+            elif cnpj_para_comparação != fornecedores[emp][1]:
                 empresadic[orgaos[index]] = 'CNPJ-ERRO'
             else:
                 empresadic[orgaos[index]] = 'INCOMPATÍVEL'
@@ -85,7 +83,7 @@ def executa():
     for emp in empresasdic:
         certidoes_a_atualizar = []
         for orgao in empresasdic[emp]:
-            if empresasdic[emp][orgao] == 'INCOMPATÍVEL':
+            if empresasdic[emp][orgao] == 'INCOMPATÍVEL' or empresasdic[emp][orgao] == 'CNPJ-ERRO':
                 certidoes_a_atualizar.append(orgao)
         if len(certidoes_a_atualizar) > 0:
             empresas_a_atualizar[emp] = certidoes_a_atualizar
@@ -170,8 +168,8 @@ def mescla_certidoes():
 frame_mestre = LabelFrame(tela, padx=0, pady=0)
 frame_mestre.pack(padx=1, pady=1)
 
-titulo = Label(frame_mestre, text ='''Indique a data pretendida para o próximo pagamento e
-em seguida escolha uma das seguintes opções:''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+titulo = Label(frame_mestre, text ='''Indique a data limite pretendida para o próximo pagamento e
+em seguida escolha uma das seguintes opções:''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 12, 'bold'))
 
 dia_etiqueta = Label(frame_mestre, text='Dia', padx=8, pady=0, bg='green', fg='white', bd = 2, relief = SUNKEN,
                      font=('Helvetica', 9, 'bold'))
@@ -214,30 +212,30 @@ validacao = OptionMenu(frame_mestre, variavel, *dias)
 validacao2 = OptionMenu(frame_mestre, variavel2, *meses)
 validacao3 = OptionMenu(frame_mestre, variavel3, *anos)
 
-titulo_analisar = Label(frame_mestre, text ='''Avaliar requisitos
- ou proceder à analise''', pady=0, padx=0, bg='green',
-                        fg='white', font=('Helvetica', 10, 'bold'))
+titulo_analisar = Label(frame_mestre, text ='''Utilize esta opção para identificar quais certidões devem ser atualizadas
+ou se há requisitos a cumprir para a devida execução da análise.''', pady=0, padx=0, bg='green',
+                        fg='white', font=('Helvetica', 9, 'bold'))
 
 botao_analisar = Button(frame_mestre, text='Analisar\ncertidões', command=executa, padx=25, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 10, 'bold'), bd=1)
+                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
 
-titulo_renomear = Label(frame_mestre, text ='''Adequar os nomes das
-certidões atualizadas''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+titulo_renomear = Label(frame_mestre, text ='''Após atualizar as certidões, use esta opção para padronizar os nomes dos 
+arquivos e em seguida faça nova análise para certificar que está tudo OK!''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
 
 botao_renomear = Button(frame_mestre, text='Renomear\ncertidões', command=renomeia, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 10, 'bold'), bd=1)
+                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
 
-titulo_transfere_arquivos = Label(frame_mestre, text ='''Criar pasta contendo
-certidões para pagamento''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+titulo_transfere_arquivos = Label(frame_mestre, text ='''Esta opção transfere as certidões para uma pasta identificada pela data
+do pagamento. Esse passo deve ser executado logo após a análise!''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
 
 botao_transfere_arquivos = Button(frame_mestre, text='Transferir\ncertidões', command=transfere_certidoes, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 10, 'bold'), bd=1)
+                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
 
-titulo_mescla_arquivos = Label(frame_mestre, text ='''Mescla arquivos de pagamento
-com as respectivas certidões''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 10, 'bold'))
+titulo_mescla_arquivos = Label(frame_mestre, text ='''Se já houve o pagamento e os comprovantes estão na devida pasta, esta 
+opção mescla os comprovantes com suas respectivas certidões.''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
 
-botao_mescla_arquivos = Button(frame_mestre, text='Mesclar\ncertidões e \npagamentos', command=mescla_certidoes, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 10, 'bold'), bd=1)
+botao_mescla_arquivos = Button(frame_mestre, text=' Mesclar  \narquivos', command=mescla_certidoes, padx=20, pady=10, bg='white',
+                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
 
 roda_pe = Label(frame_mestre, text ="SRSSU/DA/GEOF", pady=0, padx=0, bg='green', fg='white',
                font=('Helvetica', 8, 'italic'), anchor=E)
@@ -250,13 +248,13 @@ validacao.grid(row=2, column=1, pady=0)
 validacao2.grid(row=2, column=2, pady=0)
 validacao3.grid(row=2, column=3, pady=0)
 titulo_analisar.grid(row=3, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-botao_analisar.grid(row=3, column=5, padx=0, pady=30)
+botao_analisar.grid(row=3, column=5, padx=0, pady=10)
 titulo_renomear.grid(row=4, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-botao_renomear.grid(row=4, column=5, padx=0,pady=30)
+botao_renomear.grid(row=4, column=5, padx=0,pady=10)
 titulo_transfere_arquivos.grid(row=5, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-botao_transfere_arquivos.grid(row=5, column=5, padx=0,pady=30)
+botao_transfere_arquivos.grid(row=5, column=5, padx=0,pady=10)
 titulo_mescla_arquivos.grid(row=6, column=4, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-botao_mescla_arquivos.grid(row=6, column=5, padx=0,pady=30)
+botao_mescla_arquivos.grid(row=6, column=5, padx=0,pady=10)
 roda_pe.grid(row=7, column=1, columnspan=10, pady=5, sticky=W+E)
 
 tela.mainloop()
