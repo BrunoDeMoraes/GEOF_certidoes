@@ -213,31 +213,31 @@ validacao2 = OptionMenu(frame_mestre, variavel2, *meses)
 validacao3 = OptionMenu(frame_mestre, variavel3, *anos)
 
 titulo_analisar = Label(frame_mestre, text ='''Utilize esta opção para identificar quais certidões devem ser atualizadas
-ou se há requisitos a cumprir para a devida execução da análise.''', pady=0, padx=0, bg='green',
-                        fg='white', font=('Helvetica', 9, 'bold'))
+ou se há requisitos a cumprir para a devida execução da análise.''', pady=0, padx=0, bg='white',
+                        fg='black', font=('Helvetica', 9, 'bold'))
 
-botao_analisar = Button(frame_mestre, text='Analisar\ncertidões', command=executa, padx=25, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
+botao_analisar = Button(frame_mestre, text='Analisar\ncertidões', command=executa, padx=25, pady=10, bg='green',
+                        fg='white', font=('Helvetica', 11, 'bold'), bd=1)
 
 titulo_renomear = Label(frame_mestre, text ='''Após atualizar as certidões, use esta opção para padronizar os nomes dos 
-arquivos e em seguida faça nova análise para certificar que está tudo OK!''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
+arquivos e em seguida faça nova análise para certificar que está tudo OK.''', pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
-botao_renomear = Button(frame_mestre, text='Renomear\ncertidões', command=renomeia, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
+botao_renomear = Button(frame_mestre, text='Renomear\ncertidões', command=renomeia, padx=20, pady=10, bg='green',
+                        fg='white', font=('Helvetica', 11, 'bold'), bd=1)
 
 titulo_transfere_arquivos = Label(frame_mestre, text ='''Esta opção transfere as certidões para uma pasta identificada pela data
-do pagamento. Esse passo deve ser executado logo após a análise!''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
+do pagamento. Esse passo deve ser executado logo após a análise.''', pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
-botao_transfere_arquivos = Button(frame_mestre, text='Transferir\ncertidões', command=transfere_certidoes, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
+botao_transfere_arquivos = Button(frame_mestre, text='Transferir\ncertidões', command=transfere_certidoes, padx=20, pady=10, bg='green',
+                        fg='white', font=('Helvetica', 11, 'bold'), bd=1)
 
 titulo_mescla_arquivos = Label(frame_mestre, text ='''Se já houve o pagamento e os comprovantes estão na devida pasta, esta 
-opção mescla os comprovantes com suas respectivas certidões.''', pady=0, padx=0, bg='green', fg='white', font=('Helvetica', 9, 'bold'))
+opção mescla os comprovantes com suas respectivas certidões.''', pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
-botao_mescla_arquivos = Button(frame_mestre, text=' Mesclar  \narquivos', command=mescla_certidoes, padx=20, pady=10, bg='white',
-                        fg='green', font=('Helvetica', 11, 'bold'), bd=1)
+botao_mescla_arquivos = Button(frame_mestre, text=' Mesclar  \narquivos', command=mescla_certidoes, padx=20, pady=10, bg='green',
+                        fg='white', font=('Helvetica', 11, 'bold'), bd=1)
 
-roda_pe = Label(frame_mestre, text ="SRSSU/DA/GEOF", pady=0, padx=0, bg='green', fg='white',
+roda_pe = Label(frame_mestre, text ="SRSSU/DA/GEOF   ", pady=0, padx=0, bg='green', fg='white',
                font=('Helvetica', 8, 'italic'), anchor=E)
 
 titulo.grid(row=0, column=1, columnspan=5, pady=10, sticky=W+E)
