@@ -45,7 +45,7 @@ class Certidao:
     def pega_referencia(self):
         pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
         if os.path.exists(f'{pasta_de_trabalho}'):
-            print('Já existe pasta para inclusão de arquivos de pagamento.')
+            print('Pasta para inclusão de arquivos de pagamento localizada.')
         else:
             os.makedirs(f'{pasta_de_trabalho}')
             print('Pasta para inclusão de arquivos de pagamento criada com sucesso.')
@@ -135,7 +135,7 @@ class Certidao:
     def certidoes_para_pagamento(self, fornecedores):
         pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
         if os.path.exists(f'{pagamento_por_data}'):
-            print('Já existe pasta para pagamento na data informada')
+            print('Já existe pasta contendo certidões para pagamento na data informada.')
         else:
             os.makedirs(pagamento_por_data)
             for emp in fornecedores:
