@@ -24,23 +24,29 @@ class Certidao:
         self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
         self.percentual = 0
         self.lista_de_cnpj = {}
+        self.orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
+        self.empresasdic = {}
+        self.empresas_a_atualizar = {}
 
     def mensagem_log(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}\n")
+            print(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}")
 
     def mensagem_log_sem_data(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%H:%M:%S')}\n")
+            print(f"{mensagem} - {momento.strftime('%H:%M:%S')}")
 
     def mensagem_log_sem_horario(self, mensagem):
         with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
                   'a') as log:
             log.write(f"{mensagem}\n")
+            print(f"{mensagem}")
 
     def pega_referencia(self):
         pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
@@ -57,7 +63,22 @@ class Certidao:
                     self.listareferencia.append(celula.coordinate)
         return self.listareferencia
 
-    def pega_fornecedores(self, referencia):
+    def analisa_referencia(self):
+        self.pega_referencia()
+        if len(self.listareferencia) == 0:
+            self.mensagem_log('\nData específicada não encontrada')
+            raise Exception('Data não encontrada!')
+        elif len(self.listareferencia) > 1:
+            self.mensagem_log('Data informada em multiplicidade')
+            print(f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos.'
+                            f'\nApague os valores duplicados e execute o programa novamente.')
+            raise Exception(f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos.'
+                            f'\nApague os valores duplicados e execute o programa novamente.')
+        else:
+            self.mensagem_log(f'\nReferência encontrada na célula {self.listareferencia[0]}')
+
+    def pega_fornecedores(self):
+        referencia = self.listareferencia[0]
         desloca = 2
         coluna = referencia[0]
         linha = int(referencia[1:])
@@ -70,8 +91,8 @@ class Certidao:
             desloca += 1
         return self.empresas
 
-    def inclui_cnpj_em_fornecedores(self,fornecedores):
-        for emp in fornecedores:
+    def inclui_cnpj_em_fornecedores(self):
+        for emp in self.empresas:
             for linha in self.forn['A6':'A500']:
                 for celula in linha:
                     if celula.value != self.empresas[emp][0]:
@@ -86,8 +107,12 @@ class Certidao:
                         self.empresas[emp].append(cnpj_tratado)
         return self.empresas
 
-    def listar_cnpjs(self, fornecedores):
-        for emp in fornecedores:
+    def dados_completos_dos_fornecedores(self):
+        self.pega_fornecedores()
+        self.inclui_cnpj_em_fornecedores()
+
+    def listar_cnpjs(self):
+        for emp in self.empresas:
             for linha in self.forn['F6':'F500']:
                 for celula in linha:
                     if celula.value == None:
@@ -97,8 +122,111 @@ class Certidao:
                         self.lista_de_cnpj[celula.value] = ' '.join(nome_da_empresa[0:len(nome_da_empresa) - 1])
         return self.lista_de_cnpj
 
-    def pega_cnpj(self, empresas_a_atualizar):
-        for emp in empresas_a_atualizar:
+    def cria_diretorio(self):
+        novos_dir = []
+        for emp in self.empresas:
+            if os.path.isdir(f'{self.pdf_dir}/{str(emp)}'):
+                continue
+            else:
+                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Vencidas')
+                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Imagens')
+                novos_dir.append(emp)
+        self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
+
+    def certidoes_para_pagamento(self):
+        pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
+        if os.path.exists(f'{pagamento_por_data}'):
+            print('Já existe pasta contendo certidões para pagamento na data informada.')
+        else:
+            os.makedirs(pagamento_por_data)
+            for emp in self.empresas:
+                pasta_da_empresa = f'{self.pdf_dir}/{str(emp)}'
+                os.makedirs(f'{pagamento_por_data}/{emp}')
+                os.chdir(f'{pasta_da_empresa}')
+                for pdf_file in os.listdir(f'{pasta_da_empresa}'):
+                    if pdf_file.endswith(".pdf"):
+                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{pagamento_por_data}/{emp}/{pdf_file}')
+            self.mensagem_log_sem_horario(f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.')
+
+
+    def certidoes_n_encontradas(self):
+        total_faltando = 0
+        for emp in self.empresas:
+            itens = []
+            faltando = []
+            os.chdir(f'{self.pdf_dir}/{str(emp)}')
+            for item in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+                itens.append(item.split()[0])
+            for orgao in self.orgaos:
+                if orgao not in itens:
+                    faltando.append(orgao)
+            if faltando != []:
+                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
+                total_faltando += 1
+        if total_faltando != 0:
+            self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
+            raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
+
+    def pdf_para_jpg(self):
+        for emp in self.empresas:
+            os.chdir(f'{self.pdf_dir}/{str(emp)}')
+            for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+                if '00.MERGE' in pdf_file:
+                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
+                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                    else:
+                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                if pdf_file.endswith(".pdf") and pdf_file.split()[0] in self.orgaos:
+                    pages = convert_from_path(pdf_file, 300, last_page = 1)
+                    pdf_file = pdf_file[:-4]
+                    pages[0].save(f"{pdf_file}.jpg", "JPEG")
+
+    def analisa_certidoes(self):
+        objUniao = Uniao(self.dia, self.mes, self.ano)
+        objTst = Tst(self.dia, self.mes, self.ano)
+        objFgts = Fgts(self.dia, self.mes, self.ano)
+        objGdf = Gdf(self.dia, self.mes, self.ano)
+        lista_objetos = [objUniao, objTst, objFgts, objGdf]
+        self.mensagem_log('\nInicio da conferência de datas de emissão e vencimento:')
+        print(f'Total executado: {self.percentual}%')
+
+        for emp in self.empresas:
+            empresadic = {}
+            index = 0
+            self.mensagem_log(f'\n{emp}')
+            for objeto in lista_objetos:
+                objeto.empresas = self.empresas
+                objeto.lista_de_cnpj = self.lista_de_cnpj
+                certidao = objeto.pega_string(emp)
+                self.percentual += (25 / len(self.empresas))
+                print(f'   Total executado: {self.percentual}%')
+                val, cnpj_para_comparação = objeto.confere_data(certidao)
+                if val == True and cnpj_para_comparação == self.empresas[emp][1]:
+                    empresadic[self.orgaos[index]] = 'OK'
+                elif cnpj_para_comparação != self.empresas[emp][1]:
+                    empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                else:
+                    empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
+                index += 1
+            self.empresasdic[emp] = empresadic
+
+    def atualizar(self):
+        numerador = 0
+        for emp in self.empresasdic:
+            self.mensagem_log_sem_horario(f'{numerador + 1 :>2} - {emp}\n{self.empresasdic[emp]}\n')
+            numerador += 1
+        for emp in self.empresasdic:
+            certidoes_a_atualizar = []
+            for orgao in self.empresasdic[emp]:
+                if self.empresasdic[emp][orgao] == 'INCOMPATÍVEL' or self.empresasdic[emp][orgao] == 'CNPJ-ERRO':
+                    certidoes_a_atualizar.append(orgao)
+            if len(certidoes_a_atualizar) > 0:
+                self.empresas_a_atualizar[emp] = certidoes_a_atualizar
+
+    def pega_cnpj(self):
+        self.atualizar()
+        for emp in self.empresas_a_atualizar:
             for linha in self.forn['A6':'A500']:
                 for celula in linha:
                     if celula.value == None:
@@ -118,73 +246,11 @@ class Certidao:
                             for digito in cnpj_formatado:
                                 if digito in '0123456789':
                                     cnpj_tratado += digito
-                            empresas_a_atualizar[emp].append(cnpj_tratado)
+                            self.empresas_a_atualizar[emp].append(cnpj_tratado)
 
-    def cria_diretorio(self, fornecedores):
-        novos_dir = []
-        for emp in fornecedores:
-            if os.path.isdir(f'{self.pdf_dir}/{str(emp)}'):
-                continue
-            else:
-                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Vencidas')
-                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Imagens')
-                novos_dir.append(emp)
-        self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
-        print(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.\n')
-
-    def certidoes_para_pagamento(self, fornecedores):
-        pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
-        if os.path.exists(f'{pagamento_por_data}'):
-            print('Já existe pasta contendo certidões para pagamento na data informada.')
-        else:
-            os.makedirs(pagamento_por_data)
-            for emp in fornecedores:
-                pasta_da_empresa = f'{self.pdf_dir}/{str(emp)}'
-                os.makedirs(f'{pagamento_por_data}/{emp}')
-                os.chdir(f'{pasta_da_empresa}')
-                for pdf_file in os.listdir(f'{pasta_da_empresa}'):
-                    if pdf_file.endswith(".pdf"):
-                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{pagamento_por_data}/{emp}/{pdf_file}')
-
-
-    def certidoes_n_encontradas(self, fornecedores, orgaos):
-        total_faltando = 0
-        for emp in fornecedores:
-            itens = []
-            faltando = []
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for item in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
-                itens.append(item.split()[0])
-            for orgao in orgaos:
-                if orgao not in itens:
-                    faltando.append(orgao)
-            if faltando != []:
-                print(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}\n')
-                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
-                total_faltando += 1
-        if total_faltando != 0:
-            self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
-            raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
-
-    def pdf_para_jpg(self, fornecedores, orgaos):
-        for emp in fornecedores:
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
-                if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
-                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
-                    else:
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
-                if pdf_file.endswith(".pdf") and pdf_file.split()[0] in orgaos:
-                    pages = convert_from_path(pdf_file, 300, last_page = 1)
-                    pdf_file = pdf_file[:-4]
-                    pages[0].save(f"{pdf_file}.jpg", "JPEG")
-
-
-    def pdf_para_jpg_renomear(self, fornecedores):
+    def pdf_para_jpg_renomear(self):
         print('CRIANDO IMAGENS:\n')
-        for emp in fornecedores:
+        for emp in self.empresas:
             os.chdir(f'{self.pdf_dir}/{str(emp)}')
             for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
                 if '00.MERGE' in pdf_file:
@@ -198,12 +264,12 @@ class Certidao:
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
-                    self.percentual += (25 / len(fornecedores))
+                    self.percentual += (25 / len(self.empresas))
                     print(f'Total de imagens criadas: {self.percentual}%')
         self.mensagem_log('\nIMAGENS CRIADAS COM SUCESSO!')
         self.percentual = 0
 
-    def merge(self, fornecedores):
+    def merge(self):
         pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
         if os.path.exists(f'{pasta_de_trabalho}/Merge'):
             print('Já existe pasta para mesclagem na data informada')
@@ -213,12 +279,12 @@ class Certidao:
         for arquivo_pdf in os.listdir(pasta_de_trabalho):
             os.chdir(pasta_de_trabalho)
             if arquivo_pdf.endswith(".pdf"):
-                for emp in fornecedores:
+                for emp in self.empresas:
                     if emp in arquivo_pdf:
                         pdf_temporário = PyPDF2.PdfFileWriter()
                         print(arquivo_pdf)
                         pagamento = open(arquivo_pdf, 'rb')
-                        pagamento_lido = PyPDF2.PdfFileReader(pagamento)
+                        pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
                         for página in range(pagamento_lido.numPages):
                             objeto_pagina = pagamento_lido.getPage(página)
                             pdf_temporário.addPage(objeto_pagina)
@@ -239,9 +305,9 @@ class Certidao:
 
 
 
-    def gera_nome(self, fornecedores):
+    def gera_nome(self):
         print('\nRENOMEANDO CERTIDÕES:\n\n')
-        for emp in fornecedores:
+        for emp in self.empresas:
             os.chdir(f'{self.pdf_dir}/{(emp)}')
             origem = f'{self.pdf_dir}/{emp}'
             for imagem in os.listdir(origem):
@@ -263,7 +329,7 @@ class Certidao:
                                              '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
                     for frase in padroes:
                         if frase in certidao:
-                            self.percentual += (25 / len(fornecedores))
+                            self.percentual += (25 / len(self.empresas))
                             print(f'{emp} - certidão {valores[frase]} renomeada - Total executado: {self.percentual}%\n')
                             if frase == 'GOVERNO DO DISTRITO FEDERAL':
                                 try:
@@ -291,17 +357,16 @@ class Certidao:
                             shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
         print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
 
-    def apaga_imagem(self, fornercedores):
-        for emp in fornercedores:
+    def apaga_imagem(self):
+        for emp in self.empresas:
             os.chdir(f'{self.pdf_dir}/{str(emp)}')
             for arquivo in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
                 if arquivo.endswith(".jpg"):
                     os.unlink(f'{self.pdf_dir}/{str(emp)}/{arquivo}')
 
 class Uniao(Certidao):
-    def __init__(self, dia, mes, ano, fornecedores):
+    def __init__(self, dia, mes, ano):
         super().__init__(dia, mes, ano)
-        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -313,7 +378,7 @@ class Uniao(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
-        self.listar_cnpjs(self.fornecedores)
+        self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
         validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
@@ -329,20 +394,16 @@ class Uniao(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'\n   UNIÃO - emissão: {emissao}; válida até: {vencimento}')
-        print(f'    UNIÃO - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'   UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}\n')
         else:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência\n')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Tst(Certidao):
-    def __init__(self, dia, mes, ano, fornecedores):
+    def __init__(self, dia, mes, ano):
         super().__init__(dia, mes, ano)
-        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -354,7 +415,7 @@ class Tst(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
-        self.listar_cnpjs(self.fornecedores)
+        self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
         validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
@@ -370,20 +431,16 @@ class Tst(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'\n   TST   - emissão: {emissao}; válida até: {vencimento}')
-        print((f'    TST   - emissão: {emissao}; válida até: {vencimento}'))
+        self.mensagem_log_sem_data(f'   TST   - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}\n')
         else:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência\n')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Fgts(Certidao):
-    def __init__(self, dia, mes, ano, fornecedores):
+    def __init__(self, dia, mes, ano):
         super().__init__(dia, mes, ano)
-        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -395,7 +452,7 @@ class Fgts(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
-        self.listar_cnpjs(self.fornecedores)
+        self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
         validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
@@ -410,20 +467,16 @@ class Fgts(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'\n   FGTS  - emissão: {emissao}; válida até: {vencimento}')
-        print(f'    FGTS  - emissão: {emissao}; válida até: {vencimento}')
+        self.mensagem_log_sem_data(f'   FGTS  - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}\n')
         else:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência\n')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
 
 class Gdf(Certidao):
-    def __init__(self, dia, mes, ano, fornecedores):
+    def __init__(self, dia, mes, ano):
         super().__init__(dia, mes, ano)
-        self.fornecedores = fornecedores
 
     def pega_string(self, emp):
         os.chdir(f'{self.pdf_dir}/{str(emp)}')
@@ -435,7 +488,7 @@ class Gdf(Certidao):
                 return certidao
 
     def confere_data(self, certidao):
-        self.listar_cnpjs(self.fornecedores)
+        self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
         validação_de_cnpj = padrão_cnpj.search(certidao).group()
         texto = []
@@ -489,12 +542,9 @@ class Gdf(Certidao):
         data_de_vencimento = time.strptime(vencimento, "%d/%m/%Y")
         payday = f'{self.dia}/{self.mes}/{self.ano}'
         data_do_pagamento = time.strptime(payday, "%d/%m/%Y")
-        self.mensagem_log_sem_data(f'\n   GDF   - emissão: {emissao}; válida até: {vencimento}')
-        print((f'    GDF   - emissão: {emissao}; válida até: {vencimento}'))
+        self.mensagem_log_sem_data(f'   GDF   - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}\n')
         else:
-            print(f'    O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
-            self.mensagem_log_sem_data(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência')
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência\n')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
