@@ -120,92 +120,39 @@ class Analisador:
         return self.dias, self.meses, self.anos
 
     def executa(self):
-        #global variavel
-        #global variavel2
-        #global variavel3
-        #global obj1
         tempo_inicial = time.time()
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
-        empresasdic = {}
         obj1 = Certidao(dia, mes, ano)
+
         obj1.mensagem_log('Início da execução')
-        print("\nInício da Execução")
-        lis_ref_cel = obj1.pega_referencia()
-        if len(lis_ref_cel) == 0:
-            obj1.mensagem_log('\nData específicada não encontrada')
-            raise Exception('Data não encontrada!')
-        elif len(lis_ref_cel) > 1:
-            obj1.mensagem_log('Data informada em multiplicidade')
-            print(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-            raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-        else:
-            ref_cel = lis_ref_cel[0]
-            obj1.mensagem_log(f'\nReferência encontrada na célula {lis_ref_cel[0]}')
-        fornecedores = obj1.pega_fornecedores(ref_cel)
-        fornecedores_cnpj = obj1.inclui_cnpj_em_fornecedores(fornecedores)
-        lista_cnpj_completa = obj1.listar_cnpjs(fornecedores)
+
+        obj1.analisa_referencia()
+        obj1.dados_completos_dos_fornecedores()
+        obj1.listar_cnpjs()
+
         obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
-        print('\nFornecedores analisados:')
-        for emp in fornecedores:
-            print(f'{emp}')
+        for emp in obj1.empresas:
             obj1.mensagem_log_sem_horario(f'{emp}')
-        obj1.cria_diretorio(fornecedores)
-        obj1.apaga_imagem(fornecedores)
-        obj1.certidoes_n_encontradas(fornecedores, orgaos)
-        obj1.pdf_para_jpg(fornecedores, orgaos)
-        objUniao = Uniao(dia, mes, ano, fornecedores)
-        objTst = Tst(dia, mes, ano, fornecedores)
-        objFgts = Fgts(dia, mes, ano, fornecedores)
-        objGdf = Gdf(dia, mes, ano, fornecedores)
-        lista_objetos = [objUniao, objTst, objFgts, objGdf]
-        obj1.mensagem_log('\nInicio da conferência de datas de emissão e vencimento:')
-        print('\nInicio da conferência de datas de emissão e vencimento:')
-        print(f'\nTotal executado: {obj1.percentual}%')
-        for emp in fornecedores:
-            empresadic = {}
-            index = 0
-            print(f'\n{emp}')
-            obj1.mensagem_log(f'\n{emp}')
-            for objeto in lista_objetos:
-                cert = objeto.pega_string(emp)
-                obj1.percentual += (25 / len(fornecedores))
-                print(f'\n    Total executado: {obj1.percentual}%')
-                val, cnpj_para_comparação = objeto.confere_data(cert)
-                if val == True and cnpj_para_comparação == fornecedores[emp][1]:
-                    empresadic[orgaos[index]] = 'OK'
-                elif cnpj_para_comparação != fornecedores[emp][1]:
-                    empresadic[orgaos[index]] = 'CNPJ-ERRO'
-                else:
-                    empresadic[orgaos[index]] = 'INCOMPATÍVEL'
-                index += 1
-            empresasdic[emp] = empresadic
-        print('\nRESULTADO DA CONFERÊNCIA:')
+
+        obj1.cria_diretorio()
+        obj1.apaga_imagem()
+        obj1.certidoes_n_encontradas()
+        obj1.pdf_para_jpg()
+        obj1.analisa_certidoes()
+
         obj1.mensagem_log_sem_horario('\nRESULTADO DA CONFERÊNCIA:')
-        numerador = 0
-        for emp in empresasdic:
-            print(f'{numerador + 1 :>2} - {emp}\n{empresasdic[emp]}\n')
-            obj1.mensagem_log_sem_horario(f'{numerador + 1 :>2} - {emp}\n{empresasdic[emp]}\n')
-            numerador += 1
-        empresas_a_atualizar = {}
-        for emp in empresasdic:
-            certidoes_a_atualizar = []
-            for orgao in empresasdic[emp]:
-                if empresasdic[emp][orgao] == 'INCOMPATÍVEL' or empresasdic[emp][orgao] == 'CNPJ-ERRO':
-                    certidoes_a_atualizar.append(orgao)
-            if len(certidoes_a_atualizar) > 0:
-                empresas_a_atualizar[emp] = certidoes_a_atualizar
-        obj1.pega_cnpj(empresas_a_atualizar)
-        print('\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n')
+
+        obj1.pega_cnpj()
+
         obj1.mensagem_log_sem_horario('\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n')
-        for emp in empresas_a_atualizar:
-            print(f'{emp} - {empresas_a_atualizar[emp][0:-1]} - CNPJ: {empresas_a_atualizar[emp][-1]}\n')
-            obj1.mensagem_log_sem_horario(f'{emp} - {empresas_a_atualizar[emp][0:-1]} - CNPJ: {empresas_a_atualizar[emp][-1]}\n')
-        obj1.apaga_imagem(fornecedores)
+
+        for emp in obj1.empresas_a_atualizar:
+            obj1.mensagem_log_sem_horario(f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} - CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n')
+
+        obj1.apaga_imagem()
+
         tempo_final = time.time()
         tempo_de_execução = int((tempo_final - tempo_inicial))
         obj1.mensagem_log(
@@ -213,69 +160,36 @@ class Analisador:
         obj1.mensagem_log_sem_horario(
             '\n\n======================================================================================\n')
 
-    def renomeia():
-        global variavel
-        global variavel2
-        global variavel3
-        dia = variavel.get()
-        mes = variavel2.get()
-        ano = variavel3.get()
-        global obj1
-        print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES INICIADO:\n')
+    def renomeia(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
         obj1 = Certidao(dia, mes, ano)
-        lis_ref_cel = obj1.pega_referencia()
-        if len(lis_ref_cel) == 0:
-            raise Exception('Data não encontrada!')
-        elif len(lis_ref_cel) > 1:
-            raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-        else:
-            ref_cel = lis_ref_cel[0]
-        fornecedores = obj1.pega_fornecedores(ref_cel)
-        obj1.apaga_imagem(fornecedores)
-        obj1.pdf_para_jpg_renomear(fornecedores)
-        obj1.gera_nome(fornecedores)
-        obj1.apaga_imagem(fornecedores)
+        obj1.mensagem_log('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES INICIADO:\n')
+        obj1.analisa_referencia()
+        obj1.pega_fornecedores()
+        obj1.apaga_imagem()
+        obj1.pdf_para_jpg_renomear()
+        obj1.gera_nome()
+        obj1.apaga_imagem()
 
-    def transfere_certidoes():
-        global variavel
-        global variavel2
-        global variavel3
-        dia = variavel.get()
-        mes = variavel2.get()
-        ano = variavel3.get()
-        global obj1
+    def transfere_certidoes(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
         obj1 = Certidao(dia, mes, ano)
-        lis_ref_cel = obj1.pega_referencia()
-        if len(lis_ref_cel) == 0:
-            raise Exception('Data não encontrada!')
-        elif len(lis_ref_cel) > 1:
-            raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-        else:
-            ref_cel = lis_ref_cel[0]
-        fornecedores = obj1.pega_fornecedores(ref_cel)
-        obj1.certidoes_para_pagamento(fornecedores)
+        obj1.analisa_referencia()
+        obj1.pega_fornecedores()
+        obj1.certidoes_para_pagamento()
 
-    def mescla_certidoes():
-        global variavel
-        global variavel2
-        global variavel3
-        dia = variavel.get()
-        mes = variavel2.get()
-        ano = variavel3.get()
-        global obj1
+    def mescla_certidoes(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
         obj1 = Certidao(dia, mes, ano)
-        lis_ref_cel = obj1.pega_referencia()
-        if len(lis_ref_cel) == 0:
-            raise Exception('Data não encontrada!')
-        elif len(lis_ref_cel) > 1:
-            raise Exception(f'A data especificada foi encontrada nas células {lis_ref_cel} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-        else:
-            ref_cel = lis_ref_cel[0]
-        fornecedores = obj1.pega_fornecedores(ref_cel)
-        obj1.merge(fornecedores)
+        obj1.analisa_referencia()
+        obj1.pega_fornecedores()
+        obj1.merge()
 
     def caminho_de_pastas():
         #pasta = filedialog.askdirectory(initialdir='C:/Users/14343258/Desktop')
