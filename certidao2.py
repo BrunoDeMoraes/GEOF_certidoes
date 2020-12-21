@@ -280,7 +280,25 @@ class Certidao:
             os.chdir(pasta_de_trabalho)
             if arquivo_pdf.endswith(".pdf"):
                 for emp in self.empresas:
-                    if emp in arquivo_pdf:
+                    validação_de_partes_do_nome =[]
+                    retira_espaço_empresa = emp.replace(' ', '-')
+                    nome_separado = retira_espaço_empresa.split('-')
+                    retira_espaço_do_arquivo = arquivo_pdf.replace(' ','-')
+                    arquivo_separado = retira_espaço_do_arquivo.split('-')
+                    for parte_do_nome in nome_separado:
+                        contador = 0
+                        if nome_separado[contador] == arquivo_separado[contador + 1]:
+                            validação_de_partes_do_nome.append('OK')
+                            contador += 1
+                        else:
+                            validação_de_partes_do_nome.append('falha')
+                            contador += 1
+                    print(nome_separado)
+                    print(arquivo_separado)
+                    print(validação_de_partes_do_nome)
+                    if 'falha' not in validação_de_partes_do_nome:
+                        print(emp)
+                        print(arquivo_pdf.split())
                         pdf_temporário = PyPDF2.PdfFileWriter()
                         print(arquivo_pdf)
                         pagamento = open(arquivo_pdf, 'rb')
