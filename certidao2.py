@@ -27,33 +27,35 @@ class Certidao:
         self.orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
         self.empresasdic = {}
         self.empresas_a_atualizar = {}
+        self.caminho_de_log = f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt'
+        self.pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
+        self.pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
 
     def mensagem_log(self, mensagem):
-        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
+        with open(self.caminho_de_log,
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}\n")
             print(f"{mensagem} - {momento.strftime('%d/%m/%Y %H:%M:%S')}")
 
     def mensagem_log_sem_data(self, mensagem):
-        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
+        with open(self.caminho_de_log,
                   'a') as log:
             momento = datetime.datetime.now()
             log.write(f"{mensagem} - {momento.strftime('%H:%M:%S')}\n")
             print(f"{mensagem} - {momento.strftime('%H:%M:%S')}")
 
     def mensagem_log_sem_horario(self, mensagem):
-        with open(f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt',
+        with open(self.caminho_de_log,
                   'a') as log:
             log.write(f"{mensagem}\n")
             print(f"{mensagem}")
 
     def pega_referencia(self):
-        pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
-        if os.path.exists(f'{pasta_de_trabalho}'):
+        if os.path.exists(f'{self.pasta_de_trabalho}'):
             print('Pasta para inclusão de arquivos de pagamento localizada.')
         else:
-            os.makedirs(f'{pasta_de_trabalho}')
+            os.makedirs(f'{self.pasta_de_trabalho}')
             print('Pasta para inclusão de arquivos de pagamento criada com sucesso.')
         for linha in self.pag['A1':'F500']:
             for celula in linha:
@@ -134,18 +136,17 @@ class Certidao:
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
 
     def certidoes_para_pagamento(self):
-        pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
-        if os.path.exists(f'{pagamento_por_data}'):
+        if os.path.exists(f'{self.pagamento_por_data}'):
             print('Já existe pasta contendo certidões para pagamento na data informada.')
         else:
-            os.makedirs(pagamento_por_data)
+            os.makedirs(self.pagamento_por_data)
             for emp in self.empresas:
                 pasta_da_empresa = f'{self.pdf_dir}/{str(emp)}'
-                os.makedirs(f'{pagamento_por_data}/{emp}')
+                os.makedirs(f'{self.pagamento_por_data}/{emp}')
                 os.chdir(f'{pasta_da_empresa}')
                 for pdf_file in os.listdir(f'{pasta_da_empresa}'):
                     if pdf_file.endswith(".pdf"):
-                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{pagamento_por_data}/{emp}/{pdf_file}')
+                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{self.pagamento_por_data}/{emp}/{pdf_file}')
             self.mensagem_log_sem_horario(f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.')
 
 
@@ -270,14 +271,13 @@ class Certidao:
         self.percentual = 0
 
     def merge(self):
-        pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
-        if os.path.exists(f'{pasta_de_trabalho}/Merge'):
+        if os.path.exists(f'{self.pasta_de_trabalho}/Merge'):
             print('Já existe pasta para mesclagem na data informada')
         else:
-            os.makedirs(f'{pasta_de_trabalho}/Merge')
-        os.chdir(pasta_de_trabalho)
-        for arquivo_pdf in os.listdir(pasta_de_trabalho):
-            os.chdir(pasta_de_trabalho)
+            os.makedirs(f'{self.pasta_de_trabalho}/Merge')
+        os.chdir(self.pasta_de_trabalho)
+        for arquivo_pdf in os.listdir(self.pasta_de_trabalho):
+            os.chdir(self.pasta_de_trabalho)
             if arquivo_pdf.endswith(".pdf"):
                 for emp in self.empresas:
                     validação_de_partes_do_nome =[]
@@ -293,9 +293,6 @@ class Certidao:
                         else:
                             validação_de_partes_do_nome.append('falha')
                             contador += 1
-                    print(nome_separado)
-                    print(arquivo_separado)
-                    print(validação_de_partes_do_nome)
                     if 'falha' not in validação_de_partes_do_nome:
                         print(emp)
                         print(arquivo_pdf.split())
@@ -306,7 +303,7 @@ class Certidao:
                         for página in range(pagamento_lido.numPages):
                             objeto_pagina = pagamento_lido.getPage(página)
                             pdf_temporário.addPage(objeto_pagina)
-                        pasta_da_empresa = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}/{emp}'
+                        pasta_da_empresa = f'{self.pagamento_por_data}/{emp}'
                         os.chdir(pasta_da_empresa)
                         for arquivo_certidão in os.listdir(pasta_da_empresa):
                             if '00.MERGE' not in arquivo_certidão:
@@ -315,7 +312,7 @@ class Certidao:
                                 for página_da_certidão in range(certidão_lida.numPages):
                                     objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
                                     pdf_temporário.addPage(objeto_pagina_da_certidão)
-                        compilado = open(f'{pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
+                        compilado = open(f'{self.pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
                         pdf_temporário.write(compilado)
                         compilado.close()
                         pagamento.close()
