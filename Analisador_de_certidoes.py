@@ -8,13 +8,13 @@ class Analisador:
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
 
-        #self.menu_certidões = Menu(tela)
-        #self.tela.config(menu=menu_certidões)
-        #self.menu_configurações = Menu(menu_certidões)
-        #self.menu_certidões.add_cascade(label='Configurações', menu=menu_configurações)
-        #self.menu_configurações.add_separator()
-        #self.menu_configurações.add_command(label='Caminhos', command=abrir_janela_caminhos)
-        #self.menu_configurações.add_separator()
+        self.menu_certidões = Menu(tela)
+        self.menu_configurações = Menu(self.menu_certidões)
+        self.menu_certidões.add_cascade(label='Configurações', menu=self.menu_configurações)
+        self.menu_configurações.add_separator()
+        self.menu_configurações.add_command(label='Caminhos', command=self.abrir_janela_caminhos)
+        self.menu_configurações.add_separator()
+
 
         self.titulo = Label(self.frame_mestre, text='''Indique a data limite pretendida para o próximo pagamento e
         em seguida escolha uma das seguintes opções:''', pady=0, padx=0, bg='green', fg='white',
@@ -191,24 +191,60 @@ class Analisador:
         obj1.pega_fornecedores()
         obj1.merge()
 
-    def caminho_de_pastas():
-        #pasta = filedialog.askdirectory(initialdir='C:/Users/14343258/Desktop')
-        pass
+    def caminho_de_pastas(self):
+        pasta = filedialog.askdirectory(initialdir='C:/Users/14343258/Desktop')
+        self.titulo_caminhos = Label(self.frame_de_caminhos, text=pasta, pady=0, padx=0, bg='white', fg='black',
+                       font=('Helvetica', 9, 'bold'))
+        self.titulo_caminhos.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
 
 
-    def abrir_janela_caminhos():
-        janela_de_caminhos = Toplevel()
-        janela_de_caminhos.title('Lista de caminhos')
-        janela_de_caminhos.geometry('400x400')
-        frame = LabelFrame(janela_de_caminhos, padx=0, pady=0)
-        frame.pack(padx=1, pady=1)
-        botao_caminho = Button(frame, text='Buscar caminho', command=caminho_de_pastas, padx=10,
+    def abrir_janela_caminhos(self):
+        self.janela_de_caminhos = Toplevel()
+        self.janela_de_caminhos.title('Lista de caminhos')
+        self.janela_de_caminhos.resizable(False, False)
+        #self.janela_de_caminhos.geometry('500x300')
+        self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
+        self.frame_de_caminhos.pack(padx=1, pady=1)
+        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de dados XLSX', command=self.caminho_de_pastas, padx=10,
                                        pady=10, bg='green',
                                        fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        botao_caminho.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-        titulo = Label(frame, text='Nada aqui', pady=0, padx=0, bg='white', fg='black',
-                                       font=('Helvetica', 9, 'bold'))
-        titulo.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_xlsx = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0, bg='white',
+                                     fg='black',
+                                     font=('Helvetica', 9, 'bold'))
+        self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
+                                    padx=10,
+                                    pady=10, bg='green',
+                                    fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_pasta_de_certidões = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0, bg='white',
+                                     fg='black',
+                                     font=('Helvetica', 9, 'bold'))
+        self.botao_log = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
+                                               padx=10,
+                                               pady=10, bg='green',
+                                               fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_log = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0,
+                                                bg='white',
+                                                fg='black',
+                                                font=('Helvetica', 9, 'bold'))
+        self.pasta_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
+                                      padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_pasta_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white',fg='black',
+                                 font=('Helvetica', 9, 'bold'))
+        self.certidões_para_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas, padx=10,
+                                      pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_certidões_para_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0,
+                                             bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+
+        self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
+        self.caminho_xlsx.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_pasta_de_certidões.grid(row=2, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_log.grid(row=3, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.pasta_pagamento.grid(row=4, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_pasta_pagamento.grid(row=4, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.certidões_para_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_certidões_para_pagamento.grid(row=5, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
 
 tela = Tk()
 
@@ -216,6 +252,7 @@ objeto_tela = Analisador(tela)
 tela.resizable(False, False)
 tela.title('GEOF - Analisador de certidões')
 #tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
+tela.config(menu=objeto_tela.menu_certidões)
 
 
 tela.mainloop()
