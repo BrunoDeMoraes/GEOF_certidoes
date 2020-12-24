@@ -14,7 +14,8 @@ class Certidao:
         self.dia = dia
         self.mes = mes
         self.ano = ano
-        self.wb = openpyxl.load_workbook('//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx')
+        self.caminho_xls = '//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx'
+        self.wb = openpyxl.load_workbook(self.caminho_xls)
         self.pag = self.wb['PAGAMENTO']
         self.forn = self.wb['FORNECEDORES']
         self.listareferencia = []
