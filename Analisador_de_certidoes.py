@@ -47,53 +47,53 @@ class Analisador:
         ou se há requisitos a cumprir para a devida execução da análise.''', pady=0, padx=0, bg='white',
                                 fg='black', font=('Helvetica', 9, 'bold'))
 
-        self.botao_analisar = Button(self.frame_mestre, text='Analisar\ncertidões', command=self.executa, padx=25, pady=10, bg='green',
-                                fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.botao_analisar = Button(self.frame_mestre, text='Analisar\ncertidões', command=self.executa, padx=12, pady=1, bg='green',
+                                fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
         self.titulo_renomear = Label(self.frame_mestre, text='''Após atualizar as certidões, use esta opção para padronizar os nomes dos 
         arquivos e em seguida faça nova análise para certificar que está tudo OK.''', pady=0, padx=0, bg='white',
                                 fg='black', font=('Helvetica', 9, 'bold'))
 
-        self.botao_renomear = Button(self.frame_mestre, text='Renomear\ncertidões', command=self.renomeia, padx=20, pady=10,
+        self.botao_renomear = Button(self.frame_mestre, text='Renomear\ncertidões', command=self.renomeia, padx=12, pady=1,
                                 bg='green',
-                                fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+                                fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
         self.titulo_transfere_arquivos = Label(self.frame_mestre, text='''Esta opção transfere as certidões para uma pasta identificada pela data
         do pagamento. Esse passo deve ser executado logo após a análise.''', pady=0, padx=0, bg='white', fg='black',
                                           font=('Helvetica', 9, 'bold'))
 
         self.botao_transfere_arquivos = Button(self.frame_mestre, text='Transferir\ncertidões', command=self.transfere_certidoes,
-                                          padx=20, pady=10, bg='green',
-                                          fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+                                          padx=12, pady=1, bg='green',
+                                          fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
         self.titulo_mescla_arquivos = Label(self.frame_mestre, text='''Se já houve o pagamento e os comprovantes estão na devida pasta, esta 
         opção mescla os comprovantes com suas respectivas certidões.''', pady=0, padx=0, bg='white', fg='black',
                                        font=('Helvetica', 9, 'bold'))
 
-        self.botao_mescla_arquivos = Button(self.frame_mestre, text=' Mesclar  \narquivos', command=self.mescla_certidoes, padx=20,
-                                       pady=10, bg='green',
-                                       fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.botao_mescla_arquivos = Button(self.frame_mestre, text=' Mesclar  \narquivos', command=self.mescla_certidoes, padx=12,
+                                       pady=1, bg='green',
+                                       fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
         self.roda_pe = Label(self.frame_mestre, text="SRSSU/DA/GEOF   ", pady=0, padx=0, bg='green', fg='white',
                         font=('Helvetica', 8, 'italic'), anchor=E)
 
-        self.titulo.grid(row=0, column=1, columnspan=5, pady=10, sticky=W + E)
-        self.dia_etiqueta.grid(row=1, column=1, pady=0, ipadx=14, ipady=0)
-        self.mes_etiqueta.grid(row=1, column=2, pady=0, ipadx=14, ipady=0)
-        self.ano_etiqueta.grid(row=1, column=3, pady=0, ipadx=14, ipady=0)
+        self.titulo.grid(row=0, column=1, columnspan=5, pady=20, sticky=W + E)
+        self.dia_etiqueta.grid(row=1, column=1, pady=0, ipadx=8, ipady=0)
+        self.mes_etiqueta.grid(row=1, column=2, pady=0, ipadx=8, ipady=0)
+        self.ano_etiqueta.grid(row=1, column=3, pady=0, ipadx=8, ipady=0)
         self.validacao.grid(row=2, column=1, pady=0)
         self.validacao2.grid(row=2, column=2, pady=0)
         self.validacao3.grid(row=2, column=3, pady=0)
-        self.titulo_analisar.grid(row=3, column=4, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.titulo_analisar.grid(row=1, column=4, rowspan=2, columnspan=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_analisar.grid(row=3, column=5, padx=0, pady=10)
-        self.titulo_renomear.grid(row=4, column=4, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.botao_renomear.grid(row=4, column=5, padx=0, pady=10)
-        self.titulo_transfere_arquivos.grid(row=5, column=4, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13,
+        self.titulo_renomear.grid(row=8, column=1, columnspan=5, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.botao_renomear.grid(row=9, column=5, padx=0, pady=10)
+        self.titulo_transfere_arquivos.grid(row=4, column=1, columnspan=5, padx=5, pady=0, ipadx=0, ipady=8,
                                        sticky=W + E)
         self.botao_transfere_arquivos.grid(row=5, column=5, padx=0, pady=10)
-        self.titulo_mescla_arquivos.grid(row=6, column=4, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.botao_mescla_arquivos.grid(row=6, column=5, padx=0, pady=10)
-        self.roda_pe.grid(row=7, column=1, columnspan=10, pady=5, sticky=W + E)
+        self.titulo_mescla_arquivos.grid(row=6, column=1, columnspan=5, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.botao_mescla_arquivos.grid(row=7, column=5, padx=0, pady=10)
+        self.roda_pe.grid(row=10, column=1, columnspan=10, pady=5, sticky=W + E)
 
 
     def cria_calendario(self):
@@ -199,32 +199,27 @@ class Analisador:
 
 
     def abrir_janela_caminhos(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
+        obj1 = Certidao(dia, mes, ano)
         self.janela_de_caminhos = Toplevel()
         self.janela_de_caminhos.title('Lista de caminhos')
         self.janela_de_caminhos.resizable(False, False)
         #self.janela_de_caminhos.geometry('500x300')
         self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
         self.frame_de_caminhos.pack(padx=1, pady=1)
-        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de dados XLSX', command=self.caminho_de_pastas, padx=10,
-                                       pady=10, bg='green',
-                                       fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_xlsx = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0, bg='white',
-                                     fg='black',
-                                     font=('Helvetica', 9, 'bold'))
+        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de dados XLSX', command=self.caminho_de_pastas,
+                                 padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_xlsx = Label(self.frame_de_caminhos, text=obj1.caminho_xls, pady=0, padx=0, bg='white', fg='black',
+                                  font=('Helvetica', 9, 'bold'))
         self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
-                                    padx=10,
-                                    pady=10, bg='green',
-                                    fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_pasta_de_certidões = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0, bg='white',
-                                     fg='black',
+                                    padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_pasta_de_certidões = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white', fg='black',
                                      font=('Helvetica', 9, 'bold'))
-        self.botao_log = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
-                                               padx=10,
-                                               pady=10, bg='green',
-                                               fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_log = Label(self.frame_de_caminhos, text='         -         ', pady=0, padx=0,
-                                                bg='white',
-                                                fg='black',
+        self.botao_log = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas, padx=10, pady=10,
+                                bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_log = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white', fg='black',
                                                 font=('Helvetica', 9, 'bold'))
         self.pasta_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
                                       padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
@@ -232,8 +227,8 @@ class Analisador:
                                  font=('Helvetica', 9, 'bold'))
         self.certidões_para_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas, padx=10,
                                       pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_certidões_para_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0,
-                                             bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+        self.caminho_certidões_para_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white',
+                                                      fg='black', font=('Helvetica', 9, 'bold'))
 
         self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
         self.caminho_xlsx.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
