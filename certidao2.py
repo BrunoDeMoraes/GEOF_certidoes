@@ -271,56 +271,6 @@ class Certidao:
         self.mensagem_log('\nIMAGENS CRIADAS COM SUCESSO!')
         self.percentual = 0
 
-    def merge(self):
-        if os.path.exists(f'{self.pasta_de_trabalho}/Merge'):
-            print('Já existe pasta para mesclagem na data informada')
-        else:
-            os.makedirs(f'{self.pasta_de_trabalho}/Merge')
-        os.chdir(self.pasta_de_trabalho)
-        for arquivo_pdf in os.listdir(self.pasta_de_trabalho):
-            os.chdir(self.pasta_de_trabalho)
-            if arquivo_pdf.endswith(".pdf"):
-                for emp in self.empresas:
-                    validação_de_partes_do_nome =[]
-                    retira_espaço_empresa = emp.replace(' ', '-')
-                    nome_separado = retira_espaço_empresa.split('-')
-                    retira_espaço_do_arquivo = arquivo_pdf.replace(' ','-')
-                    arquivo_separado = retira_espaço_do_arquivo.split('-')
-                    for parte_do_nome in nome_separado:
-                        contador = 0
-                        if nome_separado[contador] == arquivo_separado[contador + 1]:
-                            validação_de_partes_do_nome.append('OK')
-                            contador += 1
-                        else:
-                            validação_de_partes_do_nome.append('falha')
-                            contador += 1
-                    if 'falha' not in validação_de_partes_do_nome:
-                        print(emp)
-                        print(arquivo_pdf.split())
-                        pdf_temporário = PyPDF2.PdfFileWriter()
-                        print(arquivo_pdf)
-                        pagamento = open(arquivo_pdf, 'rb')
-                        pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
-                        for página in range(pagamento_lido.numPages):
-                            objeto_pagina = pagamento_lido.getPage(página)
-                            pdf_temporário.addPage(objeto_pagina)
-                        pasta_da_empresa = f'{self.pagamento_por_data}/{emp}'
-                        os.chdir(pasta_da_empresa)
-                        for arquivo_certidão in os.listdir(pasta_da_empresa):
-                            if '00.MERGE' not in arquivo_certidão:
-                                certidão = open(arquivo_certidão, 'rb')
-                                certidão_lida = PyPDF2.PdfFileReader(certidão)
-                                for página_da_certidão in range(certidão_lida.numPages):
-                                    objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
-                                    pdf_temporário.addPage(objeto_pagina_da_certidão)
-                        compilado = open(f'{self.pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
-                        pdf_temporário.write(compilado)
-                        compilado.close()
-                        pagamento.close()
-                        certidão.close()
-
-
-
     def gera_nome(self):
         print('\nRENOMEANDO CERTIDÕES:\n\n')
         for emp in self.empresas:
@@ -372,6 +322,56 @@ class Certidao:
                                 junta = volta
                             shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
         print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
+
+
+    def merge(self):
+        if os.path.exists(f'{self.pasta_de_trabalho}/Merge'):
+            print('Já existe pasta para mesclagem na data informada')
+        else:
+            os.makedirs(f'{self.pasta_de_trabalho}/Merge')
+        os.chdir(self.pasta_de_trabalho)
+        for arquivo_pdf in os.listdir(self.pasta_de_trabalho):
+            os.chdir(self.pasta_de_trabalho)
+            if arquivo_pdf.endswith(".pdf"):
+                for emp in self.empresas:
+                    validação_de_partes_do_nome =[]
+                    retira_espaço_empresa = emp.replace(' ', '-')
+                    nome_separado = retira_espaço_empresa.split('-')
+                    retira_espaço_do_arquivo = arquivo_pdf.replace(' ','-')
+                    arquivo_separado = retira_espaço_do_arquivo.split('-')
+                    for parte_do_nome in nome_separado:
+                        contador = 0
+                        if nome_separado[contador] == arquivo_separado[contador + 1]:
+                            validação_de_partes_do_nome.append('OK')
+                            contador += 1
+                        else:
+                            validação_de_partes_do_nome.append('falha')
+                            contador += 1
+                    if 'falha' not in validação_de_partes_do_nome:
+                        print(emp)
+                        print(arquivo_pdf.split())
+                        pdf_temporário = PyPDF2.PdfFileWriter()
+                        print(arquivo_pdf)
+                        pagamento = open(arquivo_pdf, 'rb')
+                        pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
+                        for página in range(pagamento_lido.numPages):
+                            objeto_pagina = pagamento_lido.getPage(página)
+                            pdf_temporário.addPage(objeto_pagina)
+                        pasta_da_empresa = f'{self.pagamento_por_data}/{emp}'
+                        os.chdir(pasta_da_empresa)
+                        for arquivo_certidão in os.listdir(pasta_da_empresa):
+                            if '00.MERGE' not in arquivo_certidão:
+                                certidão = open(arquivo_certidão, 'rb')
+                                certidão_lida = PyPDF2.PdfFileReader(certidão)
+                                for página_da_certidão in range(certidão_lida.numPages):
+                                    objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
+                                    pdf_temporário.addPage(objeto_pagina_da_certidão)
+                        compilado = open(f'{self.pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
+                        pdf_temporário.write(compilado)
+                        compilado.close()
+                        pagamento.close()
+                        certidão.close()
+
 
     def apaga_imagem(self):
         for emp in self.empresas:
