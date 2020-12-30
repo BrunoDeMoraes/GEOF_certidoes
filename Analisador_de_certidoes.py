@@ -85,25 +85,25 @@ class Analisador:
                         arquivos e em seguida faça nova análise para certificar que está tudo OK.''', pady=0, padx=0,
                                      bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
-        self.botao_procurar_arquivo = Button(self.frame_renomear, text=' Procurar\narquivo ', command=self.caminho_de_arquivo,
+        self.botao_procurar_arquivo = Button(self.frame_renomear, text=' Selecionar\narquivos ', command=self.caminho_de_arquivo,
                                              padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.arquivo_selecionado = 'Endereço do arquivo'
-        self.caminho_do_arquivo = Label(self.frame_renomear, text=self.arquivo_selecionado, pady=0, padx=130, bg='white',fg='gray',
+        self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
+        self.caminho_do_arquivo = Label(self.frame_renomear, text=self.arquivo_selecionado, pady=0, padx=50, bg='white',fg='gray',
                                         font=('Helvetica', 9, 'bold'))
 
         self.botao_renomear_arquivo = Button(self.frame_renomear, text=' Renomear  \narquivo', command=self.pdf_para_jpg_para_renomear_arquivo,
                                              padx=12, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.botao_procurar_pasta = Button(self.frame_renomear, text='   Listar   \npastas', command=self.renomeia,
+        self.botao_procurar_pasta = Button(self.frame_renomear, text='Selecionar\npasta', command=self.caminho_de_pastas,
                                              padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
                                              bd=1)
-
-        self.caminho_da_pasta = Label(self.frame_renomear, text='Lista de pastas', pady=0, padx=130, bg='white',
+        self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
+        self.caminho_da_pasta = Label(self.frame_renomear, text=self.pasta_selecionada, pady=0, padx=50, bg='white',
                                         fg='gray',
                                         font=('Helvetica', 9, 'bold'))
 
-        self.botao_renomear_pasta = Button(self.frame_renomear, text=' Renomear\npastas', command=self.mescla_certidoes,
+        self.botao_renomear_pasta = Button(self.frame_renomear, text=' Renomear\npastas', command=self.pdf_para_jpg_renomear_conteudo_da_pasta,
                                      padx=12,
                                      pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
@@ -238,70 +238,180 @@ class Analisador:
         obj1.merge()
 
 
-    def pdf_para_jpg_para_renomear_arquivo(self):
-        print('CRIANDO IMAGENS:\n')
-        certidão_pdf = self.arquivo_selecionado
-        pages = convert_from_path(certidão_pdf, 300, last_page=1)
-        certidão_convertida_para_jpg = f'{certidão_pdf[:-4]}.jpg'
-        pages[0].save(certidão_convertida_para_jpg, "JPEG")
-        print('\nIMAGENS CRIADAS COM SUCESSO!')
-
-        certidao_jpg = pytesseract.image_to_string(Image.open(certidão_convertida_para_jpg), lang='por')
-        padroes = ['FGTS - CRF', 'Brasília,', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA', 'GOVERNO DO DISTRITO FEDERAL']
-        valores = {'FGTS - CRF': 'FGTS', 'Brasília,': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
-                               'MINISTÉRIO DA FAZENDA': 'UNIÃO', 'GOVERNO DO DISTRITO FEDERAL':'GDF'}
-        datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'Brasília,': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                          '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
-                             'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                             '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
-                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
-        datas2 = {'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
-                                             '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                             '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
-
-        for frase in padroes:
-            if frase in certidao_jpg:
-                print('Renomeando certidão')
-            if frase == 'GOVERNO DO DISTRITO FEDERAL':
-                try:
-                    data = re.compile(datas2[frase])
-                    procura = data.search(certidao_jpg)
-                    datanome = procura.group()
-                    separa = datanome.split('/')
-                    junta = '-'.join(separa)
-                except AttributeError:
-                    data = re.compile(datas[frase])
-                    procura = data.search(certidao_jpg)
-                    datanome = procura.group()
-                    separa = datanome.split('/')
-                    junta = '-'.join(separa)
-            else:
-                data = re.compile(datas[frase])
-                procura = data.search(certidao_jpg)
-                datanome = procura.group()
-                separa = datanome.split('/')
-                junta = '-'.join(separa)
-            if ':' in junta:
-                retira = junta.split(':')
-                volta = ' '.join(retira)
-                junta = volta
-        shutil.move(f'{certidão_convertida_para_jpg[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
-        print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
-
     def caminho_de_arquivo(self):
-        self.arquivo_selecionado = filedialog.askopenfilename(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2')
-        self.caminho_do_arquivo = Label(self.frame_renomear, text=f'...{self.arquivo_selecionado[-15:]}', pady=0, padx=0, bg='white',
-                                        fg='gray', font=('Helvetica', 9, 'bold'))
+        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2',
+                                                               filetypes=(('Arquivos pdf','*.pdf'),("Todos os arquivos", '*.*')))
+        numero_de_arquivos = 'Nenhum arquivo selecionado'
+        if len(self.arquivo_selecionado) > 1:
+            numero_de_arquivos = 'Multiplos arquivos selecionados'
+        elif len(self.arquivo_selecionado) == 1:
+            numero_de_arquivos = os.path.basename(self.arquivo_selecionado[0])
+        self.caminho_do_arquivo = Label(self.frame_renomear, text=numero_de_arquivos, pady=0,
+                                        padx=50, bg='white', fg='gray', font=('Helvetica', 9, 'bold'))
         self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W+E)
 
+
+
+    def pdf_para_jpg_para_renomear_arquivo(self):
+        if self.arquivo_selecionado == 'Selecione os arquivos que deseja renomear' or list(self.arquivo_selecionado) == []:
+            print('Selecione os arquivos que deseja renomear')
+        elif not os.path.exists(self.arquivo_selecionado[0]):
+            print('O arquivo selecionado não existe.')
+            self.caminho_do_arquivo = Label(self.frame_renomear, text='O arquivo selecionado não existe.', pady=0,
+                                            padx=50, bg='white', fg='gray', font=('Helvetica', 9, 'bold'))
+            self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        else:
+            print('CRIANDO IMAGENS:\n')
+            certidão_pdf = list(self.arquivo_selecionado)
+            print(certidão_pdf)
+            for arquivo_a_renomear in certidão_pdf:
+                os.chdir(arquivo_a_renomear[0:-((arquivo_a_renomear[::-1].find('/')+1))])
+                pages = convert_from_path(arquivo_a_renomear, 300, last_page=1)
+                certidão_convertida_para_jpg = f'{arquivo_a_renomear[:-4]}.jpg'
+                pages[0].save(certidão_convertida_para_jpg, "JPEG")
+                print('\nIMAGENS CRIADAS COM SUCESSO!')
+
+                certidao_jpg = pytesseract.image_to_string(Image.open(certidão_convertida_para_jpg), lang='por')
+                padroes = ['FGTS - CRF', 'Brasília,', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA', 'GOVERNO DO DISTRITO FEDERAL']
+                valores = {'FGTS - CRF': 'FGTS', 'Brasília,': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
+                                       'MINISTÉRIO DA FAZENDA': 'UNIÃO', 'GOVERNO DO DISTRITO FEDERAL':'GDF'}
+                datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
+                                     'Brasília,': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                                  '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
+                                     'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
+                                     'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
+                                     'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                                     '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                                     '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
+                datas2 = {'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                                     '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                                     '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
+
+                for frase in padroes:
+                    if frase in certidao_jpg:
+                        print('Renomeando certidão')
+                        if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                            try:
+                                data = re.compile(datas2[frase])
+                                procura = data.search(certidao_jpg)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
+                            except AttributeError:
+                                data = re.compile(datas[frase])
+                                procura = data.search(certidao_jpg)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
+                        else:
+                            data = re.compile(datas[frase])
+                            procura = data.search(certidao_jpg)
+                            datanome = procura.group()
+                            separa = datanome.split('/')
+                            junta = '-'.join(separa)
+                        if ':' in junta:
+                            retira = junta.split(':')
+                            volta = ' '.join(retira)
+                            junta = volta
+                        shutil.move(f'{certidão_convertida_para_jpg[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
+                        os.unlink(certidão_convertida_para_jpg)
+            print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
+
     def caminho_de_pastas(self):
-        pasta = filedialog.askdirectory(initialdir='C:/Users/14343258/Desktop')
-        self.titulo_caminhos = Label(self.frame_de_caminhos, text='', pady=0, padx=0, bg='white', fg='black',
+        pasta = 'Nenhuma pasta selecionada'
+        self.pasta_selecionada = filedialog.askdirectory(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2')
+        if os.path.isdir(self.pasta_selecionada) and self.pasta_selecionada != '//hrg-74977/GEOF/CERTIDÕES/Certidões2':
+            pasta = self.pasta_selecionada
+            self.caminho_da_pasta = Label(self.frame_renomear, text=os.path.basename(pasta), pady=0, padx=0, bg='white', fg='gray',
                        font=('Helvetica', 9, 'bold'))
-        self.titulo_caminhos.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+            self.caminho_da_pasta.grid(row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        else:
+            self.caminho_da_pasta = Label(self.frame_renomear, text=pasta, pady=0, padx=0, bg='white',
+                                          fg='gray',
+                                          font=('Helvetica', 9, 'bold'))
+            self.caminho_da_pasta.grid(row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+
+
+    def apaga_imagens_da_pasta(self):
+            os.chdir(self.pasta_selecionada)
+            for arquivo in os.listdir(self.pasta_selecionada):
+                if arquivo.endswith(".jpg"):
+                    os.unlink(f'{self.pasta_selecionada}/{arquivo}')
+
+    def pdf_para_jpg_renomear_conteudo_da_pasta(self):
+        if self.pasta_selecionada == 'Selecione a pasta que deseja renomear' or self.pasta_selecionada =='':
+            print('nenhuma pasta selecionada')
+            self.caminho_da_pasta = Label(self.frame_renomear, text='Nenhuma pasta selecionada', pady=0, padx=0, bg='white',
+                                          fg='gray',
+                                          font=('Helvetica', 9, 'bold'))
+            self.caminho_da_pasta.grid(row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        else:
+            print('CRIANDO IMAGENS:\n')
+            os.chdir(self.pasta_selecionada)
+            self.apaga_imagens_da_pasta()
+            for pdf_file in os.listdir(self.pasta_selecionada):
+                if '00.MERGE' in pdf_file:
+                    if not os.path.isdir(f'{self.pasta_selecionada}/Merge'):
+                        os.makedirs(f'{self.pasta_selecionada}/Merge')
+                        shutil.move(pdf_file, f'{self.pasta_selecionada}/Merge/{pdf_file}')
+                    else:
+                        shutil.move(pdf_file, f'{self.pasta_selecionada}/Merge/{pdf_file}')
+
+                elif pdf_file.endswith(".pdf"):
+                    pages = convert_from_path(pdf_file, 300, last_page=1)
+                    pdf_file = pdf_file[:-4]
+                    pages[0].save(f"{pdf_file}.jpg", "JPEG")
+
+            print('\nRENOMEANDO CERTIDÕES:\n\n')
+            os.chdir(f'{self.pasta_selecionada}')
+            origem = f'{self.pasta_selecionada}'
+            for imagem in os.listdir(origem):
+                if imagem.endswith(".jpg"):
+                    certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang='por')
+                    padroes = ['FGTS - CRF', 'Brasília,', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA',
+                                   'GOVERNO DO DISTRITO FEDERAL']
+                    valores = {'FGTS - CRF': 'FGTS', 'Brasília,': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
+                                   'MINISTÉRIO DA FAZENDA': 'UNIÃO', 'GOVERNO DO DISTRITO FEDERAL': 'GDF'}
+                    datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
+                                 'Brasília,': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                              '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
+                                 'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
+                                 'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
+                                 'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                                                '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                                                '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
+                    datas2 = {
+                            'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
+                                                           '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
+                                                           '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
+                    for frase in padroes:
+                        if frase in certidao:
+                            if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                                try:
+                                    data = re.compile(datas2[frase])
+                                    procura = data.search(certidao)
+                                    datanome = procura.group()
+                                    separa = datanome.split('/')
+                                    junta = '-'.join(separa)
+                                except AttributeError:
+                                    data = re.compile(datas[frase])
+                                    procura = data.search(certidao)
+                                    datanome = procura.group()
+                                    separa = datanome.split('/')
+                                    junta = '-'.join(separa)
+                            else:
+                                data = re.compile(datas[frase])
+                                procura = data.search(certidao)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
+                            if ':' in junta:
+                                retira = junta.split(':')
+                                volta = ' '.join(retira)
+                                junta = volta
+                            shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
+            self.apaga_imagens_da_pasta()
+            print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
 
 
     def abrir_janela_caminhos(self):
