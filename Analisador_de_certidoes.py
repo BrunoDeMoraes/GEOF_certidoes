@@ -1,5 +1,6 @@
 from tkinter import *
 from tkinter import filedialog
+from tkinter import messagebox
 from certidao2 import Certidao, Uniao, Tst, Fgts, Gdf
 import time
 from pdf2image import convert_from_path
@@ -61,16 +62,56 @@ class Analisador:
         self.botao_analisar = Button(self.frame_mestre, text='Analisar\ncertidões', command=self.executa, padx=30, pady=1, bg='green',
                                 fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.titulo_transfere_arquivos = Label(self.frame_mestre, text='''Esta opção transfere as certidões para uma pasta identificada pela data
-        do pagamento. Esse passo deve ser executado logo após a análise.''', pady=0, padx=0, bg='white', fg='black',
-                                          font=('Helvetica', 9, 'bold'))
+
+        self.titulo_renomear = Label(self.frame_mestre, text='''Após atualizar as certidões, use uma das opções (renomear arquivos, pasta ou todas as certidões) para padronizar
+         os nomes dos arquivos e em seguida faça nova análise para certificar que está tudo OK.''', pady=0, padx=0,
+                                     bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+
+        self.botao_procurar_arquivo = Button(self.frame_renomear, text=' Selecionar\narquivos ',
+                                             command=self.caminho_de_arquivo,
+                                             padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                             bd=1)
+
+        self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
+        self.caminho_do_arquivo = Label(self.frame_renomear, text=self.arquivo_selecionado, pady=0, padx=50, bg='white',
+                                        fg='gray',
+                                        font=('Helvetica', 9, 'bold'))
+
+        self.botao_renomear_arquivo = Button(self.frame_renomear, text=' Renomear  \narquivos',
+                                             command=self.pdf_para_jpg_para_renomear_arquivo,
+                                             padx=12, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                             bd=1)
+
+        self.botao_procurar_pasta = Button(self.frame_renomear, text='Selecionar\npasta',
+                                           command=self.caminho_de_pastas,
+                                           padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                           bd=1)
+        self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
+        self.caminho_da_pasta = Label(self.frame_renomear, text=self.pasta_selecionada, pady=0, padx=50, bg='white',
+                                      fg='gray',
+                                      font=('Helvetica', 9, 'bold'))
+
+        self.botao_renomear_pasta = Button(self.frame_renomear, text=' Renomear\npasta',
+                                           command=self.pdf_para_jpg_renomear_conteudo_da_pasta,
+                                           padx=12,
+                                           pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
+
+        self.botao_renomear_tudo = Button(self.frame_renomear, text='Renomear\ntodas as\ncertidões',
+                                          command=self.renomeia,
+                                          padx=25, pady=20, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                          bd=1)
+
+        self.titulo_transfere_arquivos = Label(self.frame_mestre, text='''Esta opção transfere as certidões que validam o pagamento para uma pasta identificada pela data.
+        Esse passo deve ser executado logo após a análise definitiva antes do pagamento.''', pady=0, padx=0, bg='white',
+                                               fg='black',
+                                               font=('Helvetica', 9, 'bold'))
 
         self.botao_transfere_arquivos = Button(self.frame_mestre, text='Transferir\ncertidões', command=self.transfere_certidoes,
                                           padx=30, pady=1, bg='green',
                                           fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.titulo_mescla_arquivos = Label(self.frame_mestre, text='''Se já houve o pagamento e os comprovantes estão na devida pasta, esta 
-        opção mescla os comprovantes com suas respectivas certidões.''', pady=0, padx=0, bg='white', fg='black',
+        self.titulo_mescla_arquivos = Label(self.frame_mestre, text='''Após o pagamento utilize esta opção para mesclar os comprovantes
+        de pagamento digitalizados com suas respectivas certidões.''', pady=0, padx=0, bg='white', fg='black',
                                        font=('Helvetica', 9, 'bold'))
 
         self.botao_mescla_arquivos = Button(self.frame_mestre, text=' Mesclar  \narquivos', command=self.mescla_certidoes, padx=30,
@@ -80,36 +121,6 @@ class Analisador:
 
         self.roda_pe = Label(self.frame_mestre, text="SRSSU/DA/GEOF   ", pady=0, padx=0, bg='green', fg='white',
                              font=('Helvetica', 8, 'italic'), anchor=E)
-
-        self.titulo_renomear = Label(self.frame_mestre, text='''Após atualizar as certidões, use esta opção para padronizar os nomes dos 
-                        arquivos e em seguida faça nova análise para certificar que está tudo OK.''', pady=0, padx=0,
-                                     bg='white', fg='black', font=('Helvetica', 9, 'bold'))
-
-        self.botao_procurar_arquivo = Button(self.frame_renomear, text=' Selecionar\narquivos ', command=self.caminho_de_arquivo,
-                                             padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
-
-        self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
-        self.caminho_do_arquivo = Label(self.frame_renomear, text=self.arquivo_selecionado, pady=0, padx=50, bg='white',fg='gray',
-                                        font=('Helvetica', 9, 'bold'))
-
-        self.botao_renomear_arquivo = Button(self.frame_renomear, text=' Renomear  \narquivo', command=self.pdf_para_jpg_para_renomear_arquivo,
-                                             padx=12, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
-
-        self.botao_procurar_pasta = Button(self.frame_renomear, text='Selecionar\npasta', command=self.caminho_de_pastas,
-                                             padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
-                                             bd=1)
-        self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
-        self.caminho_da_pasta = Label(self.frame_renomear, text=self.pasta_selecionada, pady=0, padx=50, bg='white',
-                                        fg='gray',
-                                        font=('Helvetica', 9, 'bold'))
-
-        self.botao_renomear_pasta = Button(self.frame_renomear, text=' Renomear\npastas', command=self.pdf_para_jpg_renomear_conteudo_da_pasta,
-                                     padx=12,
-                                     pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
-
-        self.botao_renomear_tudo = Button(self.frame_renomear, text='Renomear\ntodas as\ncertidões', command=self.renomeia,
-                                             padx=25, pady=20, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
-                                             bd=1)
 
         self.frame_data.grid(row=0, column=1, columnspan=7, rowspan=1, pady=0, sticky=W + E)
         self.titulo.grid(row=0, column=1, columnspan=5, rowspan=1, pady=0, sticky=W + E)
@@ -122,20 +133,25 @@ class Analisador:
 
         self.titulo_analisar.grid(row=1, column=1,  columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_analisar.grid(row=2, column=1, columnspan=7, padx=0, pady=10)
-        self.titulo_transfere_arquivos.grid(row=3, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
-        self.botao_transfere_arquivos.grid(row=4, column=1, columnspan=7, padx=0, pady=10)
-        self.titulo_mescla_arquivos.grid(row=5, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
-        self.botao_mescla_arquivos.grid(row=6, column=1, columnspan=7, padx=0, pady=10)
-        self.titulo_renomear.grid(row=7, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.titulo_renomear.grid(row=3, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
 
-        self.frame_renomear.grid(row=8, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.frame_renomear.grid(row=4, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_procurar_arquivo.grid(row=0, column=1, padx=0, pady=0)
-        self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W+E)
+        self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_renomear_arquivo.grid(row=0, column=3, padx=0, pady=0)
         self.botao_procurar_pasta.grid(row=1, column=1, padx=0, pady=0)
         self.caminho_da_pasta.grid(row=1, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_renomear_pasta.grid(row=1, column=3, padx=0, pady=0)
         self.botao_renomear_tudo.grid(row=0, column=4, rowspan=2, padx=20, pady=5, ipady=8)
+
+
+        self.titulo_transfere_arquivos.grid(row=5, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.botao_transfere_arquivos.grid(row=6, column=1, columnspan=7, padx=0, pady=10)
+        self.titulo_mescla_arquivos.grid(row=7, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
+        self.botao_mescla_arquivos.grid(row=8, column=1, columnspan=7, padx=0, pady=10)
+
+
+
 
         self.roda_pe.grid(row=9, column=1, columnspan=10, pady=5, sticky=W+E)
 
@@ -254,9 +270,12 @@ class Analisador:
 
     def pdf_para_jpg_para_renomear_arquivo(self):
         if self.arquivo_selecionado == 'Selecione os arquivos que deseja renomear' or list(self.arquivo_selecionado) == []:
+            messagebox.showerror('Se não selecionar os arquivos, não vai rolar!', 'Selecione os arquivos que deseja renomear')
             print('Selecione os arquivos que deseja renomear')
         elif not os.path.exists(self.arquivo_selecionado[0]):
             print('O arquivo selecionado não existe.')
+            messagebox.showerror('Esse arquivo é invenção da sua cabeça, parça!',
+                                 'O arquivo selecionado não existe ou já foi renomeado!')
             self.caminho_do_arquivo = Label(self.frame_renomear, text='O arquivo selecionado não existe.', pady=0,
                                             padx=50, bg='white', fg='gray', font=('Helvetica', 9, 'bold'))
             self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
@@ -340,6 +359,8 @@ class Analisador:
 
     def pdf_para_jpg_renomear_conteudo_da_pasta(self):
         if self.pasta_selecionada == 'Selecione a pasta que deseja renomear' or self.pasta_selecionada =='':
+            messagebox.showerror('Se não selecionar a pasta, não vai rolar!',
+                                 'Selecione uma pasta que contenha certidões que precisam ser renomeadas.')
             print('nenhuma pasta selecionada')
             self.caminho_da_pasta = Label(self.frame_renomear, text='Nenhuma pasta selecionada', pady=0, padx=0, bg='white',
                                           fg='gray',
