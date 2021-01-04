@@ -51,6 +51,9 @@ class Analisador:
 
         self.cria_calendario()
 
+        self.botao_abrir_log = Button(self.frame_data, text='Abrir log', command=self.abrir_log, padx=0,
+                                     pady=0, bg='white',
+                                     fg='green', font=('Helvetica', 9, 'bold'), bd=1)
         self.validacao = OptionMenu(self.frame_data, self.variavel, *self.dias)
         self.validacao2 = OptionMenu(self.frame_data, self.variavel2, *self.meses)
         self.validacao3 = OptionMenu(self.frame_data, self.variavel3, *self.anos)
@@ -127,6 +130,7 @@ class Analisador:
         self.dia_etiqueta.grid(row=0, column=6, pady=0, ipadx=0, ipady=0)
         self.mes_etiqueta.grid(row=0, column=7, pady=0, ipadx=0, ipady=0)
         self.ano_etiqueta.grid(row=0, column=8, pady=0, ipadx=0, ipady=0)
+        self.botao_abrir_log.grid(row=1, column=1, pady=0)
         self.validacao.grid(row=1, column=6, pady=0)
         self.validacao2.grid(row=1, column=7, pady=0)
         self.validacao3.grid(row=1, column=8, pady=0)
@@ -150,12 +154,20 @@ class Analisador:
         self.titulo_mescla_arquivos.grid(row=7, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_mescla_arquivos.grid(row=8, column=1, columnspan=7, padx=0, pady=10)
 
-
-
-
         self.roda_pe.grid(row=9, column=1, columnspan=10, pady=5, sticky=W+E)
 
 
+
+
+    def abrir_log(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
+        if not os.path.exists(f'\\\hrg-74977\\GEOF\\CERTIDÕES\\Logs de conferência\\{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
+            messagebox.showerror('Me ajuda a te ajudar!',
+                                 'Não existe log para a data informada.')
+        else:
+            os.startfile(f'\\\hrg-74977\\GEOF\\CERTIDÕES\\Logs de conferência\\{ano}-{mes}-{dia}.txt')
 
 
     def cria_calendario(self):
@@ -221,6 +233,7 @@ class Analisador:
             f'\n\nTempo total de execução: {tempo_de_execução // 60} minutos e {tempo_de_execução % 60} segundos.')
         obj1.mensagem_log_sem_horario(
             '\n\n======================================================================================\n')
+        messagebox.showinfo('Analisou, miserávi!', 'Processo de análise de certidões executado com sucesso!')
 
     def renomeia(self):
         dia = self.variavel.get()
@@ -234,6 +247,7 @@ class Analisador:
         obj1.pdf_para_jpg_renomear()
         obj1.gera_nome()
         obj1.apaga_imagem()
+        messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões da listagem de pagamento foram renomeadas com sucesso!')
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
@@ -335,6 +349,7 @@ class Analisador:
                         shutil.move(f'{certidão_convertida_para_jpg[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
                         os.unlink(certidão_convertida_para_jpg)
             print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
+            messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões selecionadas foram renomeadas com sucesso!')
 
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
@@ -433,6 +448,8 @@ class Analisador:
                             shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
             self.apaga_imagens_da_pasta()
             print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
+            messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões da pasta selecionada foram renomeadas com sucesso!')
+
 
 
     def abrir_janela_caminhos(self):
