@@ -8,6 +8,7 @@ import time
 import datetime
 import shutil
 import PyPDF2
+from tkinter import messagebox
 
 class Certidao:
     def __init__(self, dia, mes, ano):
@@ -69,14 +70,19 @@ class Certidao:
     def analisa_referencia(self):
         self.pega_referencia()
         if len(self.listareferencia) == 0:
-            self.mensagem_log('\nData específicada não encontrada')
-            raise Exception('Data não encontrada!')
+            self.mensagem_log('\nA data informada não foi encontrada na lista de datas para pagamento ou não existe!')
+            messagebox.showerror('Me ajuda a te ajudar!',
+                                 'A data informada não foi encontrada na lista de datas para pagamento ou não existe!')
+            raise Exception('A data informada não foi encontrada na lista de datas para pagamento ou não existe!!')
         elif len(self.listareferencia) > 1:
-            self.mensagem_log('Data informada em multiplicidade')
-            print(f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
-            raise Exception(f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos.'
-                            f'\nApague os valores duplicados e execute o programa novamente.')
+            self.mensagem_log(f'''Data informada em multiplicidade
+            A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\\GEOF\\CERTIDÕES\\Análise\\atual.xlsx.
+                            \nApague as células informadas com valores duplicados e execute o programa novamente.''')
+            messagebox.showerror('Me ajuda a te ajudar!',
+                                 f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\GEOF\CERTIDÕES\Análise\\atual.xlsx.'
+                            f'\nApague as células informadas com valores duplicados e execute o programa novamente.')
+            raise Exception(f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\GEOF\CERTIDÕES\Análise\\atual.xlsx.'
+                            f'\nApague as células informadas com valores duplicados e execute o programa novamente.')
         else:
             self.mensagem_log(f'\nReferência encontrada na célula {self.listareferencia[0]}')
 
