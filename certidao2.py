@@ -215,7 +215,7 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
                 certidao = objeto.pega_string(emp)
                 self.percentual += (25 / len(self.empresas))
                 print(f'   Total executado: {self.percentual}%')
-                val, cnpj_para_comparação = objeto.confere_data(certidao)
+                val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
                 if val == True and cnpj_para_comparação == self.empresas[emp][1]:
                     empresadic[self.orgaos[index]] = 'OK'
                 elif cnpj_para_comparação != self.empresas[emp][1]:
@@ -408,17 +408,38 @@ class Uniao(Certidao):
                     lang='por')
                 return certidao
 
-    def confere_data(self, certidao):
+    def confere_data(self, certidao, emp):
         self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
-        validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        try:
+            validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        except AttributeError:
+            self.mensagem_log(f'Execução interrompida!!!\nNão foi possível encontrar o padrão de CNPJ na certidão UNIÃO da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de CNPJ na certidão UNIÃO da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão UNIÃO da empresa {emp} inválido.')
         texto = []
         padrao = re.compile('do dia (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        texto.append(emissao_string.group().split()[2])
+        try:
+            texto.append(emissao_string.group().split()[2])
+        except AttributeError:
+            self.mensagem_log(
+                f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de emissão na certidão UNIÃO da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de data de emissão na certidão UNIÃO da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão UNIÃO da empresa {emp} inválido.')
+
         padrao = re.compile('Válida até (\d\d)/(\d\d)/(\d\d\d\d)')
         vencimento_string = padrao.search(certidao)
-        texto.append(vencimento_string.group().split()[2])
+        try:
+            texto.append(vencimento_string.group().split()[2])
+        except AttributeError:
+            self.mensagem_log(
+                f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de vencimento na certidão UNIÃO da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de data de vencimento na certidão UNIÃO da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão UNIÃO da empresa {emp} inválido.')
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
@@ -445,17 +466,37 @@ class Tst(Certidao):
                     lang='por')
                 return certidao
 
-    def confere_data(self, certidao):
+    def confere_data(self, certidao, emp):
         self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
-        validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        try:
+            validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        except AttributeError:
+            self.mensagem_log(f'Execução interrompida!!!\nNão foi possível encontrar o padrão de CNPJ na certidão TST da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de CNPJ na certidão TST da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão TST da empresa {emp} inválido.')
         texto = []
         padrao = re.compile('Expedição: (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        texto.append(emissao_string.group().split()[1])
+        try:
+            texto.append(emissao_string.group().split()[1])
+        except AttributeError:
+            self.mensagem_log(
+                f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de emissão na certidão TST da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de data de emissão na certidão TST da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão TST da empresa {emp} inválido.')
         padrao = re.compile('Validade: (\d\d)/(\d\d)/(\d\d\d\d)')
         vencimento_string = padrao.search(certidao)
-        texto.append(vencimento_string.group().split()[1])
+        try:
+            texto.append(vencimento_string.group().split()[1])
+        except AttributeError:
+            self.mensagem_log(
+                f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de vencimento na certidão TST da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de data de vencimento na certidão TST da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão TST da empresa {emp} inválido.')
         emissao = texto[0]
         vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, "%d/%m/%Y")
@@ -482,14 +523,27 @@ class Fgts(Certidao):
                     lang='por')
                 return certidao
 
-    def confere_data(self, certidao):
+    def confere_data(self, certidao, emp):
         self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
-        validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        try:
+            validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        except AttributeError:
+            self.mensagem_log(f'Execução interrompida!!!\nNão foi possível encontrar o padrão de CNPJ na certidão FGTS da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de CNPJ na certidão FGTS da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão FGTS da empresa {emp} inválido.')
         texto = []
         padrao = re.compile('(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)')
         emissao_string = padrao.search(certidao)
-        texto.append(emissao_string.group().split()[0])
+        try:
+            texto.append(emissao_string.group().split()[0])
+        except AttributeError:
+            self.mensagem_log(
+                f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de emissão e vencimento na certidão FGTS da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+            messagebox.showerror('Esse arquivo não rola!',
+                                 f'''Não foi possível encontrar o padrão de data de emissão e vencimento na certidão FGTS da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão FGTS da empresa {emp} inválido.')
         vencimento_string = padrao.search(certidao)
         texto.append(vencimento_string.group().split()[2])
         emissao = texto[0]
@@ -518,10 +572,17 @@ class Gdf(Certidao):
                     lang='por')
                 return certidao
 
-    def confere_data(self, certidao):
+    def confere_data(self, certidao, emp):
         self.listar_cnpjs()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
-        validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        try:
+            validação_de_cnpj = padrão_cnpj.search(certidao).group()
+        except AttributeError:
+            self.mensagem_log(f'''Execução interrompida!!!
+Não foi possível encontrar o padrão de CNPJ na certidão GDF da empresa {emp}.
+O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            messagebox.showerror('Esse arquivo não rola!', f'''Não foi possível encontrar o padrão de CNPJ na certidão GDF da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+            raise Exception(f'Arquivo da certidão GDF da empresa {emp} inválido.')
         texto = []
         meses = {'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04', 'Maio': '05', 'Junho': '06',
                  'Julho': '07', 'Agosto': '08', 'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'}
@@ -533,36 +594,60 @@ class Gdf(Certidao):
                                 '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
                                              '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
             emissao_string = padrao.search(certidao)
-            datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
-                         emissao_string.group().split()[5]]
+            try:
+                datasplit = [emissao_string.group().split()[1], meses[emissao_string.group().split()[3]],
+                             emissao_string.group().split()[5]]
+            except AttributeError:
+                self.mensagem_log(
+                    f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de emissão na certidão GDF da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+                messagebox.showerror('Esse arquivo não rola!',
+                                     f'''Não foi possível encontrar o padrão de data de emissão na certidão GDF da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+                raise Exception(f'Arquivo da certidão GDF da empresa {emp} inválido.')
+
             texto.append('/'.join(datasplit))
             padrao = re.compile(
                 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
                 '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
                                              '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
             vencimento_string = padrao.search(certidao)
-            datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
-                          vencimento_string.group().split()[6]]
+            try:
+                datasplit2 = [vencimento_string.group().split()[2], meses[vencimento_string.group().split()[4]],
+                              vencimento_string.group().split()[6]]
+            except AttributeError:
+                self.mensagem_log(
+                    f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de vencimento na certidão GDF da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+                messagebox.showerror('Esse arquivo não rola!',
+                                     f'''Não foi possível encontrar o padrão de data de vencimento na certidão GDF da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+                raise Exception(f'Arquivo da certidão GDF da empresa {emp} inválido.')
+
             texto.append('/'.join(datasplit2))
         else:
             padrao = re.compile('Certidão emitida via internet em (\d\d)/(\d\d)/(\d\d\d\d)')
             emissao_string = padrao.search(certidao)
-            texto.append(emissao_string.group().split()[5])
             try:
-                padrao = re.compile('Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
-                '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
-                                    '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
-                vencimento_string = padrao.search(certidao)
-                datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
-                             vencimento_string.group().split()[6]]
+                texto.append(emissao_string.group().split()[5])
             except AttributeError:
-                padrao = re.compile('Válida até (\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
+                self.mensagem_log(
+                    f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de emissão na certidão GDF da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+                messagebox.showerror('Esse arquivo não rola!',
+                                     f'''Não foi possível encontrar o padrão de data de emissão na certidão GDF da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+                raise Exception(f'Arquivo da certidão GDF da empresa {emp} inválido.')
+
+
+            padrao = re.compile('Válida até (\d)?(\d\d)? de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?'
                 '(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
                                     '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
-                vencimento_string = padrao.search(certidao)
+            vencimento_string = padrao.search(certidao)
+            try:
                 datasplit2 = [vencimento_string.group().split()[2], meses2[vencimento_string.group().split()[4]],
-                             vencimento_string.group().split()[6]]
-            texto.append('/'.join(datasplit2))
+                                  vencimento_string.group().split()[6]]
+            except AttributeError:
+                self.mensagem_log(
+                        f'Execução interrompida!!!\nNão foi possível encontrar o padrão de data de vencimento na certidão GDF da empresa {emp}.\nO arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.')
+                messagebox.showerror('Esse arquivo não rola!',
+                                         f'''Não foi possível encontrar o padrão de data de vencimento na certidão GDF da empresa {emp}. O arquivo pode estar corrompido ou ter sofrido atualizações que alteraram sua formatação.''')
+                raise Exception(f'Arquivo da certidão GDF da empresa {emp} inválido.')
+        texto.append('/'.join(datasplit2))
         emissao = texto[0]
         vencimento = 0
         if len(texto[1]) != 10:
