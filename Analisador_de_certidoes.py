@@ -72,7 +72,7 @@ class Analisador:
 
         self.botao_procurar_arquivo = Button(self.frame_renomear, text=' Selecionar\narquivos ',
                                              command=self.caminho_de_arquivo,
-                                             padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                             padx=0, pady=1, bg='white', fg='green', font=('Helvetica', 9, 'bold'),
                                              bd=1)
 
         self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
@@ -87,7 +87,7 @@ class Analisador:
 
         self.botao_procurar_pasta = Button(self.frame_renomear, text='Selecionar\npasta',
                                            command=self.caminho_de_pastas,
-                                           padx=0, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),
+                                           padx=0, pady=1, bg='white', fg='green', font=('Helvetica', 9, 'bold'),
                                            bd=1)
         self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
         self.caminho_da_pasta = Label(self.frame_renomear, text=self.pasta_selecionada, pady=0, padx=50, bg='white',
@@ -200,7 +200,7 @@ class Analisador:
         ano = self.variavel3.get()
         obj1 = Certidao(dia, mes, ano)
 
-        obj1.mensagem_log('Início da execução')
+        obj1.mensagem_log('\n====================================================================================================================================\n\nInício da execução')
 
         obj1.analisa_referencia()
         obj1.dados_completos_dos_fornecedores()
@@ -232,7 +232,7 @@ class Analisador:
         obj1.mensagem_log(
             f'\n\nTempo total de execução: {tempo_de_execução // 60} minutos e {tempo_de_execução % 60} segundos.')
         obj1.mensagem_log_sem_horario(
-            '\n\n======================================================================================\n')
+            '\n\n====================================================================================================================================\n')
         messagebox.showinfo('Analisou, miserávi!', 'Processo de análise de certidões executado com sucesso!')
 
     def renomeia(self):
