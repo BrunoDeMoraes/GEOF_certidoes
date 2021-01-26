@@ -26,6 +26,7 @@ class Certidao:
         self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
         self.percentual = 0
         self.lista_de_cnpj = {}
+        self.lista_de_cnpj_exceções = {}
         self.orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
         self.empresasdic = {}
         self.empresas_a_atualizar = {}
@@ -114,6 +115,16 @@ class Certidao:
                             if digito in '0123456789':
                                 cnpj_tratado += digito
                         self.empresas[emp].append(cnpj_tratado)
+                        if self.forn[f'M{celula.row}'].value == None:
+                            continue
+                        else:
+                            self.empresas[emp].append(self.forn[f'M{celula.row}'].value)
+                            cnpj_matriz_formatado = self.empresas[emp][3]
+                            cnpj_matriz_tratado = ''
+                            for digito in cnpj_matriz_formatado:
+                                if digito in '0123456789':
+                                    cnpj_matriz_tratado += digito
+                            self.empresas[emp].append(cnpj_matriz_tratado)
         return self.empresas
 
     def dados_completos_dos_fornecedores(self):
@@ -130,6 +141,17 @@ class Certidao:
                         nome_da_empresa = self.forn[f'A{celula.row}'].value.split()
                         self.lista_de_cnpj[celula.value] = ' '.join(nome_da_empresa[0:len(nome_da_empresa) - 1])
         return self.lista_de_cnpj
+
+    def listar_cnpjs_exceções(self):
+        for emp in self.empresas:
+            for linha in self.forn['M6':'M500']:
+                for celula in linha:
+                    if celula.value == None:
+                        continue
+                    else:
+                        nome_da_empresa = self.forn[f'A{celula.row}'].value.split()
+                        self.lista_de_cnpj_exceções[celula.value] = ' '.join(nome_da_empresa[0:len(nome_da_empresa) - 1])
+        return self.lista_de_cnpj_exceções
 
     def cria_diretorio(self):
         novos_dir = []
@@ -216,12 +238,43 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
                 self.percentual += (25 / len(self.empresas))
                 print(f'   Total executado: {self.percentual}%')
                 val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
-                if val == True and cnpj_para_comparação == self.empresas[emp][1]:
-                    empresadic[self.orgaos[index]] = 'OK'
-                elif cnpj_para_comparação != self.empresas[emp][1]:
-                    empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                try:
+                    self.empresas[emp][1]
+                except IndexError:
+                    messagebox.showerror('Dados do fornecedor estão zuados!', f'Não foi possível localizar o CNPJ da '
+                                                                              f'empresa {emp} na planilha FORNECEDORES'
+                                                                              f' do arquivo: {self.caminho_xls}.\n\n'
+                                                                              f'Verifique se há registro de CNPJ para a'
+                                                                              f' empresa ou se o nome informado na'
+                                                                              f' planilha PAGAMENTO é idêntico ao '
+                                                                              f'inserido na planilha FORNECEDORES.')
+                    self.mensagem_log(f'Não foi possível localizar o CNPJ da '
+                                                                              f'empresa {emp} na planilha FORNECEDORES'
+                                                                              f' do arquivo: {self.caminho_xls}.\n\n'
+                                                                              f'Verifique se há registro de CNPJ para a'
+                                                                              f' empresa ou se o nome informado na'
+                                                                              f' planilha PAGAMENTO é idêntico ao '
+                                                                              f'inserido na planilha FORNECEDORES.')
+                    raise Exception(f'''Não foi possível localizar o CNPJ da empresa {emp} na planilha FORNECEDORES do arquivo:
+{self.caminho_xls}.
+Verifique se há registro de CNPJ para a empresa ou se o nome informado na planilha PAGAMENTO é idêntico ao inserido na planilha FORNECEDORES.''')
+
+                if len(self.empresas[emp]) > 3:
+                    if val == True and cnpj_para_comparação == self.empresas[emp][3]:
+                        empresadic[self.orgaos[index]] = 'OK-MATRIZ'
+                    elif val == True and cnpj_para_comparação == self.empresas[emp][1]:
+                        empresadic[self.orgaos[index]] = 'OK'
+                    elif cnpj_para_comparação != self.empresas[emp][1] and cnpj_para_comparação != self.empresas[emp][3]:
+                        empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                    else:
+                        empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
                 else:
-                    empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
+                    if val == True and cnpj_para_comparação == self.empresas[emp][1]:
+                        empresadic[self.orgaos[index]] = 'OK'
+                    elif cnpj_para_comparação != self.empresas[emp][1]:
+                        empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                    else:
+                        empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
                 index += 1
             self.empresasdic[emp] = empresadic
 
@@ -410,6 +463,7 @@ class Uniao(Certidao):
 
     def confere_data(self, certidao, emp):
         self.listar_cnpjs()
+        self.listar_cnpjs_exceções()
         padrão_cnpj = re.compile('(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)')
         try:
             validação_de_cnpj = padrão_cnpj.search(certidao).group()
@@ -449,6 +503,8 @@ class Uniao(Certidao):
         self.mensagem_log_sem_data(f'   UNIÃO - emissão: {emissao}; válida até: {vencimento}')
         if validação_de_cnpj in self.lista_de_cnpj:
             self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à empresa {self.lista_de_cnpj[validação_de_cnpj]}\n')
+        elif validação_de_cnpj in self.lista_de_cnpj_exceções:
+            self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, pertence à matriz da empresa {self.lista_de_cnpj_exceções[validação_de_cnpj]}\n')
         else:
             self.mensagem_log_sem_horario(f'   O CNPJ encontrado, {validação_de_cnpj}, não possui correspondência\n')
         return (data_do_pagamento >= data_de_emissao and data_do_pagamento <= data_de_vencimento), validação_de_cnpj
