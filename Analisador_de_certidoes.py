@@ -205,6 +205,7 @@ class Analisador:
         obj1.analisa_referencia()
         obj1.dados_completos_dos_fornecedores()
         obj1.listar_cnpjs()
+        obj1.listar_cnpjs_exceções()
 
         obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
         for emp in obj1.empresas:
@@ -226,6 +227,8 @@ class Analisador:
             obj1.mensagem_log_sem_horario(f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} - CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n')
 
         obj1.apaga_imagem()
+
+        print(obj1.empresas)
 
         tempo_final = time.time()
         tempo_de_execução = int((tempo_final - tempo_inicial))
@@ -497,7 +500,7 @@ class Analisador:
 tela = Tk()
 
 objeto_tela = Analisador(tela)
-tela.resizable(False, False)
+tela.resizable(0, 0)
 tela.title('GEOF - Analisador de certidões')
 #tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
 tela.config(menu=objeto_tela.menu_certidões)
