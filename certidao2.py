@@ -9,12 +9,15 @@ import datetime
 import shutil
 import PyPDF2
 from tkinter import messagebox
+import sqlite3
 
 class Certidao:
     def __init__(self, dia, mes, ano):
         self.dia = dia
         self.mes = mes
         self.ano = ano
+        self.lista_de_urls = []
+        self.urls()
         self.caminho_xls = '//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx'
         self.wb = openpyxl.load_workbook(self.caminho_xls)
         self.pag = self.wb['PAGAMENTO']
@@ -33,6 +36,12 @@ class Certidao:
         self.caminho_de_log = f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt'
         self.pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
         self.pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
+
+    def __file__(self):
+        caminho_py = __file__
+        caminho_do_dir = caminho_py.split('\\')
+        caminho_uso = ('/').join(caminho_do_dir[0:-1])
+        return caminho_uso
 
     def mensagem_log(self, mensagem):
         with open(self.caminho_de_log,
@@ -53,6 +62,15 @@ class Certidao:
                   'a') as log:
             log.write(f"{mensagem}\n")
             print(f"{mensagem}")
+
+    def urls(self):
+        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        direcionador = conexao.cursor()
+        direcionador.execute("SELECT *, oid FROM urls")
+        self.lista_de_urls = direcionador.fetchall()
+        for registro in self.lista_de_urls:
+            print(registro)
+            conexao.close()
 
     def pega_referencia(self):
         if os.path.exists(f'{self.pasta_de_trabalho}'):
