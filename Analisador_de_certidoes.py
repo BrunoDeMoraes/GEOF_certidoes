@@ -10,9 +10,12 @@ import pytesseract
 import re
 import shutil
 import PyPDF2
+import sqlite3
 
 class Analisador:
     def __init__(self, tela):
+        self.urls = []
+        self.cria_bd()
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
 
@@ -157,6 +160,88 @@ class Analisador:
         self.roda_pe.grid(row=9, column=1, columnspan=10, pady=5, sticky=W+E)
 
 
+    def __file__(self):
+        caminho_py = __file__
+        caminho_do_dir = caminho_py.split('\\')
+        caminho_uso = ('/').join(caminho_do_dir[0:-1])
+        return caminho_uso
+
+
+    def abrir_janela_caminhos(self):
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
+        obj1 = Certidao(dia, mes, ano)
+        self.janela_de_caminhos = Toplevel()
+        self.janela_de_caminhos.title('Lista de caminhos')
+        self.janela_de_caminhos.resizable(False, False)
+        self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
+        self.frame_de_caminhos.pack(padx=1, pady=1)
+        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de dados XLSX', command=self.caminho_geral,
+                                 padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_xlsx = Entry(self.frame_de_caminhos, width=30)
+        #nome.grid(row=0, column=1, padx=20, pady=(10, 0), sticky=W + E + S + N)
+
+        #self.caminho_xlsx = Label(self.frame_de_caminhos, text=self.urls[0][1], pady=0, padx=0, bg='white', fg='black',
+                                  #font=('Helvetica', 9, 'bold'))
+        self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Pasta de certidões', command=self.caminho_de_pastas,
+                                    padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_pasta_de_certidões = Label(self.frame_de_caminhos, text=self.urls[1][1], pady=0, padx=0, bg='white', fg='black',
+                                     font=('Helvetica', 9, 'bold'))
+        self.botao_log = Button(self.frame_de_caminhos, text='Pasta de logs', command=self.caminho_de_pastas, padx=10, pady=10,
+                                bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_log = Label(self.frame_de_caminhos, text=self.urls[2][1], pady=0, padx=0, bg='white', fg='black',
+                                                font=('Helvetica', 9, 'bold'))
+        self.pasta_pagamento = Button(self.frame_de_caminhos, text='Pasta de pagamentos', command=self.caminho_de_pastas,
+                                      padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_pasta_pagamento = Label(self.frame_de_caminhos, text=self.urls[3][1], pady=0, padx=0, bg='white',fg='black',
+                                 font=('Helvetica', 9, 'bold'))
+        self.certidões_para_pagamento = Button(self.frame_de_caminhos, text='Certidões para pagamento', command=self.caminho_de_pastas, padx=10,
+                                      pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
+        self.caminho_certidões_para_pagamento = Label(self.frame_de_caminhos, text=self.urls[4][1], pady=0, padx=0, bg='white',
+                                                      fg='black', font=('Helvetica', 9, 'bold'))
+
+        self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
+        self.caminho_xlsx.grid(row=1, column=2, padx=20)
+        #self.caminho_xlsx.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_pasta_de_certidões.grid(row=2, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_log.grid(row=3, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.pasta_pagamento.grid(row=4, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_pasta_pagamento.grid(row=4, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.certidões_para_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.caminho_certidões_para_pagamento.grid(row=5, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+
+
+    def cria_bd(self):
+        if not os.path.exists(f'{self.__file__()}/caminhos.db'):
+            conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+            direcionador = conexao.cursor()
+            direcionador.execute('CREATE TABLE urls (variavel text, url text)')
+            caminhos = {'caminho_xlsx': "//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx",
+                        'pdf_dir': "//hrg-74977/GEOF/CERTIDÕES/Certidões2",
+                        'caminho_de_log': '//hrg-74977/GEOF/CERTIDÕES/Logs de conferência',
+                        'pasta_de_trabalho': '//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO',
+                        'pagamento_por_data': '//hrg-74977/GEOF/CERTIDÕES/Pagamentos'}
+            for caminho in caminhos:
+                direcionador.execute('INSERT INTO urls VALUES (:variavel, :url)',
+                                     {"variavel": caminho, "url": caminhos[caminho]})
+                conexao.commit()
+            direcionador.execute("SELECT *, oid FROM urls")
+            self.urls = direcionador.fetchall()
+            for registro in self.urls:
+                print(registro)
+            conexao.close()
+        else:
+            print('Banco de dados localizado.')
+            conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+            direcionador = conexao.cursor()
+            direcionador.execute("SELECT *, oid FROM urls")
+            self.urls = direcionador.fetchall()
+            for registro in self.urls:
+                print(registro)
+                conexao.close()
 
 
     def abrir_log(self):
@@ -354,6 +439,29 @@ class Analisador:
             print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
             messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões selecionadas foram renomeadas com sucesso!')
 
+
+    def caminho_geral(self):
+        caminho = filedialog.askopenfilename(initialdir=self.__file__(),filetypes=(('Arquivos', '*.xlsx'),
+                                                                                   ("Todos os arquivos", '*.*')))
+        return caminho
+
+    def caminho_xlsx(self):
+        caminho_xls = self.caminho_geral()
+        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        direcionador = conexao.cursor()
+        direcionador.execute("UPDATE urls SET url = :url WHERE oid = 1", {"url": caminho_xls})
+        conexao.commit()
+        #conexao.close()
+
+        #conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        #direcionador = conexao.cursor()
+        direcionador.execute("SELECT *, oid FROM urls")
+        self.urls = direcionador.fetchall()
+        for registro in self.urls:
+            print(registro)
+            conexao.close()
+        self.janela_de_caminhos.destroy()
+
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
         self.pasta_selecionada = filedialog.askdirectory(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2')
@@ -455,47 +563,6 @@ class Analisador:
 
 
 
-    def abrir_janela_caminhos(self):
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
-        obj1 = Certidao(dia, mes, ano)
-        self.janela_de_caminhos = Toplevel()
-        self.janela_de_caminhos.title('Lista de caminhos')
-        self.janela_de_caminhos.resizable(False, False)
-        self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
-        self.frame_de_caminhos.pack(padx=1, pady=1)
-        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de dados XLSX', command=self.caminho_de_pastas,
-                                 padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_xlsx = Label(self.frame_de_caminhos, text=obj1.caminho_xls, pady=0, padx=0, bg='white', fg='black',
-                                  font=('Helvetica', 9, 'bold'))
-        self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
-                                    padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_pasta_de_certidões = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white', fg='black',
-                                     font=('Helvetica', 9, 'bold'))
-        self.botao_log = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas, padx=10, pady=10,
-                                bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_log = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white', fg='black',
-                                                font=('Helvetica', 9, 'bold'))
-        self.pasta_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas,
-                                      padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_pasta_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white',fg='black',
-                                 font=('Helvetica', 9, 'bold'))
-        self.certidões_para_pagamento = Button(self.frame_de_caminhos, text='Fonte', command=self.caminho_de_pastas, padx=10,
-                                      pady=10, bg='green', fg='white', font=('Helvetica', 11, 'bold'), bd=1)
-        self.caminho_certidões_para_pagamento = Label(self.frame_de_caminhos, text='-', pady=0, padx=0, bg='white',
-                                                      fg='black', font=('Helvetica', 9, 'bold'))
-
-        self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=10, ipady=13, sticky=W+E)
-        self.caminho_xlsx.grid(row=1, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_pasta_de_certidões.grid(row=2, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_log.grid(row=3, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.pasta_pagamento.grid(row=4, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_pasta_pagamento.grid(row=4, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.certidões_para_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_certidões_para_pagamento.grid(row=5, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
 
 tela = Tk()
 
