@@ -18,30 +18,41 @@ class Certidao:
         self.ano = ano
         self.lista_de_urls = []
         self.urls()
-        self.caminho_xls = '//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx'
+        self.caminho_xls = self.lista_de_urls[0][1]
         self.wb = openpyxl.load_workbook(self.caminho_xls)
+        self.checagem_de_urls()
         self.pag = self.wb['PAGAMENTO']
         self.forn = self.wb['FORNECEDORES']
         self.listareferencia = []
         self.referencia = 0
         self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
         self.empresas = {}
-        self.pdf_dir = '//hrg-74977/GEOF/CERTIDÕES/Certidões2'
+        self.pdf_dir = self.lista_de_urls[1][1]
         self.percentual = 0
         self.lista_de_cnpj = {}
         self.lista_de_cnpj_exceções = {}
         self.orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
         self.empresasdic = {}
         self.empresas_a_atualizar = {}
-        self.caminho_de_log = f'//hrg-74977/GEOF/CERTIDÕES/Logs de conferência/{self.ano}-{self.mes}-{self.dia}.txt'
-        self.pasta_de_trabalho = f'//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO/{self.ano}-{self.mes}-{self.dia}'
-        self.pagamento_por_data = f'//hrg-74977/GEOF/CERTIDÕES/Pagamentos/{self.ano}-{self.mes}-{self.dia}'
+        self.caminho_de_log = f'{self.lista_de_urls[2][1]}/{self.ano}-{self.mes}-{self.dia}.txt'
+        self.pasta_de_trabalho = f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
+        self.pagamento_por_data = f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
 
     def __file__(self):
         caminho_py = __file__
         caminho_do_dir = caminho_py.split('\\')
         caminho_uso = ('/').join(caminho_do_dir[0:-1])
         return caminho_uso
+
+    def checagem_de_urls(self):
+        try:
+            self.wb['PAGAMENTO']
+        except KeyError:
+            messagebox.showerror('Esse arquivo não rola!','O arquivo xlsx selecionado como fonte não possui as'
+                                                          ' planilhas necessárias para o processamento solicitado.'
+                                                          '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
+                                                          'selecione um arquivo xlsx que atenda os critérios necessários '
+                                                          'para o processamento.')
 
     def mensagem_log(self, mensagem):
         with open(self.caminho_de_log,
