@@ -51,8 +51,9 @@ class Certidao:
             messagebox.showerror('Esse arquivo não rola!','O arquivo xlsx selecionado como fonte não possui as'
                                                           ' planilhas necessárias para o processamento solicitado.'
                                                           '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
-                                                          'selecione um arquivo xlsx que atenda os critérios necessários '
+                                                          'selecione um arquivo xlsx que atenda aos critérios necessários '
                                                           'para o processamento.')
+
 
     def mensagem_log(self, mensagem):
         with open(self.caminho_de_log,
@@ -449,7 +450,10 @@ Se deseja fazer nova mesclagem apague o diretório:
                             print(emp)
                             pdf_temporário = PyPDF2.PdfFileWriter()
                             pagamento = open(arquivo_pdf, 'rb')
-                            pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
+                            try:
+                                pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
+                            except:
+                                messagebox.showerror('Arquivo zuado!!!', f"o arquivo {arquivo_pdf} está corrompido")
                             for página in range(pagamento_lido.numPages):
                                 objeto_pagina = pagamento_lido.getPage(página)
                                 pdf_temporário.addPage(objeto_pagina)
