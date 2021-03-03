@@ -15,6 +15,7 @@ import sqlite3
 class Analisador:
     def __init__(self, tela):
         self.urls = []
+        self.cria_pastas_de_trabalho()
         self.cria_bd()
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
@@ -166,6 +167,15 @@ class Analisador:
         caminho_uso = ('/').join(caminho_do_dir[0:-1])
         return caminho_uso
 
+    def cria_pastas_de_trabalho(self):
+        pastas_de_trabalho = ['Certidões','Logs de conferência', 'Certidões para pagamento', 'Comprovantes de pagamento']
+        for pasta in pastas_de_trabalho:
+            if not os.path.exists(f'{self.__file__()}/{pasta}'):
+                os.makedirs(f'{self.__file__()}/{pasta}')
+                print('Pastas de trabalho criadas com sucesso!')
+            else:
+                print('Pasta de trabalho localizada.')
+
 
     def abrir_janela_caminhos(self):
         conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
@@ -174,25 +184,7 @@ class Analisador:
         direcionador.execute("SELECT *, oid FROM urls")
         self.urls = direcionador.fetchall()
         conexao.close()
-        #for registro in self.urls:
-            #print(registro)
-            #conexao.close()
 
-        #self.variavel_xlsx = StringVar()
-        #self.variavel_xlsx.set(f'{self.urls[0][1]}')
-        #self.variavel_certidões = StringVar()
-        #self.variavel_certidões.set(" ")
-        #self.variavel_logs = StringVar()
-        #self.variavel_logs.set(" ")
-        #self.variavel_pagamento = StringVar()
-        #self.variavel_pagamento.set(" ")
-        #self.variavel_certidões_para_pagamenmto = StringVar()
-        #self.variavel_certidões_para_pagamenmto.set(" ")
-
-        #dia = self.variavel.get()
-        #mes = self.variavel2.get()
-        #ano = self.variavel3.get()
-        #obj1 = Certidao(dia, mes, ano)
         self.janela_de_caminhos = Toplevel()
         self.janela_de_caminhos.title('Lista de caminhos')
         self.janela_de_caminhos.resizable(False, False)
@@ -296,15 +288,21 @@ class Analisador:
             self.janela_de_caminhos.destroy()
 
     def cria_bd(self):
+        pastas_de_trabalho = ['Certidões', 'Logs de conferência', 'Certidões para pagamento',
+                              'Comprovantes de pagamento']
+        for pasta in pastas_de_trabalho:
+            if not os.path.exists(f'{self.__file__()}/{pasta}'):
+                os.makedirs(f'{self.__file__()}/{pasta}')
+
         if not os.path.exists(f'{self.__file__()}/caminhos.db'):
             conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
             direcionador = conexao.cursor()
             direcionador.execute('CREATE TABLE urls (variavel text, url text)')
             caminhos = {'caminho_xlsx': "//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx",
-                        'pdf_dir': "//hrg-74977/GEOF/CERTIDÕES/Certidões2",
-                        'caminho_de_log': '//hrg-74977/GEOF/CERTIDÕES/Logs de conferência',
-                        'pasta_de_trabalho': '//hrg-74977/GEOF/HRG/PDPAS 2020/PAGAMENTO',
-                        'pagamento_por_data': '//hrg-74977/GEOF/CERTIDÕES/Pagamentos'}
+                        'pdf_dir': f'{self.__file__()}/Certidões',
+                        'caminho_de_log': f'{self.__file__()}/Logs de conferência',
+                        'pasta_de_trabalho': f'{self.__file__()}/Comprovantes de pagamento',
+                        'pagamento_por_data': f'{self.__file__()}/Certidões para pagamento'}
             for caminho in caminhos:
                 direcionador.execute('INSERT INTO urls VALUES (:variavel, :url)',
                                      {"variavel": caminho, "url": caminhos[caminho]})
@@ -326,14 +324,22 @@ class Analisador:
 
 
     def abrir_log(self):
+        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        print(self.__file__())
+        direcionador = conexao.cursor()
+        direcionador.execute("SELECT *, oid FROM urls")
+        self.urls = direcionador.fetchall()
+        conexao.close()
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        if not os.path.exists(f'\\\hrg-74977\\GEOF\\CERTIDÕES\\Logs de conferência\\{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
+        if not os.path.exists(f'{self.urls[2][1]}/{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
             messagebox.showerror('Me ajuda a te ajudar!',
                                  'Não existe log para a data informada.')
         else:
-            os.startfile(f'\\\hrg-74977\\GEOF\\CERTIDÕES\\Logs de conferência\\{ano}-{mes}-{dia}.txt')
+            caminho = f'{self.urls[2][1]}/{ano}-{mes}-{dia}.txt'
+            novo_caminho = caminho.replace('/', '\\')
+            os.startfile(novo_caminho)
 
 
     def cria_calendario(self):
@@ -364,45 +370,57 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        obj1 = Certidao(dia, mes, ano)
+        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        print(self.__file__())
+        direcionador = conexao.cursor()
+        direcionador.execute("SELECT *, oid FROM urls")
+        self.urls = direcionador.fetchall()
+        conexao.close()
+        if not os.path.exists(self.urls[0][1]):
+            messagebox.showerror('Sumiu!!!', 'O arquivo xlsx selecionado como fonte foi apagado ou removido.'
+                                                           '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
+                                                           'selecione um arquivo xlsx que atenda aos critérios necessários '
+                                                           'para o processamento.')
+        else:
+            obj1 = Certidao(dia, mes, ano)
 
-        obj1.mensagem_log('\n====================================================================================================================================\n\nInício da execução')
+            obj1.mensagem_log('\n====================================================================================================================================\n\nInício da execução')
 
-        obj1.analisa_referencia()
-        obj1.dados_completos_dos_fornecedores()
-        obj1.listar_cnpjs()
-        obj1.listar_cnpjs_exceções()
+            obj1.analisa_referencia()
+            obj1.dados_completos_dos_fornecedores()
+            obj1.listar_cnpjs()
+            obj1.listar_cnpjs_exceções()
 
-        obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
-        for emp in obj1.empresas:
-            obj1.mensagem_log_sem_horario(f'{emp}')
+            obj1.mensagem_log_sem_horario('\nFornecedores analisados:')
+            for emp in obj1.empresas:
+                obj1.mensagem_log_sem_horario(f'{emp}')
 
-        obj1.cria_diretorio()
-        obj1.apaga_imagem()
-        obj1.certidoes_n_encontradas()
-        obj1.pdf_para_jpg()
-        obj1.analisa_certidoes()
+            obj1.cria_diretorio()
+            obj1.apaga_imagem()
+            obj1.certidoes_n_encontradas()
+            obj1.pdf_para_jpg()
+            obj1.analisa_certidoes()
 
-        obj1.mensagem_log_sem_horario('\nRESULTADO DA CONFERÊNCIA:')
+            obj1.mensagem_log_sem_horario('\nRESULTADO DA CONFERÊNCIA:')
 
-        obj1.pega_cnpj()
+            obj1.pega_cnpj()
 
-        obj1.mensagem_log_sem_horario('\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n')
+            obj1.mensagem_log_sem_horario('\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n')
 
-        for emp in obj1.empresas_a_atualizar:
-            obj1.mensagem_log_sem_horario(f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} - CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n')
+            for emp in obj1.empresas_a_atualizar:
+                obj1.mensagem_log_sem_horario(f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} - CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n')
 
-        obj1.apaga_imagem()
+            obj1.apaga_imagem()
 
-        print(obj1.empresas)
+            print(obj1.empresas)
 
-        tempo_final = time.time()
-        tempo_de_execução = int((tempo_final - tempo_inicial))
-        obj1.mensagem_log(
-            f'\n\nTempo total de execução: {tempo_de_execução // 60} minutos e {tempo_de_execução % 60} segundos.')
-        obj1.mensagem_log_sem_horario(
-            '\n\n====================================================================================================================================\n')
-        messagebox.showinfo('Analisou, miserávi!', 'Processo de análise de certidões executado com sucesso!')
+            tempo_final = time.time()
+            tempo_de_execução = int((tempo_final - tempo_inicial))
+            obj1.mensagem_log(
+                f'\n\nTempo total de execução: {tempo_de_execução // 60} minutos e {tempo_de_execução % 60} segundos.')
+            obj1.mensagem_log_sem_horario(
+                '\n\n====================================================================================================================================\n')
+            messagebox.showinfo('Analisou, miserávi!', 'Processo de análise de certidões executado com sucesso!')
 
     def renomeia(self):
         dia = self.variavel.get()
