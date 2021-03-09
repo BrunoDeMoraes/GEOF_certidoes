@@ -27,7 +27,7 @@ class Certidao:
         self.referencia = 0
         self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
         self.empresas = {}
-        self.pdf_dir = self.lista_de_urls[1][1]
+        self.pasta_de_certidões = self.lista_de_urls[1][1]
         self.percentual = 0
         self.lista_de_cnpj = {}
         self.lista_de_cnpj_exceções = {}
@@ -35,8 +35,8 @@ class Certidao:
         self.empresasdic = {}
         self.empresas_a_atualizar = {}
         self.caminho_de_log = f'{self.lista_de_urls[2][1]}/{self.ano}-{self.mes}-{self.dia}.txt'
-        self.pasta_de_trabalho = f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
-        self.pagamento_por_data = f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
+        self.comprovantes_de_pagamento = f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
+        self.certidões_para_pagamento = f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
 
     def __file__(self):
         caminho_py = __file__
@@ -53,7 +53,6 @@ class Certidao:
                                                           '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
                                                           'selecione um arquivo xlsx que atenda aos critérios necessários '
                                                           'para o processamento.')
-
 
     def mensagem_log(self, mensagem):
         with open(self.caminho_de_log,
@@ -80,15 +79,13 @@ class Certidao:
         direcionador = conexao.cursor()
         direcionador.execute("SELECT *, oid FROM urls")
         self.lista_de_urls = direcionador.fetchall()
-        for registro in self.lista_de_urls:
-            print(registro)
-            conexao.close()
+        conexao.close()
 
     def pega_referencia(self):
-        if os.path.exists(f'{self.pasta_de_trabalho}'):
+        if os.path.exists(f'{self.comprovantes_de_pagamento}'):
             print('Pasta para inclusão de arquivos de pagamento localizada.')
         else:
-            os.makedirs(f'{self.pasta_de_trabalho}')
+            os.makedirs(f'{self.comprovantes_de_pagamento}')
             print('Pasta para inclusão de arquivos de pagamento criada com sucesso.')
         for linha in self.pag['A1':'F500']:
             for celula in linha:
@@ -186,30 +183,30 @@ class Certidao:
     def cria_diretorio(self):
         novos_dir = []
         for emp in self.empresas:
-            if os.path.isdir(f'{self.pdf_dir}/{str(emp)}'):
+            if os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 continue
             else:
-                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Vencidas')
-                os.makedirs(f'{self.pdf_dir}/{str(emp)}/Imagens')
+                os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Vencidas')
+                os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Imagens')
                 novos_dir.append(emp)
         self.mensagem_log(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.')
 
     def certidoes_para_pagamento(self):
-        if os.path.exists(f'{self.pagamento_por_data}'):
+        if os.path.exists(f'{self.certidões_para_pagamento}'):
             print('Já existe pasta contendo certidões para pagamento na data informada.')
             messagebox.showwarning('FICA CALMO!!!', f'''Já existe pasta contendo certidões para pagamento na data informada!
 
 Se deseja fazer nova transferência apague o diretório:
-{self.pagamento_por_data}''')
+{self.certidões_para_pagamento}''')
         else:
-            os.makedirs(self.pagamento_por_data)
+            os.makedirs(self.certidões_para_pagamento)
             for emp in self.empresas:
-                pasta_da_empresa = f'{self.pdf_dir}/{str(emp)}'
-                os.makedirs(f'{self.pagamento_por_data}/{emp}')
+                pasta_da_empresa = f'{self.pasta_de_certidões}/{str(emp)}'
+                os.makedirs(f'{self.certidões_para_pagamento}/{emp}')
                 os.chdir(f'{pasta_da_empresa}')
                 for pdf_file in os.listdir(f'{pasta_da_empresa}'):
                     if pdf_file.endswith(".pdf"):
-                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{self.pagamento_por_data}/{emp}/{pdf_file}')
+                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}', f'{self.certidões_para_pagamento}/{emp}/{pdf_file}')
             self.mensagem_log_sem_horario(f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.')
             messagebox.showinfo('Transferiu, miserávi!', 'As certidões que validam o pagamento foram transferidas com sucesso!')
 
@@ -218,8 +215,8 @@ Se deseja fazer nova transferência apague o diretório:
         for emp in self.empresas:
             itens = []
             faltando = []
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for item in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+            os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+            for item in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 itens.append(item.split()[0])
             for orgao in self.orgaos:
                 if orgao not in itens:
@@ -235,14 +232,14 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
 
     def pdf_para_jpg(self):
         for emp in self.empresas:
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+            os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+            for pdf_file in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
-                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                    if not os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}/Merge'):
+                        os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Merge')
+                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
                     else:
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
                 if pdf_file.endswith(".pdf") and pdf_file.split()[0] in self.orgaos:
                     pages = convert_from_path(pdf_file, 300, last_page = 1)
                     pdf_file = pdf_file[:-4]
@@ -346,16 +343,17 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                             self.empresas_a_atualizar[emp].append(cnpj_tratado)
 
     def pdf_para_jpg_renomear(self):
-        print('CRIANDO IMAGENS:\n')
+        print('\n===================================================================================================\n\n'
+              'Criando imagens:\n')
         for emp in self.empresas:
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for pdf_file in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+            os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+            for pdf_file in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(f'{self.pdf_dir}/{str(emp)}/Merge'):
-                        os.makedirs(f'{self.pdf_dir}/{str(emp)}/Merge')
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                    if not os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}/Merge'):
+                        os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Merge')
+                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
                     else:
-                        shutil.move(pdf_file, f'{self.pdf_dir}/{str(emp)}/Merge/{pdf_file}')
+                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
             
                 elif pdf_file.endswith(".pdf"):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
@@ -363,14 +361,14 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
                     self.percentual += (25 / len(self.empresas))
                     print(f'Total de imagens criadas: {self.percentual}%')
-        self.mensagem_log('\nIMAGENS CRIADAS COM SUCESSO!')
+        self.mensagem_log('\nImagens criadas com sucesso!')
         self.percentual = 0
 
     def gera_nome(self):
-        print('\nRENOMEANDO CERTIDÕES:\n\n')
+        print('\nRenomeando certidões:\n\n')
         for emp in self.empresas:
-            os.chdir(f'{self.pdf_dir}/{(emp)}')
-            origem = f'{self.pdf_dir}/{emp}'
+            os.chdir(f'{self.pasta_de_certidões}/{(emp)}')
+            origem = f'{self.pasta_de_certidões}/{emp}'
             for imagem in os.listdir(origem):
                 if imagem.endswith(".jpg"):
                     certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang='por')
@@ -416,21 +414,21 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                                 volta = ' '.join(retira)
                                 junta = volta
                             shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
-        print('\nPROCESSO DE RENOMEAÇÃO DE CERTIDÕES EXECUTADO COM SUCESSO!')
+        print('\nProcesso de renomeação de certidões executado com sucesso!')
 
 
     def merge(self):
-        if os.path.exists(f'{self.pasta_de_trabalho}/Merge'):
+        if os.path.exists(f'{self.comprovantes_de_pagamento}/Mesclados'):
             print('Já existe pasta para mesclagem na data informada')
             messagebox.showwarning('FICA CALMO!!!', f'''Já existe pasta para mesclagem na data informada!
 
 Se deseja fazer nova mesclagem apague o diretório:
-{self.pasta_de_trabalho}/Merge.''')
+{self.comprovantes_de_pagamento}/Mesclados.''')
         else:
-            os.makedirs(f'{self.pasta_de_trabalho}/Merge')
-            os.chdir(self.pasta_de_trabalho)
-            for arquivo_pdf in os.listdir(self.pasta_de_trabalho):
-                os.chdir(self.pasta_de_trabalho)
+            os.makedirs(f'{self.comprovantes_de_pagamento}/Mesclados')
+            os.chdir(self.comprovantes_de_pagamento)
+            for arquivo_pdf in os.listdir(self.comprovantes_de_pagamento):
+                os.chdir(self.comprovantes_de_pagamento)
                 if arquivo_pdf.endswith(".pdf"):
                     for emp in self.empresas:
                         validação_de_partes_do_nome =[]
@@ -457,7 +455,7 @@ Se deseja fazer nova mesclagem apague o diretório:
                             for página in range(pagamento_lido.numPages):
                                 objeto_pagina = pagamento_lido.getPage(página)
                                 pdf_temporário.addPage(objeto_pagina)
-                            pasta_da_empresa = f'{self.pagamento_por_data}/{emp}'
+                            pasta_da_empresa = f'{self.certidões_para_pagamento}/{emp}'
                             os.chdir(pasta_da_empresa)
                             for arquivo_certidão in os.listdir(pasta_da_empresa):
                                 if '00.MERGE' not in arquivo_certidão:
@@ -466,7 +464,7 @@ Se deseja fazer nova mesclagem apague o diretório:
                                     for página_da_certidão in range(certidão_lida.numPages):
                                         objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
                                         pdf_temporário.addPage(objeto_pagina_da_certidão)
-                            compilado = open(f'{self.pasta_de_trabalho}/Merge/{arquivo_pdf[0:-4]}_mesclado.pdf','wb')
+                            compilado = open(f'{self.comprovantes_de_pagamento}/Mesclados/{arquivo_pdf[0:-4]}_mesclado.pdf', 'wb')
                             pdf_temporário.write(compilado)
                             compilado.close()
                             pagamento.close()
@@ -476,21 +474,26 @@ Se deseja fazer nova mesclagem apague o diretório:
 
     def apaga_imagem(self):
         for emp in self.empresas:
-            os.chdir(f'{self.pdf_dir}/{str(emp)}')
-            for arquivo in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+            if not os.path.exists(f'{self.pasta_de_certidões}/{str(emp)}'):
+                messagebox.showerror('Tem essa pasta aí não, locão!', f'A pasta {self.pasta_de_certidões}/{str(emp)} ainda não existe.\n\n'
+                                                                      f'Antes de tentar renomear as certidões, execute a opção "Analisar certidões". '
+                                                                      f'A referida opção criará as pastas necessárias e indicará o que '
+                                                                      f'precisa ser atualizado antes do processo de renomeação.')
+            os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+            for arquivo in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 if arquivo.endswith(".jpg"):
-                    os.unlink(f'{self.pdf_dir}/{str(emp)}/{arquivo}')
+                    os.unlink(f'{self.pasta_de_certidões}/{str(emp)}/{arquivo}')
 
 class Uniao(Certidao):
     def __init__(self, dia, mes, ano):
         super().__init__(dia, mes, ano)
 
     def pega_string(self, emp):
-        os.chdir(f'{self.pdf_dir}/{str(emp)}')
-        for imagem in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+        os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+        for imagem in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'UNIÃO':
                 certidao = pytesseract.image_to_string(
-                    Image.open(f'{self.pdf_dir}/{emp}/{imagem}'),
+                    Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -547,11 +550,11 @@ class Tst(Certidao):
         super().__init__(dia, mes, ano)
 
     def pega_string(self, emp):
-        os.chdir(f'{self.pdf_dir}/{str(emp)}')
-        for imagem in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+        os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+        for imagem in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'TST':
                 certidao = pytesseract.image_to_string(
-                    Image.open(f'{self.pdf_dir}/{emp}/{imagem}'),
+                    Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -604,11 +607,11 @@ class Fgts(Certidao):
         super().__init__(dia, mes, ano)
 
     def pega_string(self, emp):
-        os.chdir(f'{self.pdf_dir}/{str(emp)}')
-        for imagem in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+        os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+        for imagem in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'FGTS':
                 certidao = pytesseract.image_to_string(
-                    Image.open(f'{self.pdf_dir}/{emp}/{imagem}'),
+                    Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
@@ -653,11 +656,11 @@ class Gdf(Certidao):
         super().__init__(dia, mes, ano)
 
     def pega_string(self, emp):
-        os.chdir(f'{self.pdf_dir}/{str(emp)}')
-        for imagem in os.listdir(f'{self.pdf_dir}/{str(emp)}'):
+        os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+        for imagem in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'GDF':
                 certidao = pytesseract.image_to_string(
-                    Image.open(f'{self.pdf_dir}/{emp}/{imagem}'),
+                    Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
                     lang='por')
                 return certidao
 
