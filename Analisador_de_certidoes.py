@@ -23,7 +23,7 @@ class Certidao:
         self.urls()
         self.caminho_xls = self.lista_de_urls[0][1]
         self.wb = openpyxl.load_workbook(self.caminho_xls)
-        self.checagem_de_urls()
+        self.checagem_de_planilhas()
         self.pag = self.wb['PAGAMENTO']
         self.forn = self.wb['FORNECEDORES']
         self.listareferencia = []
@@ -47,9 +47,9 @@ class Certidao:
         caminho_uso = ('/').join(caminho_do_dir[0:-1])
         return caminho_uso
 
-    def checagem_de_urls(self):
+    def checagem_de_planilhas(self):
         try:
-            self.wb['PAGAMENTO']
+            self.wb['PAGAMENTO'] and self.wb['FORNECEDORES']
         except KeyError:
             messagebox.showerror('Esse arquivo não rola!', 'O arquivo xlsx selecionado como fonte não possui as'
                                                            ' planilhas necessárias para o processamento solicitado.'
@@ -231,8 +231,12 @@ Se deseja fazer nova transferência apague o diretório:
                 if orgao not in itens:
                     faltando.append(orgao)
             if faltando != []:
-                self.mensagem_log(
-                    f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
+                try:
+                    self.empresas[emp][2]
+                except:
+                    messagebox.showerror('Problema com o xlsx', 'O arquivo fonte de dados XLSX parece não ter sido atualizado corretamente.\n\n'
+                                                                                'Tente atualizar a planilha FORNECEDORES usando a oção de colagem  que insere apenas "Valores"')
+                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
                 total_faltando += 1
         if total_faltando != 0:
             self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
@@ -923,7 +927,7 @@ class Analisador:
         self.botao_procurar_pasta.grid(row=1, column=1, padx=0, pady=0)
         self.caminho_da_pasta.grid(row=1, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W + E)
         self.botao_renomear_pasta.grid(row=1, column=3, padx=0, pady=0)
-        self.botao_renomear_tudo.grid(row=0, column=4, rowspan=2, padx=20, pady=5, ipady=8)
+        self.botao_renomear_tudo.grid(row=0, column=4, rowspan=2, padx=150, pady=5, ipady=8)
 
 
         self.titulo_transfere_arquivos.grid(row=5, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W + E)
@@ -1070,7 +1074,7 @@ class Analisador:
             conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
             direcionador = conexao.cursor()
             direcionador.execute('CREATE TABLE urls (variavel text, url text)')
-            caminhos = {'caminho_xlsx': "//hrg-74977/GEOF/CERTIDÕES/Análise/atual.xlsx",
+            caminhos = {'caminho_xlsx': f'{self.__file__()}/listas.xlsx',
                         'pasta_de_certidões': f'{self.__file__()}/Certidões',
                         'caminho_de_log': f'{self.__file__()}/Logs de conferência',
                         'comprovantes_de_pagamento': f'{self.__file__()}/Comprovantes de pagamento',
@@ -1136,21 +1140,50 @@ class Analisador:
             contador_anos += 1
         return self.dias, self.meses, self.anos
 
-    def executa(self):
-        tempo_inicial = time.time()
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+    def atualiza_urls(self):
         conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
         direcionador = conexao.cursor()
         direcionador.execute("SELECT *, oid FROM urls")
         self.urls = direcionador.fetchall()
         conexao.close()
+
+    def checa_urls(self):
         if not os.path.exists(self.urls[0][1]):
-            messagebox.showerror('Sumiu!!!', 'O arquivo xlsx selecionado como fonte foi apagado ou removido.'
-                                                           '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
-                                                           'selecione um arquivo xlsx que atenda aos critérios necessários '
-                                                           'para o processamento.')
+            messagebox.showerror('Sumiu!!!',
+                                 'O arquivo xlsx selecionado como fonte foi apagado, removido ou não existe.'
+                                 '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
+                                 'selecione um arquivo xlsx que atenda aos critérios necessários '
+                                 'para o processamento.')
+        elif not os.path.exists(self.urls[1][1]):
+            messagebox.showerror('Sumiu!!!',
+                                 'A pasta apontada como fonte para cetidões foi apagada, removida ou não existe.'
+                                 '\n\nClique em Configurações>>Caminhos>>Pasta de certidões e '
+                                 'selecione uma pasta que contenha as certidões que devem ser analisadas.')
+        elif not os.path.exists(self.urls[2][1]):
+            messagebox.showerror('Sumiu!!!',
+                                 'A pasta apontada como fonte e destino para logs foi apagada, removida ou não existe.'
+                                 '\n\nClique em Configurações>>Caminhos>>Pasta de logs e '
+                                 'selecione uma pasta onde os logs serão criados.')
+        elif not os.path.exists(self.urls[4][1]):
+            messagebox.showerror('Sumiu!!!',
+                                 'A pasta apontada como destino de cetidões para pagamento foi apagada, removida ou não existe.'
+                                 '\n\nClique em Configurações>>Caminhos>>Cetidões para pagamento e '
+                                 'selecione uma pasta para direcionar as certidões do pagamento.')
+        elif not os.path.exists(self.urls[3][1]):
+            messagebox.showerror('Sumiu!!!',
+                                 'A pasta apontada como fonte de comprovantes de pagamento foi apagada, removida ou não existe.'
+                                 '\n\nClique em Configurações>>Caminhos>>Comprovantes de pagamento e '
+                                 'selecione uma pasta que contenha os comprovantes de pagamento.')
+
+    def executa(self):
+        tempo_inicial = time.time()
+        dia = self.variavel.get()
+        mes = self.variavel2.get()
+        ano = self.variavel3.get()
+        self.atualiza_urls()
+        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(self.urls[2][1])\
+                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+            self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
 
@@ -1194,37 +1227,54 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        obj1 = Certidao(dia, mes, ano)
-        obj1.mensagem_log('\nProcesso de renomeação de certidões iniciado:\n')
-        obj1.analisa_referencia()
-        obj1.pega_fornecedores()
-        obj1.apaga_imagem()
-        obj1.pdf_para_jpg_renomear()
-        obj1.gera_nome()
-        obj1.apaga_imagem()
-        messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões da listagem de pagamento foram renomeadas com sucesso!')
+        self.atualiza_urls()
+        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(self.urls[2][1])\
+                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+            self.checa_urls()
+        else:
+            obj1 = Certidao(dia, mes, ano)
+            obj1.mensagem_log('\nProcesso de renomeação de certidões iniciado:\n')
+            obj1.analisa_referencia()
+            obj1.pega_fornecedores()
+            obj1.apaga_imagem()
+            obj1.pdf_para_jpg_renomear()
+            obj1.gera_nome()
+            obj1.apaga_imagem()
+            messagebox.showinfo('Renomeou, miserávi!', 'Todas as certidões da listagem de pagamento foram renomeadas com sucesso!')
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        obj1 = Certidao(dia, mes, ano)
-        obj1.analisa_referencia()
-        obj1.pega_fornecedores()
-        obj1.cria_certidoes_para_pagamento()
+        self.atualiza_urls()
+        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(
+                self.urls[2][1]) \
+                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+            self.checa_urls()
+        else:
+            obj1 = Certidao(dia, mes, ano)
+            obj1.analisa_referencia()
+            obj1.pega_fornecedores()
+            obj1.cria_certidoes_para_pagamento()
 
     def mescla_certidoes(self):
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        obj1 = Certidao(dia, mes, ano)
-        obj1.analisa_referencia()
-        obj1.pega_fornecedores()
-        obj1.merge()
+        self.atualiza_urls()
+        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(
+                self.urls[2][1]) \
+                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+            self.checa_urls()
+        else:
+            obj1 = Certidao(dia, mes, ano)
+            obj1.analisa_referencia()
+            obj1.pega_fornecedores()
+            obj1.merge()
 
 
     def caminho_de_arquivo(self):
-        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2',
+        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.__file__()}/Certidões',
                                                                filetypes=(('Arquivos pdf','*.pdf'),("Todos os arquivos", '*.*')))
         numero_de_arquivos = 'Nenhum arquivo selecionado'
         if len(self.arquivo_selecionado) > 1:
@@ -1312,8 +1362,8 @@ class Analisador:
 
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
-        self.pasta_selecionada = filedialog.askdirectory(initialdir='//hrg-74977/GEOF/CERTIDÕES/Certidões2')
-        if os.path.isdir(self.pasta_selecionada) and self.pasta_selecionada != '//hrg-74977/GEOF/CERTIDÕES/Certidões2':
+        self.pasta_selecionada = filedialog.askdirectory(initialdir=f'{self.__file__()}/Certidões')
+        if os.path.isdir(self.pasta_selecionada) and self.pasta_selecionada != f'{self.__file__()}/Certidões':
             pasta = self.pasta_selecionada
             self.caminho_da_pasta = Label(self.frame_renomear, text=os.path.basename(pasta), pady=0, padx=0, bg='white', fg='gray',
                        font=('Helvetica', 9, 'bold'))
