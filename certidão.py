@@ -211,10 +211,10 @@ Se deseja fazer nova transferência apague o diretório:
                 except:
                     messagebox.showerror('Problema com o xlsx', 'O arquivo fonte de dados XLSX parece não ter sido atualizado corretamente.\n\n'
                                                                                 'Tente atualizar a planilha FORNECEDORES usando a oção de colagem  que insere apenas "Valores"')
-                self.mensagem_log(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}')
+                self.mensagem_de_log_completa(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}', self.caminho_de_log)
                 total_faltando += 1
         if total_faltando != 0:
-            self.mensagem_log(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
+            self.mensagem_de_log_completa(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.', self.caminho_de_log)
             messagebox.showerror('Tá faltando coisa, mano!', f'''Algumas certidões não foram encontradas!
 Consulte o arquivo de log, resolva as pendências indicadas e então execute novamente a análise.''')
             raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')

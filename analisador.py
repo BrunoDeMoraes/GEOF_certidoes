@@ -268,8 +268,8 @@ class Analisador:
             if not os.path.exists(f'{self.__file__()}/{pasta}'):
                 os.makedirs(f'{self.__file__()}/{pasta}')
 
-        if not os.path.exists(f'{self.__file__()}/caminhos.db'):
-            conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        if not os.path.exists('C:/Users/Ana/PycharmProjects/GEOF_certidoes'):
+            conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes')
             direcionador = conexao.cursor()
             direcionador.execute('CREATE TABLE urls (variavel text, url text)')
             caminhos = {'caminho_xlsx': f'{self.__file__()}/listas.xlsx',
@@ -288,7 +288,7 @@ class Analisador:
             conexao.close()
         else:
             print('Banco de dados localizado.')
-            conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+            conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes/caminhos.db')
             direcionador = conexao.cursor()
             direcionador.execute("SELECT *, oid FROM urls")
             self.urls = direcionador.fetchall()
@@ -339,7 +339,7 @@ class Analisador:
         return self.dias, self.meses, self.anos
 
     def atualiza_urls(self):
-        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+        conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes/caminhos.db')
         direcionador = conexao.cursor()
         direcionador.execute("SELECT *, oid FROM urls")
         self.urls = direcionador.fetchall()
