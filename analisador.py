@@ -1,3 +1,4 @@
+from conexao import Conexao
 from certidão import Certidao
 from união import Uniao
 from tst import Tst
@@ -19,15 +20,15 @@ from tkinter import messagebox
 import sqlite3
 
 
-class Analisador:
+class Analisador(Certidao):
     opções = [
         'Selecione uma opção', 'Renomear arquivos',
         'Renomear todos os arquivos de uma pasta', 'Renomear todas as certidões da lista de pagamento']
 
     def __init__(self, tela):
-        self.urls = []
-        self.cria_pastas_de_trabalho()
-        self.cria_bd()
+        #self.cria_pastas_de_trabalho()
+        #self.cria_bd()
+        #self.configura_bd()
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
 
@@ -136,34 +137,24 @@ class Analisador:
 
         self.roda_pe.grid(row=11, column=1, columnspan=10, pady=5, sticky=W+E)
 
-    def __file__(self):
-        caminho_py = __file__
-        caminho_do_dir = caminho_py.split('\\')
-        caminho_uso = ('/').join(caminho_do_dir[0:-1])
-        return caminho_uso
-
-    def cria_pastas_de_trabalho(self):
-        pastas_de_trabalho = ['Certidões','Logs de conferência', 'Certidões para pagamento', 'Comprovantes de pagamento']
-        for pasta in pastas_de_trabalho:
-            if not os.path.exists(f'{self.__file__()}/{pasta}'):
-                os.makedirs(f'{self.__file__()}/{pasta}')
-                print(f'Pasta de trabalho {pasta} criada com sucesso!\n')
-            else:
-                print(f'Pasta de trabalho {pasta} localizada.\n')
-
 
     def abrir_janela_caminhos(self):
-        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
-        direcionador = conexao.cursor()
-        direcionador.execute("SELECT *, oid FROM urls")
-        self.urls = direcionador.fetchall()
-        conexao.close()
-
         self.janela_de_caminhos = Toplevel()
+        urls = self.consulta_urls()
+        print(f'Essa é a consulta de urls {urls}')
         self.janela_de_caminhos.title('Lista de caminhos')
         self.janela_de_caminhos.resizable(False, False)
         self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
         self.frame_de_caminhos.pack(padx=1, pady=1)
+
+        self.criar_estrutura = Label(self.frame_de_caminhos, text='Se deseja criar toda a estrutura de pastas de trabalho\n'
+                                                             'necessárias para o correto funcionamento do programa na\n'
+                                                             'pasta que contém o arquivo principal clique em "Criar estrura\n", '
+                                                             'caso contrário selecione manualmente cada caminho abaixo.\n')
+
+        self.botão_criar_estrutura = Button(self.frame_de_caminhos, text='Criar estrutura', command=self.cria_pastas_de_trabalho,
+                                 padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+
         self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de\ndados XLSX', command=self.altera_caminho_xlsl,
                                  padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
         self.caminho_xlsx = Entry(self.frame_de_caminhos, width=70)
@@ -184,26 +175,38 @@ class Analisador:
                                                command=self.atualizar_xlsx, padx=10,
                                                pady=10, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
 
+
+
+        self.botão_criar_estrutura.grid(row=0, column=1, columnspan=1, padx=15, pady=10, ipadx=5, ipady=13, sticky=W + E)
+        self.criar_estrutura.grid(row=0, column=2, padx=20)
         self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=5, ipady=13, sticky=W+E)
-        self.caminho_xlsx.insert(0, self.urls[0][1])
+        urls = self.consulta_urls()
+
+        self.caminho_xlsx.insert(0, urls[0][1])
+
         self.caminho_xlsx.grid(row=1, column=2, padx=20)
         self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_pasta_de_certidões.insert(0, self.urls[1][1])
+        self.caminho_pasta_de_certidões.insert(0, urls[1][1])
         self.caminho_pasta_de_certidões.grid(row=2, column=2, padx=20)
         self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_log.insert(0, self.urls[2][1])
+        self.caminho_log.insert(0, urls[2][1])
         self.caminho_log.grid(row=3, column=2, padx=20)
         self.certidões_para_pagamento.grid(row=4, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_certidões_para_pagamento.insert(0, self.urls[4][1])
+        self.caminho_certidões_para_pagamento.insert(0, urls[4][1])
         self.caminho_certidões_para_pagamento.grid(row=4, column=2, padx=20)
         self.pasta_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
-        self.caminho_pasta_pagamento.insert(0, self.urls[3][1])
+        self.caminho_pasta_pagamento.insert(0, urls[3][1])
         self.caminho_pasta_pagamento.grid(row=5, column=2, padx=20)
         self.gravar_alterações.grid(row=6, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13)
 
 
+    def criar_estrutura(self):
+        self.cria_pastas_de_trabalho()
+        self.cria_bd()
+        self.configura_bd()
+
     def altera_caminho_xlsl(self):
-        caminho = filedialog.askopenfilename(initialdir=self.__file__(),filetypes=(('Arquivos', '*.xlsx'),
+        caminho = filedialog.askopenfilename(initialdir=self.caminho_do_arquivo(),filetypes=(('Arquivos', '*.xlsx'),
                                                                                    ("Todos os arquivos", '*.*')))
         self.caminho_xlsx.destroy()
         self.caminho_xlsx = Entry(self.frame_de_caminhos, width=30)
@@ -211,28 +214,28 @@ class Analisador:
         self.caminho_xlsx.grid(row=1, column=2, padx=20)
 
     def altera_caminho_pasta_de_certidões(self):
-        caminho = filedialog.askdirectory(initialdir=self.__file__())
+        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
         self.caminho_pasta_de_certidões.destroy()
         self.caminho_pasta_de_certidões = Entry(self.frame_de_caminhos, width=30)
         self.caminho_pasta_de_certidões.insert(0, caminho)
         self.caminho_pasta_de_certidões.grid(row=2, column=2, padx=20)
 
     def altera_caminho_log(self):
-        caminho = filedialog.askdirectory(initialdir=self.__file__())
+        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
         self.caminho_log.destroy()
         self.caminho_log = Entry(self.frame_de_caminhos, width=30)
         self.caminho_log.insert(0, caminho)
         self.caminho_log.grid(row=3, column=2, padx=20)
 
     def altera_caminho_pasta_pagamento(self):
-        caminho = filedialog.askdirectory(initialdir=self.__file__())
+        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
         self.caminho_pasta_pagamento.destroy()
         self.caminho_pasta_pagamento = Entry(self.frame_de_caminhos, width=30)
         self.caminho_pasta_pagamento.insert(0, caminho)
         self.caminho_pasta_pagamento.grid(row=4, column=2, padx=20)
 
     def altera_caminho_certidões_para_pagamento(self):
-        caminho = filedialog.askdirectory(initialdir=self.__file__())
+        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
         self.caminho_certidões_para_pagamento.destroy()
         self.caminho_certidões_para_pagamento = Entry(self.frame_de_caminhos, width=30)
         self.caminho_certidões_para_pagamento.insert(0, caminho)
@@ -241,7 +244,7 @@ class Analisador:
     def atualizar_xlsx(self):
         resposta = messagebox.askyesno('Vc sabe o que está fazendo?','Tem certeza que deseja alterar a configuração dos caminhos de pastas e arquivos?')
         if resposta == True:
-            conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
+            conexao = sqlite3.connect(f'{self.caminho_do_arquivo()}/caminhos.db')
             direcionador = conexao.cursor()
             direcionador.execute("UPDATE urls SET url = :caminho_xlsx WHERE oid = 1",
                                  {"caminho_xlsx": self.caminho_xlsx.get()})
@@ -261,56 +264,16 @@ class Analisador:
         else:
             self.janela_de_caminhos.destroy()
 
-    def cria_bd(self):
-        pastas_de_trabalho = ['Certidões', 'Logs de conferência', 'Certidões para pagamento',
-                              'Comprovantes de pagamento']
-        for pasta in pastas_de_trabalho:
-            if not os.path.exists(f'{self.__file__()}/{pasta}'):
-                os.makedirs(f'{self.__file__()}/{pasta}')
-
-        if not os.path.exists('C:/Users/Ana/PycharmProjects/GEOF_certidoes'):
-            conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes')
-            direcionador = conexao.cursor()
-            direcionador.execute('CREATE TABLE urls (variavel text, url text)')
-            caminhos = {'caminho_xlsx': f'{self.__file__()}/listas.xlsx',
-                        'pasta_de_certidões': f'{self.__file__()}/Certidões',
-                        'caminho_de_log': f'{self.__file__()}/Logs de conferência',
-                        'comprovantes_de_pagamento': f'{self.__file__()}/Comprovantes de pagamento',
-                        'certidões_para_pagamento': f'{self.__file__()}/Certidões para pagamento'}
-            for caminho in caminhos:
-                direcionador.execute('INSERT INTO urls VALUES (:variavel, :url)',
-                                     {"variavel": caminho, "url": caminhos[caminho]})
-                conexao.commit()
-            direcionador.execute("SELECT *, oid FROM urls")
-            self.urls = direcionador.fetchall()
-            for registro in self.urls:
-                print(f'{registro[0]}: {registro[1]}\n')
-            conexao.close()
-        else:
-            print('Banco de dados localizado.')
-            conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes/caminhos.db')
-            direcionador = conexao.cursor()
-            direcionador.execute("SELECT *, oid FROM urls")
-            self.urls = direcionador.fetchall()
-            for registro in self.urls:
-                print(f'{registro[0]}: {registro[1]}\n')
-                conexao.close()
-
-
     def abrir_log(self):
-        conexao = sqlite3.connect(f'{self.__file__()}/caminhos.db')
-        direcionador = conexao.cursor()
-        direcionador.execute("SELECT *, oid FROM urls")
-        self.urls = direcionador.fetchall()
-        conexao.close()
+        urls = self.consulta_urls()
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        if not os.path.exists(f'{self.urls[2][1]}/{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
+        if not os.path.exists(f'{urls[2][1]}/{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
             messagebox.showerror('Me ajuda a te ajudar!',
                                  'Não existe log para a data informada.')
         else:
-            caminho = f'{self.urls[2][1]}/{ano}-{mes}-{dia}.txt'
+            caminho = f'{urls[2][1]}/{ano}-{mes}-{dia}.txt'
             novo_caminho = caminho.replace('/', '\\')
             os.startfile(novo_caminho)
 
@@ -338,36 +301,30 @@ class Analisador:
             contador_anos += 1
         return self.dias, self.meses, self.anos
 
-    def atualiza_urls(self):
-        conexao = sqlite3.connect('C:/Users/Ana/PycharmProjects/GEOF_certidoes/caminhos.db')
-        direcionador = conexao.cursor()
-        direcionador.execute("SELECT *, oid FROM urls")
-        self.urls = direcionador.fetchall()
-        conexao.close()
-
     def checa_urls(self):
-        if not os.path.exists(self.urls[0][1]):
+        urls = self.consulta_urls()
+        if not os.path.exists(urls[0][1]):
             messagebox.showerror('Sumiu!!!',
                                  'O arquivo xlsx selecionado como fonte foi apagado, removido ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
                                  'selecione um arquivo xlsx que atenda aos critérios necessários '
                                  'para o processamento.')
-        elif not os.path.exists(self.urls[1][1]):
+        elif not os.path.exists(urls[1][1]):
             messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como fonte para cetidões foi apagada, removida ou não existe.'
+                                 'A pasta apontada como fonte para certidões foi apagada, removida ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Pasta de certidões e '
                                  'selecione uma pasta que contenha as certidões que devem ser analisadas.')
-        elif not os.path.exists(self.urls[2][1]):
+        elif not os.path.exists(urls[2][1]):
             messagebox.showerror('Sumiu!!!',
                                  'A pasta apontada como fonte e destino para logs foi apagada, removida ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Pasta de logs e '
                                  'selecione uma pasta onde os logs serão criados.')
-        elif not os.path.exists(self.urls[4][1]):
+        elif not os.path.exists(urls[4][1]):
             messagebox.showerror('Sumiu!!!',
                                  'A pasta apontada como destino de cetidões para pagamento foi apagada, removida ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Cetidões para pagamento e '
                                  'selecione uma pasta para direcionar as certidões do pagamento.')
-        elif not os.path.exists(self.urls[3][1]):
+        elif not os.path.exists(urls[3][1]):
             messagebox.showerror('Sumiu!!!',
                                  'A pasta apontada como fonte de comprovantes de pagamento foi apagada, removida ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Comprovantes de pagamento e '
@@ -378,9 +335,9 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        self.atualiza_urls()
-        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(self.urls[2][1])\
-                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+        urls = self.consulta_urls()
+        if not os.path.exists(urls[0][1]) or not os.path.exists(urls[1][1]) or not os.path.exists(urls[2][1])\
+                or not os.path.exists(urls[4][1]) or not os.path.exists(urls[3][1]):
             self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
@@ -442,9 +399,9 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        self.atualiza_urls()
-        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(self.urls[2][1])\
-                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+        urls = self.consulta_urls()
+        if not os.path.exists(urls[0][1]) or not os.path.exists(urls[1][1]) or not os.path.exists(urls[2][1])\
+                or not os.path.exists(urls[4][1]) or not os.path.exists(urls[3][1]):
             self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
@@ -461,10 +418,10 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        self.atualiza_urls()
-        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(
-                self.urls[2][1]) \
-                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+        urls = self.consulta_urls()
+        if not os.path.exists(urls[0][1]) or not os.path.exists(urls[1][1]) or not os.path.exists(
+                urls[2][1]) \
+                or not os.path.exists(urls[4][1]) or not os.path.exists(urls[3][1]):
             self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
@@ -476,10 +433,10 @@ class Analisador:
         dia = self.variavel.get()
         mes = self.variavel2.get()
         ano = self.variavel3.get()
-        self.atualiza_urls()
-        if not os.path.exists(self.urls[0][1]) or not os.path.exists(self.urls[1][1]) or not os.path.exists(
-                self.urls[2][1]) \
-                or not os.path.exists(self.urls[4][1]) or not os.path.exists(self.urls[3][1]):
+        urls = self.consulta_urls()
+        if not os.path.exists(urls[0][1]) or not os.path.exists(urls[1][1]) or not os.path.exists(
+                urls[2][1]) \
+                or not os.path.exists(urls[4][1]) or not os.path.exists(urls[3][1]):
             self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
@@ -488,7 +445,7 @@ class Analisador:
             obj1.merge()
 
     def caminho_de_arquivo(self):
-        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.__file__()}/Certidões',
+        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.caminho_do_arquivo()}/Certidões',
                                                                filetypes=(('Arquivos pdf','*.pdf'),("Todos os arquivos", '*.*')))
         numero_de_arquivos = 'Nenhum arquivo selecionado'
         if len(self.arquivo_selecionado) > 1:
@@ -500,7 +457,7 @@ class Analisador:
         self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W+E)
 
     def pdf_para_jpg_para_renomear_arquivo(self):
-        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.__file__()}/Certidões',
+        self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.caminho_do_arquivo()}/Certidões',
                                                                filetypes=(
                                                                ('Arquivos pdf', '*.pdf'), ("Todos os arquivos", '*.*')))
         if self.arquivo_selecionado == 'Selecione os arquivos que deseja renomear' or list(self.arquivo_selecionado) == []:
@@ -577,8 +534,8 @@ class Analisador:
 
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
-        self.pasta_selecionada = filedialog.askdirectory(initialdir=f'{self.__file__()}/Certidões')
-        if os.path.isdir(self.pasta_selecionada) and self.pasta_selecionada != f'{self.__file__()}/Certidões':
+        self.pasta_selecionada = filedialog.askdirectory(initialdir=f'{self.caminho_do_arquivo()}/Certidões')
+        if os.path.isdir(self.pasta_selecionada) and self.pasta_selecionada != f'{self.caminho_do_arquivo()}/Certidões':
             pasta = self.pasta_selecionada
             self.caminho_da_pasta = Label(self.frame_renomear, text=os.path.basename(pasta), pady=0, padx=0, bg='white', fg='gray',
                        font=('Helvetica', 9, 'bold'))
@@ -597,7 +554,7 @@ class Analisador:
                     os.unlink(f'{self.pasta_selecionada}/{arquivo}')
 
     def pdf_para_jpg_renomear_conteudo_da_pasta(self):
-        self.pasta_selecionada = filedialog.askdirectory(initialdir=f'{self.__file__()}/Certidões')
+        self.pasta_selecionada = filedialog.askdirectory(initialdir=f'{self.caminho_do_arquivo()}/Certidões')
         if self.pasta_selecionada == 'Selecione a pasta que deseja renomear' or self.pasta_selecionada =='':
             messagebox.showerror('Se não selecionar a pasta, não vai rolar!',
                                  'Selecione uma pasta que contenha certidões que precisam ser renomeadas.')

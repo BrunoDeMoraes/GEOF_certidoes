@@ -1,4 +1,5 @@
 from log import Log
+from conexao import Conexao
 
 from tkinter import *
 from tkinter import filedialog
@@ -15,13 +16,12 @@ import PyPDF2
 from tkinter import messagebox
 import sqlite3
 
-class Certidao(Log):
+class Certidao(Log, Conexao):
     def __init__(self, dia, mes, ano):
         self.dia = dia
         self.mes = mes
         self.ano = ano
-        self.lista_de_urls = []
-        self.urls()
+        self.lista_de_urls = self.consulta_urls()
         self.caminho_xls = self.lista_de_urls[0][1]
         self.wb = openpyxl.load_workbook(self.caminho_xls)
         self.checagem_de_planilhas()
@@ -51,13 +51,6 @@ class Certidao(Log):
                                                            '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
                                                            'selecione um arquivo xlsx que atenda aos critérios necessários '
                                                            'para o processamento.')
-
-    def urls(self):
-        conexao = sqlite3.connect('caminhos.db')
-        direcionador = conexao.cursor()
-        direcionador.execute("SELECT *, oid FROM urls")
-        self.lista_de_urls = direcionador.fetchall()
-        conexao.close()
 
     def pega_referencia(self):
         if os.path.exists(f'{self.comprovantes_de_pagamento}'):
