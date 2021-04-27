@@ -21,19 +21,36 @@ import sqlite3
 
 
 class Analisador(Certidao):
+    texto_do_título = '    Indique a data limite pretendida para o próximo pagamento e em seguida escolha' \
+                      ' uma das seguintes opções:    '
+
+    texto_titulo_analisar = 'Utilize esta opção para identificar quais certidões devem ser atualizadas ou ' \
+                            'se há requisitos a cumprir para a devida execução da análise.'
+
+    texto_titulo_renomear = 'Após atualizar as certidões, selecione uma das opções para padronizar os nomes ' \
+                            'dos\narquivos e em seguida faça nova análise para certificar que está tudo OK.'
+
     opções = [
         'Selecione uma opção', 'Renomear arquivos',
-        'Renomear todos os arquivos de uma pasta', 'Renomear todas as certidões da lista de pagamento']
+        'Renomear todos os arquivos de uma pasta',
+        'Renomear todas as certidões da lista de pagamento']
+
+    texto_titulo_transfere_arquivos = 'Esta opção transfere as certidões que validam o pagamento para uma pasta ' \
+                                      'identificada pela data.\nEsse passo deve ser executado logo após a análise ' \
+                                      'definitiva antes do pagamento.'
+
+    texto_titulo_mescla_arquivos = 'Após o pagamento utilize esta opção para mesclar os comprovantes de pagamento ' \
+                                   'digitalizados com suas respectivas certidões.'
+
+    texto_cria_estrutura = 'Se deseja criar toda a estrutura de pastas de trabalho necessárias para o\ncorreto ' \
+                           'funcionamento do programa na pasta que contém o arquivo principal,\nclique em "Criar ' \
+                           'estrutura". Em seguida, selecione manualmente cada caminho.'
+
 
     def __init__(self, tela):
-        #self.cria_pastas_de_trabalho()
-        #self.cria_bd()
-        #self.configura_bd()
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
-
         self.frame_data = LabelFrame(self.frame_mestre, padx=0, pady=0)
-
         self.frame_renomear = LabelFrame(self.frame_mestre, padx=0, pady=0)
 
         self.menu_certidões = Menu(tela)
@@ -43,16 +60,14 @@ class Analisador(Certidao):
         self.menu_configurações.add_command(label='Caminhos', command=self.abrir_janela_caminhos)
         self.menu_configurações.add_separator()
 
-
-        self.titulo = Label(self.frame_data, text='    Indique a data limite pretendida para o próximo pagamento e em seguida escolha uma das seguintes opções:    ',
-                            pady=0, padx=0, bg='green', fg='white', bd=2, relief=SUNKEN,font=('Helvetica', 10, 'bold'))
-
-        self.dia_etiqueta = Label(self.frame_data, text='Dia', padx=22, pady=0, bg='green', fg='white', bd=2, relief=SUNKEN,
-                             font=('Helvetica', 10, 'bold'))
-        self.mes_etiqueta = Label(self.frame_data, text='Mês', padx=22, pady=0, bg='green', fg='white', bd=2, relief=SUNKEN,
-                             font=('Helvetica', 10, 'bold'))
-        self.ano_etiqueta = Label(self.frame_data, text='Ano', padx=22, pady=0, bg='green', fg='white', bd=2, relief=SUNKEN,
-                             font=('Helvetica', 10, 'bold'))
+        self.titulo = Label(self.frame_data, text=Analisador.texto_do_título, pady=0, padx=0, bg='green', fg='white',
+                            bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.dia_etiqueta = Label(self.frame_data, text='Dia', padx=22, pady=0, bg='green', fg='white', bd=2,
+                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.mes_etiqueta = Label(self.frame_data, text='Mês', padx=22, pady=0, bg='green', fg='white', bd=2,
+                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.ano_etiqueta = Label(self.frame_data, text='Ano', padx=22, pady=0, bg='green', fg='white', bd=2,
+                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
 
         self.variavel = StringVar()
         self.variavel.set(" ")
@@ -63,56 +78,47 @@ class Analisador(Certidao):
         self.dias = [' ']
         self.meses = [' ']
         self.anos = [' ']
-
         self.cria_calendario()
 
-        self.botao_abrir_log = Button(self.frame_data, text='Abrir log', command=self.abrir_log, padx=0,
-                                     pady=0, bg='white',
-                                     fg='green', font=('Helvetica', 9, 'bold'), bd=1)
+        self.botao_abrir_log = Button(self.frame_data, text='Abrir log', command=self.abrir_log, padx=0, pady=0,
+                                      bg='white', fg='green', font=('Helvetica', 9, 'bold'), bd=1)
+
         self.validacao1 = OptionMenu(self.frame_data, self.variavel, *self.dias)
         self.validacao2 = OptionMenu(self.frame_data, self.variavel2, *self.meses)
         self.validacao3 = OptionMenu(self.frame_data, self.variavel3, *self.anos)
 
-        self.titulo_analisar = Label(self.frame_mestre, text='Utilize esta opção para identificar quais certidões devem ser atualizadas ou se há requisitos a cumprir para a devida execução da análise.', pady=0, padx=0, bg='white',
-                                fg='black', font=('Helvetica', 9, 'bold'))
-
+        self.titulo_analisar = Label(self.frame_mestre, text=Analisador.texto_titulo_analisar, pady=0, padx=0,
+                                     bg='white', fg='black', font=('Helvetica', 9, 'bold'))
         self.botao_analisar = Button(self.frame_mestre, text='Analisar\ncertidões', command=self.executa, padx=30,
                                      pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-
-        self.titulo_renomear = Label(self.frame_mestre, text='Após atualizar as certidões, selecione uma das opções para padronizar os nomes dos\narquivos e em seguida faça nova análise para certificar que está tudo OK.', pady=0, padx=0,
-                                     bg='white', fg='black', font=('Helvetica', 9, 'bold'))
-
+        self.titulo_renomear = Label(self.frame_mestre, text=Analisador.texto_titulo_renomear, pady=0,
+                                     padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
         self.variavel_de_opções = StringVar()
         self.variavel_de_opções.set("Selecione uma opção")
         self.validacao = OptionMenu(self.frame_mestre, self.variavel_de_opções, *Analisador.opções)
-
         self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
         self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
+        self.botao_renomear_tudo = Button(
+            self.frame_mestre, text='Renomear\ncertidões', command=self.selecionador_de_opções,
+            padx=30,pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
+        )
+
+        self.titulo_transfere_arquivos = Label(self.frame_mestre, text=Analisador.texto_titulo_transfere_arquivos,
+                                               pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+        self.botao_transfere_arquivos = Button(
+            self.frame_mestre, text='Transferir\ncertidões', command=self.transfere_certidoes,
+            padx=30, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
+        )
+
+        self.titulo_mescla_arquivos = Label(self.frame_mestre, text=Analisador.texto_titulo_mescla_arquivos,
+                                            pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+        self.botao_mescla_arquivos = Button(self.frame_mestre, text='Mesclar\narquivos', command=self.mescla_certidoes,
+                                            padx=30, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),bd=1)
 
 
-        self.botao_renomear_tudo = Button(self.frame_mestre, text='Renomear\ncertidões',
-                                          command=self.selecionador_de_opções, padx=30, pady=1, bg='green', fg='white',
-                                          font=('Helvetica', 9, 'bold'), bd=1)
-
-        self.titulo_transfere_arquivos = Label(self.frame_mestre, text='Esta opção transfere as certidões que validam o pagamento para uma pasta identificada pela data.\nEsse passo deve ser executado logo após a análise definitiva antes do pagamento.', pady=0, padx=0, bg='white',
-                                               fg='black',
-                                               font=('Helvetica', 9, 'bold'))
-
-        self.botao_transfere_arquivos = Button(self.frame_mestre, text='Transferir\ncertidões', command=self.transfere_certidoes,
-                                          padx=30, pady=1, bg='green',
-                                          fg='white', font=('Helvetica', 9, 'bold'), bd=1)
-
-        self.titulo_mescla_arquivos = Label(self.frame_mestre, text='Após o pagamento utilize esta opção para mesclar os comprovantes de pagamento digitalizados com suas respectivas certidões.', pady=0, padx=0, bg='white', fg='black',
-                                       font=('Helvetica', 9, 'bold'))
-
-        self.botao_mescla_arquivos = Button(self.frame_mestre, text=' Mesclar  \narquivos', command=self.mescla_certidoes, padx=30,
-                                       pady=1, bg='green',
-                                       fg='white', font=('Helvetica', 9, 'bold'), bd=1)
-
-
-        self.roda_pe = Label(self.frame_mestre, text="SRSSU/DA/GEOF   ", pady=0, padx=0, bg='green', fg='white',
-                             font=('Helvetica', 8, 'italic'), anchor=E)
+        self.roda_pe = Label(self.frame_mestre, text="SRSSU/DA/GEOF    ", pady=0, padx=0, bg='green',
+                             fg='white', font=('Helvetica', 8, 'italic'), anchor=E)
 
         self.frame_data.grid(row=0, column=1, columnspan=7, rowspan=1, pady=0, sticky=W+E)
         self.titulo.grid(row=0, column=1, columnspan=5, rowspan=1, pady=0, sticky=W+E)
@@ -147,120 +153,98 @@ class Analisador(Certidao):
         self.frame_de_caminhos = LabelFrame(self.janela_de_caminhos, padx=0, pady=0)
         self.frame_de_caminhos.pack(padx=1, pady=1)
 
-        self.criar_estrutura = Label(self.frame_de_caminhos, text='Se deseja criar toda a estrutura de pastas de trabalho\n'
-                                                             'necessárias para o correto funcionamento do programa na\n'
-                                                             'pasta que contém o arquivo principal clique em "Criar estrura\n", '
-                                                             'caso contrário selecione manualmente cada caminho abaixo.\n')
+        self.criar_estrutura = Label(self.frame_de_caminhos, text=Analisador.texto_cria_estrutura,
+                                     bg='white', fg='green', font=('Helvetica', 10, 'bold'))
 
-        self.botão_criar_estrutura = Button(self.frame_de_caminhos, text='Criar estrutura', command=self.cria_pastas_de_trabalho,
-                                 padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+        self.botão_criar_estrutura = Button(self.frame_de_caminhos, text='Criar estrutura',
+                                            command=self.cria_pastas_de_trabalho, padx=0, pady=0,
+                                            bg='green', fg='white', font=('Helvetica', 10, 'bold'), bd=1)
 
-        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de\ndados XLSX', command=self.altera_caminho_xlsl,
-                                 padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+        self.botao_xlsx = Button(self.frame_de_caminhos, text='Fonte de\ndados XLSX',
+                                 command=lambda: self.altera_caminho(self.caminho_xlsx, True), padx=0,
+                                 pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
         self.caminho_xlsx = Entry(self.frame_de_caminhos, width=70)
-        self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Pasta de\ncertidões', command=self.altera_caminho_pasta_de_certidões,
-                                               padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+
+        self.botao_pasta_de_certidões = Button(self.frame_de_caminhos, text='Pasta de\ncertidões',
+                                               command=lambda: self.altera_caminho(self.caminho_pasta_de_certidões),
+                                               padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'),
+                                               bd=1)
         self.caminho_pasta_de_certidões = Entry(self.frame_de_caminhos, width=70)
-        self.botao_log = Button(self.frame_de_caminhos, text='Pasta de\nlogs', command=self.altera_caminho_log, padx=0, pady=0,
-                                bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+
+        self.botao_log = Button(self.frame_de_caminhos, text='Pasta de\nlogs',
+                                command=lambda: self.altera_caminho(self.caminho_log), padx=0,
+                                pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
         self.caminho_log = Entry(self.frame_de_caminhos, width=70)
-        self.pasta_pagamento = Button(self.frame_de_caminhos, text='Comprovantes\nde pagamentos', command=self.altera_caminho_pasta_pagamento,
+
+        self.pasta_pagamento = Button(self.frame_de_caminhos, text='Comprovantes\nde pagamentos',
+                                      command=lambda: self.altera_caminho(self.caminho_pasta_pagamento),
                                       padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
         self.caminho_pasta_pagamento = Entry(self.frame_de_caminhos, width=70)
-        self.certidões_para_pagamento = Button(self.frame_de_caminhos, text='Certidões para\npagamento', command=self.altera_caminho_certidões_para_pagamento, padx=0,
-                                      pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+
+        self.certidões_para_pagamento = Button(
+            self.frame_de_caminhos, text='Certidões para\npagamento',
+            command=lambda: self.altera_caminho(self.caminho_certidões_para_pagamento),
+            padx=0, pady=0, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1
+        )
         self.caminho_certidões_para_pagamento = Entry(self.frame_de_caminhos, width=70)
 
-        self.gravar_alterações = Button(self.frame_de_caminhos, text='Gravar alterações',
-                                               command=self.atualizar_xlsx, padx=10,
-                                               pady=10, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
+        self.gravar_alterações = Button(self.frame_de_caminhos, text='Gravar alterações', command=self.atualizar_caminhos,
+                                        padx=10, pady=10, bg='green', fg='white', font=('Helvetica', 8, 'bold'), bd=1)
 
-
-
-        self.botão_criar_estrutura.grid(row=0, column=1, columnspan=1, padx=15, pady=10, ipadx=5, ipady=13, sticky=W + E)
-        self.criar_estrutura.grid(row=0, column=2, padx=20)
-        self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx = 15, pady=10, ipadx=5, ipady=13, sticky=W+E)
         urls = self.consulta_urls()
-
+        self.botão_criar_estrutura.grid(row=0, column=1, columnspan=1, padx=15, pady=10, ipadx=5, ipady=13, sticky=W+E)
+        self.criar_estrutura.grid(row=0, column=2, padx=20, pady=10)
+        self.botao_xlsx.grid(row=1, column=1, columnspan=1, padx=15, pady=10, ipadx=5, ipady=13, sticky=W+E)
         self.caminho_xlsx.insert(0, urls[0][1])
-
         self.caminho_xlsx.grid(row=1, column=2, padx=20)
-        self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_pasta_de_certidões.grid(row=2, column=1, columnspan=1, padx=15,
+                                           pady=10, ipadx=10, ipady=13, sticky=W+E)
         self.caminho_pasta_de_certidões.insert(0, urls[1][1])
         self.caminho_pasta_de_certidões.grid(row=2, column=2, padx=20)
-        self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.botao_log.grid(row=3, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W+E)
         self.caminho_log.insert(0, urls[2][1])
         self.caminho_log.grid(row=3, column=2, padx=20)
-        self.certidões_para_pagamento.grid(row=4, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.certidões_para_pagamento.grid(row=4, column=1, columnspan=1, padx=15,
+                                           pady=10, ipadx=10, ipady=13, sticky=W+E)
         self.caminho_certidões_para_pagamento.insert(0, urls[4][1])
         self.caminho_certidões_para_pagamento.grid(row=4, column=2, padx=20)
-        self.pasta_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W + E)
+        self.pasta_pagamento.grid(row=5, column=1, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13, sticky=W+E)
         self.caminho_pasta_pagamento.insert(0, urls[3][1])
         self.caminho_pasta_pagamento.grid(row=5, column=2, padx=20)
         self.gravar_alterações.grid(row=6, column=2, columnspan=1, padx=15, pady=10, ipadx=10, ipady=13)
-
 
     def criar_estrutura(self):
         self.cria_pastas_de_trabalho()
         self.cria_bd()
         self.configura_bd()
 
-    def altera_caminho_xlsl(self):
-        caminho = filedialog.askopenfilename(initialdir=self.caminho_do_arquivo(),filetypes=(('Arquivos', '*.xlsx'),
-                                                                                   ("Todos os arquivos", '*.*')))
-        self.caminho_xlsx.destroy()
-        self.caminho_xlsx = Entry(self.frame_de_caminhos, width=30)
-        self.caminho_xlsx.insert(0, caminho)
-        self.caminho_xlsx.grid(row=1, column=2, padx=20)
+    def altera_caminho(self, entrada, xlsx=False):
+        if xlsx == True:
+            caminho = filedialog.askopenfilename(initialdir=self.caminho_do_arquivo(),
+                                                 filetypes=(('Arquivos', '*.xlsx'), ("Todos os arquivos", '*.*')))
+        else:
+            caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
+        entrada.delete(0, 'end')
+        entrada.insert(0, caminho)
 
-    def altera_caminho_pasta_de_certidões(self):
-        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
-        self.caminho_pasta_de_certidões.destroy()
-        self.caminho_pasta_de_certidões = Entry(self.frame_de_caminhos, width=30)
-        self.caminho_pasta_de_certidões.insert(0, caminho)
-        self.caminho_pasta_de_certidões.grid(row=2, column=2, padx=20)
-
-    def altera_caminho_log(self):
-        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
-        self.caminho_log.destroy()
-        self.caminho_log = Entry(self.frame_de_caminhos, width=30)
-        self.caminho_log.insert(0, caminho)
-        self.caminho_log.grid(row=3, column=2, padx=20)
-
-    def altera_caminho_pasta_pagamento(self):
-        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
-        self.caminho_pasta_pagamento.destroy()
-        self.caminho_pasta_pagamento = Entry(self.frame_de_caminhos, width=30)
-        self.caminho_pasta_pagamento.insert(0, caminho)
-        self.caminho_pasta_pagamento.grid(row=4, column=2, padx=20)
-
-    def altera_caminho_certidões_para_pagamento(self):
-        caminho = filedialog.askdirectory(initialdir=self.caminho_do_arquivo())
-        self.caminho_certidões_para_pagamento.destroy()
-        self.caminho_certidões_para_pagamento = Entry(self.frame_de_caminhos, width=30)
-        self.caminho_certidões_para_pagamento.insert(0, caminho)
-        self.caminho_certidões_para_pagamento.grid(row=5, column=2, padx=20)
-
-    def atualizar_xlsx(self):
-        resposta = messagebox.askyesno('Vc sabe o que está fazendo?','Tem certeza que deseja alterar a configuração dos caminhos de pastas e arquivos?')
+    def atualizar_caminhos(self):
+        resposta = messagebox.askyesno('Vc sabe o que está fazendo?',
+                                       'Deseja alterar a configuração dos caminhos de pastas e arquivos?')
+        itens_para_atualizacao = [
+            ['caminho_xlsx', '1', self.caminho_xlsx.get()],
+            ['pasta_de_certidões', '2', self.caminho_pasta_de_certidões.get()],
+            ['caminho_de_log', '3', self.caminho_log.get()],
+            ['comprovantes_de_pagamento', '4', self.caminho_pasta_pagamento.get()],
+            ['certidões_para_pagamento', '5', self.caminho_certidões_para_pagamento.get()]
+        ]
         if resposta == True:
-            conexao = sqlite3.connect(f'{self.caminho_do_arquivo()}/caminhos.db')
-            direcionador = conexao.cursor()
-            direcionador.execute("UPDATE urls SET url = :caminho_xlsx WHERE oid = 1",
-                                 {"caminho_xlsx": self.caminho_xlsx.get()})
-            direcionador.execute("UPDATE urls SET url = :pasta_de_certidões WHERE oid = 2",
-                                 {"pasta_de_certidões": self.caminho_pasta_de_certidões.get()})
-            direcionador.execute("UPDATE urls SET url = :caminho_de_log WHERE oid = 3",
-                                 {"caminho_de_log": self.caminho_log.get()})
-            direcionador.execute("UPDATE urls SET url = :comprovantes_de_pagamento WHERE oid = 4",
-                {"comprovantes_de_pagamento": self.caminho_pasta_pagamento.get()})
-            direcionador.execute("UPDATE urls SET url = :certidões_para_pagamento WHERE oid = 5",
-                                 {"certidões_para_pagamento": self.caminho_certidões_para_pagamento.get()})
-            conexao.commit()
-            conexao.close()
+            with sqlite3.connect(f'{self.caminho_do_arquivo()}/caminhos.db') as conexao:
+                direcionador = conexao.cursor()
+                for item in itens_para_atualizacao:
+                    direcionador.execute(f'UPDATE urls SET url = :{item[0]} WHERE oid = {item[1]}', {item[0]: item[2]})
+                conexao.commit()
             self.janela_de_caminhos.destroy()
-            print('\nOs caminhos para pastas e arquivos utilizados pelo sistema foram atualizados.\n')
-            messagebox.showinfo('Fez porque quis!',"Caminhos para pastas e arquivos utilizados pelo sistema atualizados com sucesso!")
+            messagebox.showinfo('Fez porque quis!','Caminhos de pastas e arquivos utilizados pelo sistema atualizados.')
         else:
             self.janela_de_caminhos.destroy()
 
@@ -270,15 +254,13 @@ class Analisador(Certidao):
         mes = self.variavel2.get()
         ano = self.variavel3.get()
         if not os.path.exists(f'{urls[2][1]}/{ano}-{mes}-{dia}.txt') or (dia, mes, ano) == (' ', ' ', ' '):
-            messagebox.showerror('Me ajuda a te ajudar!',
-                                 'Não existe log para a data informada.')
+            messagebox.showerror('Me ajuda a te ajudar!', 'Não existe log para a data informada.')
         else:
             caminho = f'{urls[2][1]}/{ano}-{mes}-{dia}.txt'
             novo_caminho = caminho.replace('/', '\\')
             os.startfile(novo_caminho)
 
-
-    def cria_calendario(self):
+    def cria_dias(self):
         contador_dia = 1
         while contador_dia <= 31:
             if contador_dia < 10:
@@ -287,6 +269,8 @@ class Analisador(Certidao):
             else:
                 self.dias.append(str(contador_dia))
                 contador_dia += 1
+
+    def cria_meses(self):
         contador_mes = 1
         while contador_mes <= 12:
             if contador_mes < 10:
@@ -295,12 +279,20 @@ class Analisador(Certidao):
             else:
                 self.meses.append(str(contador_mes))
                 contador_mes += 1
+
+    def cria_anos(self):
         contador_anos = 2010
         while contador_anos <= 2040:
             self.anos.append(str(contador_anos))
             contador_anos += 1
-        return self.dias, self.meses, self.anos
 
+    def cria_calendario(self):
+        self.cria_dias()
+        self.cria_meses()
+        self.cria_anos()
+
+
+    #Continuar refatoramento a partir daqui.
     def checa_urls(self):
         urls = self.consulta_urls()
         if not os.path.exists(urls[0][1]):
@@ -321,7 +313,7 @@ class Analisador(Certidao):
                                  'selecione uma pasta onde os logs serão criados.')
         elif not os.path.exists(urls[4][1]):
             messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como destino de cetidões para pagamento foi apagada, removida ou não existe.'
+                                 'A pasta apontada como destino de certidões para pagamento foi apagada, removida ou não existe.'
                                  '\n\nClique em Configurações>>Caminhos>>Cetidões para pagamento e '
                                  'selecione uma pasta para direcionar as certidões do pagamento.')
         elif not os.path.exists(urls[3][1]):
