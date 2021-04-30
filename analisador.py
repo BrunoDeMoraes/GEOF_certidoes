@@ -21,31 +21,83 @@ import sqlite3
 
 
 class Analisador(Certidao):
-    texto_do_título = '    Indique a data limite pretendida para o próximo pagamento e em seguida escolha' \
-                      ' uma das seguintes opções:    '
+    checa_url_0 = (
+        'O arquivo xlsx selecionado como fonte foi apagado, removido o'
+        'u não existe.\n\nClique em Configurações>>Caminhos>>Fonte de '
+        'dados XLSX e selecione um arquivo xlsx que atenda aos critéri'
+        'os necessários para o processamento.'
+    )
 
-    texto_titulo_analisar = 'Utilize esta opção para identificar quais certidões devem ser atualizadas ou ' \
-                            'se há requisitos a cumprir para a devida execução da análise.'
+    checa_url_1 = (
+        'A pasta apontada como fonte para certidões foi apagada, remov'
+        'ida ou não existe.\n\nClique em Configurações>>Caminhos>>Past'
+        'a de certidões e selecione uma pasta que contenha as certidõe'
+        's que devem ser analisadas.'
+    )
 
-    texto_titulo_renomear = 'Após atualizar as certidões, selecione uma das opções para padronizar os nomes ' \
-                            'dos\narquivos e em seguida faça nova análise para certificar que está tudo OK.'
+    checa_url_2 = (
+        'A pasta apontada como fonte e destino para logs foi apagada, '
+        'removida ou não existe.\n\nClique em Configurações>>Caminhos>'
+        '>Pasta de logs e selecione uma pasta onde os logs serão criad'
+        'os.'
+    )
+
+    checa_url_3 = (
+        'A pasta apontada como fonte de comprovantes de pagamento foi '
+        'apagada, removida ou não existe.\n\nClique em Configurações>>'
+        'Caminhos>>Comprovantes de pagamento e selecione uma pasta que'
+        ' contenha os comprovantes de pagamento.'
+    )
+
+    checa_url_4 = (
+        'A pasta apontada como destino de certidões para pagamento foi'
+        ' apagada, removida ou não existe.\n\nClique em Configurações>'
+        '>Caminhos>>Certidões para pagamento e selecione uma pasta par'
+        'a direcionar as certidões do pagamento.'
+    )
 
     opções = [
-        'Selecione uma opção', 'Renomear arquivos',
+        'Selecione uma opção',
+        'Renomear arquivos',
         'Renomear todos os arquivos de uma pasta',
-        'Renomear todas as certidões da lista de pagamento']
+        'Renomear todas as certidões da lista de pagamento'
+    ]
 
-    texto_titulo_transfere_arquivos = 'Esta opção transfere as certidões que validam o pagamento para uma pasta ' \
-                                      'identificada pela data.\nEsse passo deve ser executado logo após a análise ' \
-                                      'definitiva antes do pagamento.'
+    texto_cria_estrutura = (
+        'Se deseja criar toda a estrutura de pastas de trabalho necess'
+        'árias para o\ncorreto funcionamento do programa na pasta que '
+        'contém o arquivo principal,\nclique em "Criar estrutura". Em '
+        'seguida, selecione manualmente cada caminho.'
+    )
 
-    texto_titulo_mescla_arquivos = 'Após o pagamento utilize esta opção para mesclar os comprovantes de pagamento ' \
-                                   'digitalizados com suas respectivas certidões.'
+    texto_analisar = (
+        'Utilize esta opção para identificar quais certidões devem ser'
+        ' atualizadas ou se há requisitos a cumprir para a devida exec'
+        'ução da análise.'
+    )
 
-    texto_cria_estrutura = 'Se deseja criar toda a estrutura de pastas de trabalho necessárias para o\ncorreto ' \
-                           'funcionamento do programa na pasta que contém o arquivo principal,\nclique em "Criar ' \
-                           'estrutura". Em seguida, selecione manualmente cada caminho.'
+    texto_mescla_arquivos = (
+        'Após o pagamento utilize esta opção para mesclar os comprovan'
+        'tes de pagamento digitalizados com suas respectivas certidões'
+        '.'
+    )
 
+    texto_principal = (
+        '    Indique a data limite pretendida para o próximo pagamento'
+        ' e em seguida escolha uma das seguintes opções:    '
+    )
+
+    texto_renomear = (
+        'Após atualizar as certidões, selecione uma das opções para pa'
+        'dronizar os nomes dos\narquivos e em seguida faça nova anális'
+        'e para certificar que está tudo OK.'
+    )
+
+    texto_transfere_arquivos = (
+        'Esta opção transfere as certidões que validam o pagamento par'
+        'a uma pasta identificada pela data.\nEsse passo deve ser exec'
+        'utado logo após a análise definitiva antes do pagamento.'
+    )
 
     def __init__(self, tela):
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
@@ -55,19 +107,27 @@ class Analisador(Certidao):
 
         self.menu_certidões = Menu(tela)
         self.menu_configurações = Menu(self.menu_certidões)
-        self.menu_certidões.add_cascade(label='Configurações', menu=self.menu_configurações)
+        self.menu_certidões.add_cascade(
+            label='Configurações', menu=self.menu_configurações)
         self.menu_configurações.add_separator()
-        self.menu_configurações.add_command(label='Caminhos', command=self.abrir_janela_caminhos)
+        self.menu_configurações.add_command(
+            label='Caminhos', command=self.abrir_janela_caminhos)
         self.menu_configurações.add_separator()
 
-        self.titulo = Label(self.frame_data, text=Analisador.texto_do_título, pady=0, padx=0, bg='green', fg='white',
-                            bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold'))
-        self.dia_etiqueta = Label(self.frame_data, text='Dia', padx=22, pady=0, bg='green', fg='white', bd=2,
-                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
-        self.mes_etiqueta = Label(self.frame_data, text='Mês', padx=22, pady=0, bg='green', fg='white', bd=2,
-                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
-        self.ano_etiqueta = Label(self.frame_data, text='Ano', padx=22, pady=0, bg='green', fg='white', bd=2,
-                                  relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.titulo = Label(
+            self.frame_data, text=Analisador.texto_principal,
+            pady=0, padx=0, bg='green', fg='white', bd=2,
+            relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+
+        self.dia_etiqueta = Label(
+            self.frame_data, text='Dia', padx=22, pady=0, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.mes_etiqueta = Label(
+            self.frame_data, text='Mês', padx=22, pady=0, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold'))
+        self.ano_etiqueta = Label(
+            self.frame_data, text='Ano', padx=22, pady=0, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold'))
 
         self.variavel = StringVar()
         self.variavel.set(" ")
@@ -80,66 +140,108 @@ class Analisador(Certidao):
         self.anos = [' ']
         self.cria_calendario()
 
-        self.botao_abrir_log = Button(self.frame_data, text='Abrir log', command=self.abrir_log, padx=0, pady=0,
-                                      bg='white', fg='green', font=('Helvetica', 9, 'bold'), bd=1)
+        self.botao_abrir_log = Button(
+            self.frame_data, text='Abrir log', command=self.abrir_log, padx=0,
+            pady=0, bg='white', fg='green', font=('Helvetica', 9, 'bold'),
+            bd=1)
 
-        self.validacao1 = OptionMenu(self.frame_data, self.variavel, *self.dias)
-        self.validacao2 = OptionMenu(self.frame_data, self.variavel2, *self.meses)
-        self.validacao3 = OptionMenu(self.frame_data, self.variavel3, *self.anos)
+        self.validacao1 = OptionMenu(
+            self.frame_data, self.variavel, *self.dias)
+        self.validacao2 = OptionMenu(
+            self.frame_data, self.variavel2, *self.meses)
+        self.validacao3 = OptionMenu(
+            self.frame_data, self.variavel3, *self.anos)
 
-        self.titulo_analisar = Label(self.frame_mestre, text=Analisador.texto_titulo_analisar, pady=0, padx=0,
-                                     bg='white', fg='black', font=('Helvetica', 9, 'bold'))
-        self.botao_analisar = Button(self.frame_mestre, text='Analisar\ncertidões', command=self.executa, padx=30,
-                                     pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
+        self.titulo_analisar = Label(
+            self.frame_mestre, text=Analisador.texto_analisar, pady=0, padx=0,
+            bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
-        self.titulo_renomear = Label(self.frame_mestre, text=Analisador.texto_titulo_renomear, pady=0,
-                                     padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+        self.botao_analisar = Button(
+            self.frame_mestre, text='Analisar\ncertidões',
+            command=self.executa, padx=30, pady=1, bg='green',
+            fg='white', font=('Helvetica', 9, 'bold'), bd=1)
+
+        self.titulo_renomear = Label(
+            self.frame_mestre, text=Analisador.texto_renomear, pady=0, padx=0,
+            bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+
         self.variavel_de_opções = StringVar()
         self.variavel_de_opções.set("Selecione uma opção")
-        self.validacao = OptionMenu(self.frame_mestre, self.variavel_de_opções, *Analisador.opções)
-        self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
-        self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
+        self.validacao = OptionMenu(
+            self.frame_mestre, self.variavel_de_opções, *Analisador.opções)
+
+        #self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
+        #self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
+
         self.botao_renomear_tudo = Button(
-            self.frame_mestre, text='Renomear\ncertidões', command=self.selecionador_de_opções,
-            padx=30,pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
-        )
+            self.frame_mestre, text='Renomear\ncertidões',
+            command=self.selecionador_de_opções, padx=30, pady=1,
+            bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.titulo_transfere_arquivos = Label(self.frame_mestre, text=Analisador.texto_titulo_transfere_arquivos,
-                                               pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
+        self.titulo_transfere_arquivos = Label(
+            self.frame_mestre, text=Analisador.texto_transfere_arquivos,
+            pady=0, padx=0, bg='white', fg='black',
+            font=('Helvetica', 9, 'bold'))
+
         self.botao_transfere_arquivos = Button(
-            self.frame_mestre, text='Transferir\ncertidões', command=self.transfere_certidoes,
-            padx=30, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
-        )
+            self.frame_mestre, text='Transferir\ncertidões',
+            command=self.transfere_certidoes, padx=30, pady=1,
+            bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.titulo_mescla_arquivos = Label(self.frame_mestre, text=Analisador.texto_titulo_mescla_arquivos,
-                                            pady=0, padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
-        self.botao_mescla_arquivos = Button(self.frame_mestre, text='Mesclar\narquivos', command=self.mescla_certidoes,
-                                            padx=30, pady=1, bg='green', fg='white', font=('Helvetica', 9, 'bold'),bd=1)
+        self.titulo_mescla_arquivos = Label(
+            self.frame_mestre, text=Analisador.texto_mescla_arquivos, pady=0,
+            padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold'))
 
+        self.botao_mescla_arquivos = Button(
+            self.frame_mestre, text='Mesclar\narquivos',
+            command=self.mescla_certidoes, padx=30, pady=1,
+            bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1)
 
-        self.roda_pe = Label(self.frame_mestre, text="SRSSU/DA/GEOF    ", pady=0, padx=0, bg='green',
-                             fg='white', font=('Helvetica', 8, 'italic'), anchor=E)
+        self.roda_pe = Label(
+            self.frame_mestre, text="SRSSU/DA/GEOF    ", pady=0, padx=0,
+            bg='green', fg='white', font=('Helvetica', 8, 'italic'), anchor=E)
 
-        self.frame_data.grid(row=0, column=1, columnspan=7, rowspan=1, pady=0, sticky=W+E)
-        self.titulo.grid(row=0, column=1, columnspan=5, rowspan=1, pady=0, sticky=W+E)
+        self.frame_data.grid(
+            row=0, column=1, columnspan=7, rowspan=1, pady=0, sticky=W+E)
+        self.titulo.grid(
+            row=0, column=1, columnspan=5, rowspan=1, pady=0, sticky=W+E)
         self.dia_etiqueta.grid(row=0, column=6, pady=0, ipadx=0, ipady=0)
         self.mes_etiqueta.grid(row=0, column=7, pady=0, ipadx=0, ipady=0)
         self.ano_etiqueta.grid(row=0, column=8, pady=0, ipadx=0, ipady=0)
+
         self.botao_abrir_log.grid(row=1, column=1, pady=0)
         self.validacao1.grid(row=1, column=6, pady=0)
         self.validacao2.grid(row=1, column=7, pady=0)
         self.validacao3.grid(row=1, column=8, pady=0)
+        self.titulo_analisar.grid(
+            row=1, column=1, columnspan=7, padx=0,
+            pady=0, ipadx=0, ipady=8, sticky=W+E)
 
-        self.titulo_analisar.grid(row=1, column=1,  columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W+E)
-        self.botao_analisar.grid(row=2, column=1, columnspan=7, padx=0, pady=10)
-        self.titulo_renomear.grid(row=3, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W+E)
+        self.botao_analisar.grid(
+            row=2, column=1, columnspan=7, padx=0, pady=10)
+
+        self.titulo_renomear.grid(
+            row=3, column=1, columnspan=7, padx=0,
+            pady=0, ipadx=0, ipady=8, sticky=W+E)
+
         self.validacao.grid(row=4, column=1, columnspan=7, padx=0, pady=10)
-        self.botao_renomear_tudo.grid(row=5, column=1, columnspan=7, padx=0, pady=10)
 
-        self.titulo_transfere_arquivos.grid(row=7, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W+E)
-        self.botao_transfere_arquivos.grid(row=8, column=1, columnspan=7, padx=0, pady=10)
-        self.titulo_mescla_arquivos.grid(row=9, column=1, columnspan=7, padx=0, pady=0, ipadx=0, ipady=8, sticky=W+E)
-        self.botao_mescla_arquivos.grid(row=10, column=1, columnspan=7, padx=0, pady=10)
+        self.botao_renomear_tudo.grid(
+            row=5, column=1, columnspan=7, padx=0, pady=10)
+
+        self.titulo_transfere_arquivos.grid(
+            row=7, column=1, columnspan=7, padx=0,
+            pady=0, ipadx=0, ipady=8, sticky=W+E)
+
+        self.botao_transfere_arquivos.grid(
+            row=8, column=1, columnspan=7, padx=0, pady=10)
+
+        self.titulo_mescla_arquivos.grid(
+            row=9, column=1, columnspan=7, padx=0,
+            pady=0, ipadx=0, ipady=8, sticky=W+E)
+
+        self.botao_mescla_arquivos.grid(
+            row=10, column=1, columnspan=7, padx=0, pady=10)
 
         self.roda_pe.grid(row=11, column=1, columnspan=10, pady=5, sticky=W+E)
 
@@ -291,36 +393,20 @@ class Analisador(Certidao):
         self.cria_meses()
         self.cria_anos()
 
-
     #Continuar refatoramento a partir daqui.
     def checa_urls(self):
         urls = self.consulta_urls()
         if not os.path.exists(urls[0][1]):
-            messagebox.showerror('Sumiu!!!',
-                                 'O arquivo xlsx selecionado como fonte foi apagado, removido ou não existe.'
-                                 '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
-                                 'selecione um arquivo xlsx que atenda aos critérios necessários '
-                                 'para o processamento.')
+            messagebox.showerror('Sumiu!!!', Analisador.checa_url_0)
         elif not os.path.exists(urls[1][1]):
-            messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como fonte para certidões foi apagada, removida ou não existe.'
-                                 '\n\nClique em Configurações>>Caminhos>>Pasta de certidões e '
-                                 'selecione uma pasta que contenha as certidões que devem ser analisadas.')
+            messagebox.showerror('Sumiu!!!', Analisador.checa_url_1)
         elif not os.path.exists(urls[2][1]):
-            messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como fonte e destino para logs foi apagada, removida ou não existe.'
-                                 '\n\nClique em Configurações>>Caminhos>>Pasta de logs e '
-                                 'selecione uma pasta onde os logs serão criados.')
-        elif not os.path.exists(urls[4][1]):
-            messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como destino de certidões para pagamento foi apagada, removida ou não existe.'
-                                 '\n\nClique em Configurações>>Caminhos>>Cetidões para pagamento e '
-                                 'selecione uma pasta para direcionar as certidões do pagamento.')
+            messagebox.showerror('Sumiu!!!', Analisador.checa_url_2)
         elif not os.path.exists(urls[3][1]):
-            messagebox.showerror('Sumiu!!!',
-                                 'A pasta apontada como fonte de comprovantes de pagamento foi apagada, removida ou não existe.'
-                                 '\n\nClique em Configurações>>Caminhos>>Comprovantes de pagamento e '
-                                 'selecione uma pasta que contenha os comprovantes de pagamento.')
+            messagebox.showerror('Sumiu!!!', Analisador.checa_url_3)
+        elif not os.path.exists(urls[4][1]):
+            messagebox.showerror('Sumiu!!!', Analisador.checa_url_4)
+
 
     def executa(self):
         tempo_inicial = time.time()
