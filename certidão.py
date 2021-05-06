@@ -74,9 +74,9 @@ class Certidao(Log, Conexao):
                                  'A data informada não foi encontrada na lista de datas para pagamento ou não existe!')
             raise Exception('A data informada não foi encontrada na lista de datas para pagamento ou não existe!!')
         elif len(self.listareferencia) > 1:
-            self.mensagem_log(f'''Data informada em multiplicidade
+            self.mensagem_de_log_completa(f'''Data informada em multiplicidade
             A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\\GEOF\\CERTIDÕES\\Análise\\atual.xlsx.
-                            \nApague as células informadas com valores duplicados e execute o programa novamente.''')
+                            \nApague as células informadas com valores duplicados e execute o programa novamente.''', self.caminho_de_log)
             messagebox.showerror('Me ajuda a te ajudar!',
                                  f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\GEOF\CERTIDÕES\Análise\\atual.xlsx.'
                                  f'\nApague as células informadas com valores duplicados e execute o programa novamente.')
@@ -182,8 +182,8 @@ Se deseja fazer nova transferência apague o diretório:
                     if pdf_file.endswith(".pdf"):
                         shutil.copy(f'{pasta_da_empresa}/{pdf_file}',
                                     f'{self.certidões_para_pagamento}/{emp}/{pdf_file}')
-            self.mensagem_log_sem_horario(
-                f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.')
+            self.mensagem_de_log_simples(
+                f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.', self.caminho_de_log)
             messagebox.showinfo('Transferiu, miserávi!',
                                 'As certidões que validam o pagamento foram transferidas com sucesso!')
 
@@ -233,7 +233,7 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
         #objFgts = Fgts(self.dia, self.mes, self.ano)
         #objGdf = Gdf(self.dia, self.mes, self.ano)
         lista_objetos = lista_de_objetos
-        self.mensagem_de_log_completa('\nInicio da conferência de datas de emissão e vencimento:',self.caminho_de_log)
+        self.mensagem_de_log_completa('\nInicio da conferência de datas de emissão e vencimento:', self.caminho_de_log)
         print(f'Total executado: {self.percentual}%')
 
         for emp in self.empresas:
@@ -346,7 +346,10 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
                     self.percentual += (25 / len(self.empresas))
                     print(f'Total de imagens criadas: {self.percentual}%')
-        self.mensagem_log('\nImagens criadas com sucesso!')
+        self.mensagem_de_log_completa(
+            '\nImagens criadas com sucesso!',
+            self.caminho_de_log
+        )
         self.percentual = 0
 
     def gera_nome(self):

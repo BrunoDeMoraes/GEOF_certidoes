@@ -1,104 +1,37 @@
-from conexao import Conexao
-from certidão import Certidao
-from união import Uniao
-from tst import Tst
-from fgts import Fgts
-from gdf import Gdf
-
-from tkinter import *
-from tkinter import filedialog
-from pdf2image import convert_from_path
-from PIL import Image
 import os
 import pytesseract
-import re
-import time
-import datetime
 import shutil
-import PyPDF2
-from tkinter import messagebox
 import sqlite3
+import time
+from pdf2image import convert_from_path
+from PIL import Image
+from tkinter import *
+from tkinter import filedialog
+from tkinter import messagebox
+
+from certidão import Certidao
+from constantes import ANALISADOS
+from constantes import ATUALIZAR_CAMINHOS
+from constantes import CAMINHOS_ATUALIZADOS
+from constantes import CHECA_URL_0, CHECA_URL_1, CHECA_URL_2
+from constantes import CHECA_URL_3, CHECA_URL_4
+from constantes import CONFERENCIA
+from constantes import INICIO_DA_EXECUCAO
+from constantes import LINHA_FINAL
+from constantes import LOG_INEXISTENTE
+from constantes import OPCOES_DE_RENOMEACAO
+from constantes import PENDENCIAS
+from constantes import RENOMEACAO_EXECUTADA
+from constantes import TEXTO_ANALISAR, TEXTO_CRIA_ESTRUTURA
+from constantes import TEXTO_MESCLA_ARQUIVOS, TEXTO_PRINCIPAL
+from constantes import TEXTO_RENOMEAR, TEXTO_TRANSFERE_ARQUIVOS
+from fgts import Fgts
+from gdf import Gdf
+from tst import Tst
+from união import Uniao
 
 
 class Analisador(Certidao):
-    checa_url_0 = (
-        'O arquivo xlsx selecionado como fonte foi apagado, removido o'
-        'u não existe.\n\nClique em Configurações>>Caminhos>>Fonte de '
-        'dados XLSX e selecione um arquivo xlsx que atenda aos critéri'
-        'os necessários para o processamento.'
-    )
-
-    checa_url_1 = (
-        'A pasta apontada como fonte para certidões foi apagada, remov'
-        'ida ou não existe.\n\nClique em Configurações>>Caminhos>>Past'
-        'a de certidões e selecione uma pasta que contenha as certidõe'
-        's que devem ser analisadas.'
-    )
-
-    checa_url_2 = (
-        'A pasta apontada como fonte e destino para logs foi apagada, '
-        'removida ou não existe.\n\nClique em Configurações>>Caminhos>'
-        '>Pasta de logs e selecione uma pasta onde os logs serão criad'
-        'os.'
-    )
-
-    checa_url_3 = (
-        'A pasta apontada como fonte de comprovantes de pagamento foi '
-        'apagada, removida ou não existe.\n\nClique em Configurações>>'
-        'Caminhos>>Comprovantes de pagamento e selecione uma pasta que'
-        ' contenha os comprovantes de pagamento.'
-    )
-
-    checa_url_4 = (
-        'A pasta apontada como destino de certidões para pagamento foi'
-        ' apagada, removida ou não existe.\n\nClique em Configurações>'
-        '>Caminhos>>Certidões para pagamento e selecione uma pasta par'
-        'a direcionar as certidões do pagamento.'
-    )
-
-    opções = [
-        'Selecione uma opção',
-        'Renomear arquivos',
-        'Renomear todos os arquivos de uma pasta',
-        'Renomear todas as certidões da lista de pagamento'
-    ]
-
-    texto_cria_estrutura = (
-        'Se deseja criar toda a estrutura de pastas de trabalho necess'
-        'árias para o\ncorreto funcionamento do programa na pasta que '
-        'contém o arquivo principal,\nclique em "Criar estrutura". Em '
-        'seguida, selecione manualmente cada caminho.'
-    )
-
-    texto_analisar = (
-        'Utilize esta opção para identificar quais certidões devem ser'
-        ' atualizadas ou se há requisitos a cumprir para a devida exec'
-        'ução da análise.'
-    )
-
-    texto_mescla_arquivos = (
-        'Após o pagamento utilize esta opção para mesclar os comprovan'
-        'tes de pagamento digitalizados com suas respectivas certidões'
-        '.'
-    )
-
-    texto_principal = (
-        '    Indique a data limite pretendida para o próximo pagamento'
-        ' e em seguida escolha uma das seguintes opções:    '
-    )
-
-    texto_renomear = (
-        'Após atualizar as certidões, selecione uma das opções para pa'
-        'dronizar os nomes dos\narquivos e em seguida faça nova anális'
-        'e para certificar que está tudo OK.'
-    )
-
-    texto_transfere_arquivos = (
-        'Esta opção transfere as certidões que validam o pagamento par'
-        'a uma pasta identificada pela data.\nEsse passo deve ser exec'
-        'utado logo após a análise definitiva antes do pagamento.'
-    )
-
     def __init__(self, tela):
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
@@ -115,9 +48,8 @@ class Analisador(Certidao):
         self.menu_configurações.add_separator()
 
         self.titulo = Label(
-            self.frame_data, text=Analisador.texto_principal,
-            pady=0, padx=0, bg='green', fg='white', bd=2,
-            relief=SUNKEN, font=('Helvetica', 10, 'bold')
+            self.frame_data, text=TEXTO_PRINCIPAL, pady=0, padx=0, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold')
         )
 
         self.dia_etiqueta = Label(
@@ -158,7 +90,7 @@ class Analisador(Certidao):
             self.frame_data, self.variavel3, *self.anos)
 
         self.titulo_analisar = Label(
-            self.frame_mestre, text=Analisador.texto_analisar, pady=0, padx=0,
+            self.frame_mestre, text=TEXTO_ANALISAR, pady=0, padx=0,
             bg='white', fg='black', font=('Helvetica', 9, 'bold')
         )
 
@@ -169,18 +101,15 @@ class Analisador(Certidao):
         )
 
         self.titulo_renomear = Label(
-            self.frame_mestre, text=Analisador.texto_renomear, pady=0, padx=0,
+            self.frame_mestre, text=TEXTO_RENOMEAR, pady=0, padx=0,
             bg='white', fg='black', font=('Helvetica', 9, 'bold')
         )
 
         self.variavel_de_opções = StringVar()
         self.variavel_de_opções.set("Selecione uma opção")
         self.validacao = OptionMenu(
-            self.frame_mestre, self.variavel_de_opções, *Analisador.opções
+            self.frame_mestre, self.variavel_de_opções, *OPCOES_DE_RENOMEACAO
         )
-
-        #self.arquivo_selecionado = 'Selecione os arquivos que deseja renomear'
-        #self.pasta_selecionada = 'Selecione a pasta que deseja renomear'
 
         self.botao_renomear_tudo = Button(
             self.frame_mestre, text='Renomear\ncertidões',
@@ -189,7 +118,7 @@ class Analisador(Certidao):
         )
 
         self.titulo_transfere_arquivos = Label(
-            self.frame_mestre, text=Analisador.texto_transfere_arquivos,
+            self.frame_mestre, text=TEXTO_TRANSFERE_ARQUIVOS,
             pady=0, padx=0, bg='white', fg='black',
             font=('Helvetica', 9, 'bold')
         )
@@ -201,8 +130,8 @@ class Analisador(Certidao):
         )
 
         self.titulo_mescla_arquivos = Label(
-            self.frame_mestre, text=Analisador.texto_mescla_arquivos, pady=0,
-            padx=0, bg='white', fg='black', font=('Helvetica', 9, 'bold')
+            self.frame_mestre, text=TEXTO_MESCLA_ARQUIVOS, pady=0, padx=0,
+            bg='white', fg='black', font=('Helvetica', 9, 'bold')
         )
 
         self.botao_mescla_arquivos = Button(
@@ -270,11 +199,9 @@ class Analisador(Certidao):
 
         self.roda_pe.grid(row=11, column=1, columnspan=10, pady=5, sticky=W+E)
 
-
     def abrir_janela_caminhos(self):
         self.janela_de_caminhos = Toplevel()
         self.urls = self.consulta_urls()
-        print(f'Essa é a consulta de urls {self.urls}')
         self.janela_de_caminhos.title('Lista de caminhos')
         self.janela_de_caminhos.resizable(False, False)
         self.frame_de_caminhos = LabelFrame(
@@ -283,7 +210,7 @@ class Analisador(Certidao):
         self.frame_de_caminhos.pack(padx=1, pady=1)
 
         self.criar_estrutura = Label(
-            self.frame_de_caminhos, text=Analisador.texto_cria_estrutura,
+            self.frame_de_caminhos, text=TEXTO_CRIA_ESTRUTURA,
             bg='white', fg='green', font=('Helvetica', 10, 'bold')
         )
 
@@ -405,9 +332,7 @@ class Analisador(Certidao):
         if xlsx == True:
             caminho = filedialog.askopenfilename(
                 initialdir=self.caminho_do_arquivo(),
-                filetypes=(
-                    ('Arquivos', '*.xlsx'), ("Todos os arquivos", '*.*')
-                )
+                filetypes=(('Arquivos', '*.xlsx'), ("Tudo", '*.*'))
             )
         else:
             caminho = filedialog.askdirectory(
@@ -418,8 +343,7 @@ class Analisador(Certidao):
 
     def atualizar_caminhos(self):
         resposta = messagebox.askyesno(
-            'Vc sabe o que está fazendo?',
-            'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
+            ATUALIZAR_CAMINHOS[0], ATUALIZAR_CAMINHOS[1]
         )
 
         itens_para_atualizacao = [
@@ -457,9 +381,8 @@ class Analisador(Certidao):
                 conexao.commit()
             self.janela_de_caminhos.destroy()
             messagebox.showinfo(
-                'Fez porque quis!',
-                ('Caminhos de pastas e arquivos utilizados pelo sistema '
-                 'atualizados.')
+                CAMINHOS_ATUALIZADOS[0],
+                (CAMINHOS_ATUALIZADOS[1])
             )
         else:
             self.janela_de_caminhos.destroy()
@@ -471,9 +394,7 @@ class Analisador(Certidao):
         ano = self.variavel3.get()
         if not os.path.exists(f'{urls[2][1]}/{ano}-{mes}-{dia}.txt') \
                 or (dia, mes, ano) == (' ', ' ', ' '):
-            messagebox.showerror(
-                'Me ajuda a te ajudar!',
-                'Não existe log para a data informada.')
+            messagebox.showerror(LOG_INEXISTENTE[0], LOG_INEXISTENTE[1])
         else:
             caminho = f'{urls[2][1]}/{ano}-{mes}-{dia}.txt'
             novo_caminho = caminho.replace('/', '\\')
@@ -514,15 +435,15 @@ class Analisador(Certidao):
     def checa_urls(self):
         urls = self.consulta_urls()
         if not os.path.exists(urls[0][1]):
-            messagebox.showerror('Sumiu!!!', Analisador.checa_url_0)
+            messagebox.showerror('Sumiu!!!', CHECA_URL_0)
         elif not os.path.exists(urls[1][1]):
-            messagebox.showerror('Sumiu!!!', Analisador.checa_url_1)
+            messagebox.showerror('Sumiu!!!', CHECA_URL_1)
         elif not os.path.exists(urls[2][1]):
-            messagebox.showerror('Sumiu!!!', Analisador.checa_url_2)
+            messagebox.showerror('Sumiu!!!', CHECA_URL_2)
         elif not os.path.exists(urls[3][1]):
-            messagebox.showerror('Sumiu!!!', Analisador.checa_url_3)
+            messagebox.showerror('Sumiu!!!', CHECA_URL_3)
         elif not os.path.exists(urls[4][1]):
-            messagebox.showerror('Sumiu!!!', Analisador.checa_url_4)
+            messagebox.showerror('Sumiu!!!', CHECA_URL_4)
 
 
     def executa(self):
@@ -545,24 +466,16 @@ class Analisador(Certidao):
             objGdf = Gdf(dia, mes, ano)
             lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
 
-
             obj1.mensagem_de_log_completa(
-                ('\n========================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 '\n\nInício da execução'),
-                obj1.caminho_de_log)
+                INICIO_DA_EXECUCAO, obj1.caminho_de_log
+            )
 
             obj1.analisa_referencia()
             obj1.dados_completos_dos_fornecedores()
             obj1.listar_cnpjs()
             obj1.listar_cnpjs_exceções()
 
-            obj1.mensagem_de_log_simples(
-                '\nFornecedores analisados:',
-                obj1.caminho_de_log
-            )
+            obj1.mensagem_de_log_simples(ANALISADOS, obj1.caminho_de_log)
 
             for emp in obj1.empresas:
                 obj1.mensagem_de_log_simples(f'{emp}', obj1.caminho_de_log)
@@ -573,16 +486,11 @@ class Analisador(Certidao):
             obj1.pdf_para_jpg()
             obj1.analisa_certidoes(lista_de_objetos)
 
-            obj1.mensagem_de_log_simples(
-                '\nRESULTADO DA CONFERÊNCIA:', obj1.caminho_de_log
-            )
+            obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
 
             obj1.pega_cnpj()
 
-            obj1.mensagem_de_log_simples(
-                '\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n',
-                obj1.caminho_de_log
-            )
+            obj1.mensagem_de_log_simples(PENDENCIAS, obj1.caminho_de_log)
 
             for emp in obj1.empresas_a_atualizar:
                 obj1.mensagem_de_log_simples(
@@ -603,32 +511,22 @@ class Analisador(Certidao):
             )
 
             obj1.mensagem_de_log_simples(
-                ('\n\n======================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 '\n'), obj1.caminho_de_log)
+                LINHA_FINAL, obj1.caminho_de_log)
 
-            messagebox.showinfo(
-                'Analisou, miserávi!',
-                'Processo de análise de certidões executado com sucesso!'
-            )
+            messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
 
     def selecionador_de_opções(self):
-        arquivos = 'Renomear arquivos'
-        pasta = 'Renomear todos os arquivos de uma pasta'
-        todas_certidões = 'Renomear todas as certidões da lista de pagamento'
-        selecione = 'Selecione uma opção'
         print(self.variavel_de_opções.get())
-        if self.variavel_de_opções.get() == arquivos:
+        if self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[1]:
             self.pdf_para_jpg_para_renomear_arquivo()
-        elif self.variavel_de_opções.get() == pasta:
+        elif self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[2]:
             self.pdf_para_jpg_renomear_conteudo_da_pasta()
-        elif self.variavel_de_opções.get() == todas_certidões:
+        elif self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[3]:
             self.renomeia()
-        elif self.variavel_de_opções.get() == selecione:
+        elif self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[0]:
             messagebox.showwarning(
-                'Tem que escolher, fi!', 'Nenhuma opção selecionada!'
+                OPCOES_DE_RENOMEACAO[4],
+                OPCOES_DE_RENOMEACAO[5]
             )
 
     def renomeia(self):
@@ -645,9 +543,6 @@ class Analisador(Certidao):
             self.checa_urls()
         else:
             obj1 = Certidao(dia, mes, ano)
-            obj1.mensagem_de_log_completa(
-                '\nProcesso de renomeação de certidões iniciado:\n'
-            )
             obj1.analisa_referencia()
             obj1.pega_fornecedores()
             obj1.apaga_imagem()
@@ -656,9 +551,8 @@ class Analisador(Certidao):
             obj1.apaga_imagem()
 
             messagebox.showinfo(
-                'Renomeou, miserávi!',
-                ('Todas as certidões da listagem de pagamento foram renomeada'
-                 's com sucesso!')
+                RENOMEACAO_EXECUTADA[0],
+                RENOMEACAO_EXECUTADA[1]
             )
 
     def transfere_certidoes(self):
@@ -697,24 +591,11 @@ class Analisador(Certidao):
             obj1.pega_fornecedores()
             obj1.merge()
 
-    # def caminho_de_arquivo(self):
-    #     self.arquivo_selecionado = filedialog.askopenfilenames(initialdir=f'{self.caminho_do_arquivo()}/Certidões',
-    #                                                            filetypes=(('Arquivos pdf','*.pdf'),("Todos os arquivos", '*.*')))
-    #     numero_de_arquivos = 'Nenhum arquivo selecionado'
-    #     if len(self.arquivo_selecionado) > 1:
-    #         numero_de_arquivos = 'Multiplos arquivos selecionados'
-    #     elif len(self.arquivo_selecionado) == 1:
-    #         numero_de_arquivos = os.path.basename(self.arquivo_selecionado[0])
-    #     self.caminho_do_arquivo = Label(self.frame_renomear, text=numero_de_arquivos, pady=0,
-    #                                     padx=50, bg='white', fg='gray', font=('Helvetica', 9, 'bold'))
-    #     self.caminho_do_arquivo.grid(row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W+E)
-
+    #continuar limpeza de constantes a partir daqui
     def pdf_para_jpg_para_renomear_arquivo(self):
         self.arquivo_selecionado = filedialog.askopenfilenames(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões',
-            filetypes=(
-                ('Arquivos pdf', '*.pdf'), ("Todos os arquivos", '*.*')
-            )
+            filetypes=(('PDF', '*.pdf'), ("Tudo", '*.*'))
         )
 
         if (
