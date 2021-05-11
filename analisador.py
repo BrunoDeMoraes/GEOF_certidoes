@@ -11,11 +11,17 @@ from tkinter import messagebox
 
 from certidão import Certidao
 from constantes import ANALISADOS
+from constantes import ARQUIVO_INEXISTENTE
 from constantes import ATUALIZAR_CAMINHOS
+from constantes import ARQUIVOS_NAO_SELECIONADOS
 from constantes import CAMINHOS_ATUALIZADOS
 from constantes import CHECA_URL_0, CHECA_URL_1, CHECA_URL_2
 from constantes import CHECA_URL_3, CHECA_URL_4
 from constantes import CONFERENCIA
+from constantes import CRIANDO_IMAGENS
+from constantes import IDENTIFICADOR_DE_CERTIDAO
+from constantes import IDENTIFICADOR_DE_VALIDADE, IDENTIFICADOR_DE_VALIDADE_2
+from constantes import IDENTIFICADOR_TRADUZIDO
 from constantes import INICIO_DA_EXECUCAO
 from constantes import LINHA_FINAL
 from constantes import LOG_INEXISTENTE
@@ -593,49 +599,32 @@ class Analisador(Certidao):
 
     #continuar limpeza de constantes a partir daqui
     def pdf_para_jpg_para_renomear_arquivo(self):
-        self.arquivo_selecionado = filedialog.askopenfilenames(
+        arquivo_selecionado = filedialog.askopenfilenames(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões',
             filetypes=(('PDF', '*.pdf'), ("Tudo", '*.*'))
         )
 
-        if (
-                self.arquivo_selecionado == 'Selecione os arquivos que deseja renomear'
-                or list(self.arquivo_selecionado) == []
-        ):
+        if list(arquivo_selecionado) == []:
             messagebox.showerror(
-                'Se não selecionar os arquivos, não vai rolar!',
-                'Selecione os arquivos que deseja renomear'
-
+                ARQUIVOS_NAO_SELECIONADOS[0],
+                ARQUIVOS_NAO_SELECIONADOS[1]
             )
-            print('Selecione os arquivos que deseja renomear')
+            print(ARQUIVOS_NAO_SELECIONADOS[1])
 
-        elif not os.path.exists(self.arquivo_selecionado[0]):
-            print('O arquivo selecionado não existe.')
+        elif not os.path.exists(arquivo_selecionado[0]):
+            print(ARQUIVO_INEXISTENTE[0])
 
             messagebox.showerror(
-                'Esse arquivo é invenção da sua cabeça, parça!',
-                'O arquivo selecionado não existe ou já foi renomeado!'
-            )
-
-            self.caminho_do_arquivo = Label(
-                self.frame_renomear, text='O arquivo selecionado não existe.',
-                pady=0, padx=50, bg='white', fg='gray',
-                font=('Helvetica', 9, 'bold')
-            )
-
-            self.caminho_do_arquivo.grid(
-                row=0, column=2, padx=5, pady=0, ipadx=0, ipady=8, sticky=W+E
+                ARQUIVO_INEXISTENTE[1],
+                ARQUIVO_INEXISTENTE[2]
             )
 
         else:
-            print(
-                '============================================================'
-                '============================================================'
-                '============================================================'
-                '\nCriando imagem:\n')
+            print(CRIANDO_IMAGENS[0])
 
-            certidão_pdf = list(self.arquivo_selecionado)
+            certidão_pdf = list(arquivo_selecionado)
 
+            #lixo de debbug
             print(f'Arquivo que está sendo renomeado: {certidão_pdf}\n')
 
             for arquivo_a_renomear in certidão_pdf:
@@ -648,78 +637,32 @@ class Analisador(Certidao):
 
                 imagem_da_certidao = f'{arquivo_a_renomear[:-4]}.jpg'
                 pages[0].save(imagem_da_certidao, "JPEG")
-                print('\nImagem criada com sucesso!\n')
+                print(CRIANDO_IMAGENS[1])
 
                 certidao_jpg = pytesseract.image_to_string(
                     Image.open(imagem_da_certidao), lang='por'
                 )
 
-                padroes = [
-                    'FGTS - CRF',
-                    'Brasília,',
-                    'JUSTIÇA DO TRABALHO',
-                    'MINISTÉRIO DA FAZENDA',
-                    'GOVERNO DO DISTRITO FEDERAL'
-                ]
-
-                valores = {
-                    'FGTS - CRF': 'FGTS',
-                    'Brasília,': 'GDF',
-                    'JUSTIÇA DO TRABALHO': 'TST',
-                    'MINISTÉRIO DA FAZENDA': 'UNIÃO',
-                    'GOVERNO DO DISTRITO FEDERAL':'GDF'
-                }
-
-                datas = {
-                    'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
-
-                    'Brasília,': (
-                        'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?('
-                        'Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(Setembro)?(O'
-                        'utubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'),
-
-                    'JUSTIÇA DO TRABALHO': (
-                        'Validade: (\d\d)/(\d\d)/(\d\d\d\d)'),
-
-                    'MINISTÉRIO DA FAZENDA': (
-                        'Válida até (\d\d)/(\d\d)/(\d\d\d\d)'),
-
-                    'GOVERNO DO DISTRITO FEDERAL': (
-                        'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?('
-                        'Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(Setembro)?(O'
-                        'utubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?'
-                        '(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?(set'
-                        'embro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d'
-                        ')')
-                        }
-
-                datas2 = {
-                        'GOVERNO DO DISTRITO FEDERAL': (
-                            'Válida até (\d) de (janeiro)?(fevereiro)?(março)'
-                            '?(abril)?(maio)?(junho)?(julho)?(agosto)?(setemb'
-                            'ro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(F'
-                            'evereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)'
-                            '?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezem'
-                            'bro)? de (\d\d\d\d)')}
-
+                #lixo de debbug
                 print('Renomeando certidão')
-                for frase in padroes:
+
+                for frase in IDENTIFICADOR_DE_CERTIDAO:
                     if frase in certidao_jpg:
                         if frase == 'GOVERNO DO DISTRITO FEDERAL':
                             try:
-                                data = re.compile(datas2[frase])
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
                                 procura = data.search(certidao_jpg)
                                 datanome = procura.group()
                                 separa = datanome.split('/')
                                 junta = '-'.join(separa)
                             except AttributeError:
-                                data = re.compile(datas[frase])
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                                 procura = data.search(certidao_jpg)
                                 datanome = procura.group()
                                 separa = datanome.split('/')
                                 junta = '-'.join(separa)
                         else:
-                            data = re.compile(datas[frase])
+                            data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                             procura = data.search(certidao_jpg)
                             datanome = procura.group()
                             separa = datanome.split('/')
@@ -730,7 +673,7 @@ class Analisador(Certidao):
                             junta = volta
                         shutil.move(
                             f'{imagem_da_certidao[0:-4]}.pdf',
-                            f'{valores[frase]} - {junta}.pdf'
+                            f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
                         )
                         os.unlink(imagem_da_certidao)
             print(
@@ -862,73 +805,23 @@ class Analisador(Certidao):
                         Image.open(f'{origem}/{imagem}'), lang='por'
                     )
 
-                    padroes = [
-                        'FGTS - CRF',
-                        'Brasília,',
-                        'JUSTIÇA DO TRABALHO',
-                        'MINISTÉRIO DA FAZENDA',
-                        'GOVERNO DO DISTRITO FEDERAL'
-                    ]
-
-                    valores = {
-                        'FGTS - CRF': 'FGTS',
-                        'Brasília,': 'GDF',
-                        'JUSTIÇA DO TRABALHO': 'TST',
-                        'MINISTÉRIO DA FAZENDA': 'UNIÃO',
-                        'GOVERNO DO DISTRITO FEDERAL': 'GDF'
-                    }
-
-                    datas = {
-                        'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
-                        'Brasília,': (
-                            'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Març'
-                            'o)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(Sete'
-                            'mbro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d'
-                            '\d\d)'),
-                        'JUSTIÇA DO TRABALHO': (
-                            'Validade: (\d\d)/(\d\d)/(\d\d\d\d)'
-                        ),
-                        'MINISTÉRIO DA FAZENDA': (
-                            'Válida até (\d\d)/(\d\d)/(\d\d\d\d)'
-                        ),
-                        'GOVERNO DO DISTRITO FEDERAL': (
-                            'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Març'
-                            'o)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(Sete'
-                            'mbro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?'
-                            '(fevereiro)?(março)?(abril)?(maio)?(junho)?(julh'
-                            'o)?(agosto)?(setembro)?(outubro)?(novembro)?(dez'
-                            'embro)? de (\d\d\d\d)'
-                        )
-                    }
-
-                    datas2 = {
-                            'GOVERNO DO DISTRITO FEDERAL': (
-                                'Válida até (\d) de (janeiro)?(fevereiro)?(ma'
-                                'rço)?(abril)?(maio)?(junho)?(julho)?(agosto)'
-                                '?(setembro)?(outubro)?(novembro)?(dezembro)?'
-                                '(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)'
-                                '?(Junho)?(Julho)?(Agosto)?(Setembro)?(Outubr'
-                                'o)?(Novembro)?(Dezembro)? de (\d\d\d\d)'
-                            )
-                    }
-
-                    for frase in padroes:
+                    for frase in IDENTIFICADOR_DE_CERTIDAO:
                         if frase in certidao:
                             if frase == 'GOVERNO DO DISTRITO FEDERAL':
                                 try:
-                                    data = re.compile(datas2[frase])
+                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                                 except AttributeError:
-                                    data = re.compile(datas[frase])
+                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                             else:
-                                data = re.compile(datas[frase])
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                                 procura = data.search(certidao)
                                 datanome = procura.group()
                                 separa = datanome.split('/')
@@ -939,7 +832,7 @@ class Analisador(Certidao):
                                 junta = volta
                             shutil.move(
                                 f'{origem}/{imagem[0:-4]}.pdf',
-                                f'{valores[frase]} - {junta}.pdf'
+                                f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
                             )
                             print(imagem.split()[0])
             self.apaga_imagens_da_pasta()

@@ -95,6 +95,18 @@ ANALISE_EXECUTADA = [
     'Processo de análise de certidões executado com sucesso!'
 ]
 
+
+ARQUIVO_INEXISTENTE = [
+    'O arquivo selecionado não existe.',
+    'Esse arquivo é invenção da sua cabeça, parça!',
+    'O arquivo selecionado não existe ou já foi renomeado!'
+]
+
+ARQUIVOS_NAO_SELECIONADOS = [
+    'Se não selecionar os arquivos, não vai rolar!',
+    'Selecione os arquivos que deseja renomear'
+]
+
 ATUALIZAR_CAMINHOS = [
 'Vc sabe o que está fazendo?',
 'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
@@ -103,6 +115,23 @@ ATUALIZAR_CAMINHOS = [
 CAMINHOS_ATUALIZADOS = [
 'Fez porque quis!',
 'Caminhos de pastas e arquivos utilizados pelo sistema atualizados.'
+]
+
+CRIANDO_IMAGENS = [
+    '========================================================================'
+    '========================================================================'
+    '========================================================================'
+    '========================================================================'
+    '\nCriando imagem:\n',
+    '\nImagem criada com sucesso!\n'
+]
+
+IDENTIFICADOR_DE_CERTIDAO = [
+    'FGTS - CRF',
+    'Brasília,',
+    'JUSTIÇA DO TRABALHO',
+    'MINISTÉRIO DA FAZENDA',
+    'GOVERNO DO DISTRITO FEDERAL'
 ]
 
 LOG_INEXISTENTE = [
@@ -123,3 +152,40 @@ RENOMEACAO_EXECUTADA = [
     ('Todas as certidões da listagem de pagamento foram renomeadas com sucess'
      'o!')
 ]
+
+#dicionários de strings
+
+IDENTIFICADOR_TRADUZIDO = {
+    'FGTS - CRF': 'FGTS',
+    'Brasília,': 'GDF',
+    'JUSTIÇA DO TRABALHO': 'TST',
+    'MINISTÉRIO DA FAZENDA': 'UNIÃO',
+    'GOVERNO DO DISTRITO FEDERAL':'GDF'
+}
+
+IDENTIFICADOR_DE_VALIDADE = {
+    'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
+
+    'Brasília,': (
+        'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(J'
+        'unho)?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? d'
+        'e (\d\d\d\d)'),
+
+    'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
+
+    'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
+
+    'GOVERNO DO DISTRITO FEDERAL': (
+        'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(J'
+        'unho)?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(j'
+        'aneiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
+        '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
+}
+
+IDENTIFICADOR_DE_VALIDADE_2 = {
+    'GOVERNO DO DISTRITO FEDERAL': (
+        'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(jun'
+        'ho)?(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Jan'
+        'eiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(S'
+        'etembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+}
