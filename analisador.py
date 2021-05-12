@@ -11,6 +11,7 @@ from tkinter import messagebox
 
 from certidão import Certidao
 from constantes import ANALISADOS
+from constantes import ANALISE_EXECUTADA
 from constantes import ARQUIVO_INEXISTENTE
 from constantes import ATUALIZAR_CAMINHOS
 from constantes import ARQUIVOS_NAO_SELECIONADOS
@@ -25,12 +26,14 @@ from constantes import IDENTIFICADOR_TRADUZIDO
 from constantes import INICIO_DA_EXECUCAO
 from constantes import LINHA_FINAL
 from constantes import LOG_INEXISTENTE
-from constantes import OPCOES_DE_RENOMEACAO
+from constantes import OPCOES_DE_RENOMEACAO, OPCOES_DE_RENOMEAR_VAZIA
+from constantes import PASTA_NAO_SELECIONADA
 from constantes import PENDENCIAS
 from constantes import RENOMEACAO_EXECUTADA
 from constantes import TEXTO_ANALISAR, TEXTO_CRIA_ESTRUTURA
 from constantes import TEXTO_MESCLA_ARQUIVOS, TEXTO_PRINCIPAL
 from constantes import TEXTO_RENOMEAR, TEXTO_TRANSFERE_ARQUIVOS
+from constantes import TITULO_DA_INTERFACE
 from fgts import Fgts
 from gdf import Gdf
 from tst import Tst
@@ -531,8 +534,8 @@ class Analisador(Certidao):
             self.renomeia()
         elif self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[0]:
             messagebox.showwarning(
-                OPCOES_DE_RENOMEACAO[4],
-                OPCOES_DE_RENOMEACAO[5]
+                OPCOES_DE_RENOMEAR_VAZIA[0],
+                OPCOES_DE_RENOMEAR_VAZIA[1]
             )
 
     def renomeia(self):
@@ -676,19 +679,13 @@ class Analisador(Certidao):
                             f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
                         )
                         os.unlink(imagem_da_certidao)
-            print(
-                '\nProcesso de renomeação de certidão executado com sucesso!'
-            )
-            print(
-                '============================================================'
-                '============================================================'
-                '============================================================'
-                '============================================================'
-            )
+
+            print(RENOMEACAO_EXECUTADA[2])
+            print(LINHA_FINAL)
 
             messagebox.showinfo(
-                'Renomeou, miserávi!',
-                'As certidões selecionadas foram renomeadas com sucesso!'
+                RENOMEACAO_EXECUTADA[0],
+                RENOMEACAO_EXECUTADA[2]
             )
 
     def caminho_de_pastas(self):
@@ -742,11 +739,10 @@ class Analisador(Certidao):
                 or self.pasta_selecionada == ''
         ):
             messagebox.showerror(
-                'Se não selecionar a pasta, não vai rolar!',
-                ('Selecione uma pasta que contenha certidões que precisam ser'
-                 ' renomeadas.')
+                PASTA_NAO_SELECIONADA[0], PASTA_NAO_SELECIONADA[1]
             )
-            print('nenhuma pasta selecionada')
+
+            print(PASTA_NAO_SELECIONADA[1])
 
             self.caminho_da_pasta = Label(
                 self.frame_renomear, text='Nenhuma pasta selecionada', pady=0,
@@ -759,15 +755,7 @@ class Analisador(Certidao):
             )
 
         else:
-            print(
-                ('==========================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 '==========================================================='
-                 )
-            )
-
-            print('\nCriando imagens:\n')
+            print(CRIANDO_IMAGENS[0])
             os.chdir(self.pasta_selecionada)
             self.apaga_imagens_da_pasta()
             for pdf_file in os.listdir(self.pasta_selecionada):
@@ -807,7 +795,7 @@ class Analisador(Certidao):
 
                     for frase in IDENTIFICADOR_DE_CERTIDAO:
                         if frase in certidao:
-                            if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                            if frase == IDENTIFICADOR_DE_CERTIDAO[4]:
                                 try:
                                     data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
                                     procura = data.search(certidao)
@@ -836,15 +824,11 @@ class Analisador(Certidao):
                             )
                             print(imagem.split()[0])
             self.apaga_imagens_da_pasta()
-            print(
-                '\nProcesso de renomeação de certidões executado com sucesso!'
-            )
+            print(RENOMEACAO_EXECUTADA[2])
 
             messagebox.showinfo(
-                'Renomeou, miserávi!',
-                ('Todas as certidões da pasta selecionada foram renomeadas co'
-                 'm sucesso!'
-                 )
+                RENOMEACAO_EXECUTADA[0],
+                RENOMEACAO_EXECUTADA[3]
             )
 
 if __name__ == '__main__':
@@ -852,7 +836,7 @@ if __name__ == '__main__':
 
     objeto_tela = Analisador(tela)
     tela.resizable(False, False)
-    tela.title('GEOF - Analisador de certidões')
+    tela.title(TITULO_DA_INTERFACE)
     #tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
     tela.config(menu=objeto_tela.menu_certidões)
 
