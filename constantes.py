@@ -1,4 +1,4 @@
-#strings em ordem alfabética
+#strings simples em ordem alfabética
 
 ANALISADOS = '\nFornecedores analisados:'
 
@@ -40,18 +40,27 @@ CHECA_URL_4 = (
 INICIO_DA_EXECUCAO = (
     '\n======================================================================'
     '========================================================================'
-    '========================================================================'
     '\n\nInício da execução'
 )
 
 LINHA_FINAL = (
     '\n\n===================================================================='
     '========================================================================'
-    '========================================================================'
-    '======================================================================\n'
+    '=\n'
+)
+
+PASTA_CRIADA = (
+    '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n'
+)
+
+PASTA_LOCALIZADA = (
+    '\nPasta para inclusão de arquivos de pagamento localizada.\n'
 )
 
 PENDENCIAS = '\n\nCERTIDÕES QUE DEVEM SER ATUALIZADAS:\n'
+
+REFERENCIA = 'Referência encontrada na célula '
+
 
 TEXTO_ANALISAR = (
     'Utilize esta opção para identificar quais certidões devem ser atualizada'
@@ -87,71 +96,117 @@ TEXTO_TRANSFERE_ARQUIVOS = (
     'ise definitiva antes do pagamento.'
 )
 
+TITULO_DA_INTERFACE = 'GEOF - Analisador de certidões'
 
-#listas de strings por ordem alfabética
+#tuplas de strings por ordem alfabética
 
-ANALISE_EXECUTADA = [
+ANALISE_EXECUTADA = (
     'Analisou, miserávi!',
     'Processo de análise de certidões executado com sucesso!'
-]
+)
 
 
-ARQUIVO_INEXISTENTE = [
+ARQUIVO_INEXISTENTE = (
     'O arquivo selecionado não existe.',
     'Esse arquivo é invenção da sua cabeça, parça!',
     'O arquivo selecionado não existe ou já foi renomeado!'
-]
+)
 
-ARQUIVOS_NAO_SELECIONADOS = [
+ARQUIVOS_NAO_SELECIONADOS = (
     'Se não selecionar os arquivos, não vai rolar!',
     'Selecione os arquivos que deseja renomear'
-]
+)
 
-ATUALIZAR_CAMINHOS = [
-'Vc sabe o que está fazendo?',
-'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
-]
+ATUALIZAR_CAMINHOS = (
+    'Vc sabe o que está fazendo?',
+    'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
+)
 
-CAMINHOS_ATUALIZADOS = [
-'Fez porque quis!',
-'Caminhos de pastas e arquivos utilizados pelo sistema atualizados.'
-]
+CAMINHOS_ATUALIZADOS = (
+    'Fez porque quis!',
+    'Caminhos de pastas e arquivos utilizados pelo sistema atualizados.'
+)
 
-CRIANDO_IMAGENS = [
-    '========================================================================'
-    '========================================================================'
+CRIANDO_IMAGENS = (
     '========================================================================'
     '========================================================================'
     '\nCriando imagem:\n',
     '\nImagem criada com sucesso!\n'
-]
+)
 
-IDENTIFICADOR_DE_CERTIDAO = [
+DATAS_MULTIPLAS = (
+    'Me ajuda a te ajudar!',
+    (
+        'Data informada em multiplicidade.\nA data especificada como limite p'
+        'ara pagamento foi encontrada nas células:'
+    ),
+    (
+        '\nApague as células com valores duplicados na planilha de pagamentos'
+        ' e execute o programa novamente.'
+    )
+)
+
+DATA_NAO_ENCONTRADA = (
+    'Me ajuda a te ajudar!',
+    (
+        '\nA data informada não foi encontrada na lista de datas para pagamen'
+        'to ou não existe!'
+    )
+)
+
+IDENTIFICADOR_DE_CERTIDAO = (
     'FGTS - CRF',
     'Brasília,',
     'JUSTIÇA DO TRABALHO',
     'MINISTÉRIO DA FAZENDA',
     'GOVERNO DO DISTRITO FEDERAL'
-]
+)
 
-LOG_INEXISTENTE = [
+LOG_INEXISTENTE = (
     'Me ajuda a te ajudar!',
-    'Não existe log para a data informada.']
+    'Não existe log para a data informada.'
+)
 
-OPCOES_DE_RENOMEACAO = [
+OPCOES_DE_RENOMEACAO = (
     'Selecione uma opção',
     'Renomear arquivos',
     'Renomear todos os arquivos de uma pasta',
-    'Renomear todas as certidões da lista de pagamento',
+    'Renomear todas as certidões da lista de pagamento'
+)
+
+OPCOES_DE_RENOMEAR_VAZIA = (
     'Tem que escolher, fi!',
     'Nenhuma opção selecionada!'
-]
+)
 
-RENOMEACAO_EXECUTADA = [
+ORGAOS = ('UNIÃO', 'TST', 'FGTS', 'GDF')
+
+PASTA_NAO_SELECIONADA = (
+    'Se não selecionar a pasta, não vai rolar!',
+    ('Selecione uma pasta para renomear todos os seu arquivos de certidões.')
+)
+
+PLANILHAS = (
+    'FORNECEDORES',
+    'PAGAMENTO',
+    'Esse arquivo não rola!',
+    'O arquivo xlsx selecionado como fonte não possui as planilhas necessária'
+    's para o processamento solicitado.\n\nClique em Configurações>>Caminhos>'
+    '>Fonte de dados XLSX e selecione um arquivo xlsx que atenda aos critério'
+    's necessários para o processamento.'
+)
+
+RENOMEACAO_EXECUTADA = (
     'Renomeou, miserávi!',
     ('Todas as certidões da listagem de pagamento foram renomeadas com sucess'
-     'o!')
-]
+     'o!'),
+    '\nProcesso de renomeação de certidão executado com sucesso!',
+    'Todas as certidões da pasta selecionada foram renomeadas co'
+    'm sucesso!'
+)
+
+
+
 
 #dicionários de strings
 

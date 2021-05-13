@@ -1,91 +1,123 @@
-from log import Log
-from conexao import Conexao
-
-from tkinter import *
-from tkinter import filedialog
-from pdf2image import convert_from_path
-from PIL import Image
-import openpyxl
 import os
-import pytesseract
-import re
-import time
-import datetime
 import shutil
-import PyPDF2
+from tkinter import *
 from tkinter import messagebox
-import sqlite3
+
+import PyPDF2
+import openpyxl
+import pytesseract
+from PIL import Image
+from pdf2image import convert_from_path
+
+from conexao import Conexao
+from constantes import DATA_NAO_ENCONTRADA
+from constantes import DATAS_MULTIPLAS
+from constantes import ORGAOS
+from constantes import PASTA_CRIADA
+from constantes import PASTA_LOCALIZADA
+from constantes import PLANILHAS
+from constantes import REFERENCIA
+from log import Log
+
 
 class Certidao(Log, Conexao):
     def __init__(self, dia, mes, ano):
         self.dia = dia
         self.mes = mes
         self.ano = ano
+
         self.lista_de_urls = self.consulta_urls()
+
         self.caminho_xls = self.lista_de_urls[0][1]
         self.wb = openpyxl.load_workbook(self.caminho_xls)
+        self.forn = self.wb[PLANILHAS[0]]
+        self.pag = self.wb[PLANILHAS[1]]
         self.checagem_de_planilhas()
-        self.pag = self.wb['PAGAMENTO']
-        self.forn = self.wb['FORNECEDORES']
+
         self.listareferencia = []
-        self.referencia = 0
-        self.datapag = f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
         self.empresas = {}
-        self.pasta_de_certidões = self.lista_de_urls[1][1]
         self.percentual = 0
         self.lista_de_cnpj = {}
         self.lista_de_cnpj_exceções = {}
-        self.orgaos = ['UNIÃO', 'TST', 'FGTS', 'GDF']
         self.empresasdic = {}
         self.empresas_a_atualizar = {}
-        self.caminho_de_log = f'{self.lista_de_urls[2][1]}/{self.ano}-{self.mes}-{self.dia}.txt'
-        self.comprovantes_de_pagamento = f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
-        self.certidões_para_pagamento = f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
+
+        self.pasta_de_certidões = self.lista_de_urls[1][1]
+        self.caminho_de_log = (
+            f'{self.lista_de_urls[2][1]}/{self.ano}-{self.mes}-{self.dia}.txt'
+        )
+        self.comprovantes_de_pagamento = (
+            f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
+        )
+        self.certidões_para_pagamento = (
+            f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
+        )
 
     def checagem_de_planilhas(self):
         try:
-            self.wb['PAGAMENTO'] and self.wb['FORNECEDORES']
+            self.forn and self.pag
         except KeyError:
-            messagebox.showerror('Esse arquivo não rola!', 'O arquivo xlsx selecionado como fonte não possui as'
-                                                           ' planilhas necessárias para o processamento solicitado.'
-                                                           '\n\nClique em Configurações>>Caminhos>>Fonte de dados XLSX e '
-                                                           'selecione um arquivo xlsx que atenda aos critérios necessários '
-                                                           'para o processamento.')
+            messagebox.showerror(PLANILHAS[2], PLANILHAS[3])
+
+    def checa_pasta_de_comprovantes(self):
+        if os.path.exists(self.comprovantes_de_pagamento):
+            print(PASTA_LOCALIZADA)
+        else:
+            os.makedirs(self.comprovantes_de_pagamento)
+            print(PASTA_CRIADA)
 
     def pega_referencia(self):
-        if os.path.exists(f'{self.comprovantes_de_pagamento}'):
-            print('\nPasta para inclusão de arquivos de pagamento localizada.\n')
-        else:
-            os.makedirs(f'{self.comprovantes_de_pagamento}')
-            print('\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n')
+        self.checa_pasta_de_comprovantes()
+        data_para_pagamento = (
+            f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
+        )
+
         for linha in self.pag['A1':'F500']:
             for celula in linha:
-                if celula.value != self.datapag:
+                if celula.value != data_para_pagamento:
                     continue
-                elif celula.value == self.datapag and celula.coordinate not in self.listareferencia:
+                elif (
+                        celula.value == data_para_pagamento
+                        and celula.coordinate not in self.listareferencia
+                ):
                     self.listareferencia.append(celula.coordinate)
         return self.listareferencia
 
     def analisa_referencia(self):
         self.pega_referencia()
         if len(self.listareferencia) == 0:
-            self.mensagem_de_log_completa('\nA data informada não foi encontrada na lista de datas para pagamento ou não existe!', self.caminho_de_log)
-            messagebox.showerror('Me ajuda a te ajudar!',
-                                 'A data informada não foi encontrada na lista de datas para pagamento ou não existe!')
-            raise Exception('A data informada não foi encontrada na lista de datas para pagamento ou não existe!!')
-        elif len(self.listareferencia) > 1:
-            self.mensagem_de_log_completa(f'''Data informada em multiplicidade
-            A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\\GEOF\\CERTIDÕES\\Análise\\atual.xlsx.
-                            \nApague as células informadas com valores duplicados e execute o programa novamente.''', self.caminho_de_log)
-            messagebox.showerror('Me ajuda a te ajudar!',
-                                 f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\GEOF\CERTIDÕES\Análise\\atual.xlsx.'
-                                 f'\nApague as células informadas com valores duplicados e execute o programa novamente.')
-            raise Exception(
-                f'A data especificada foi encontrada nas células {self.listareferencia} da planilha de pagamentos: \\\hrg-74977\GEOF\CERTIDÕES\Análise\\atual.xlsx.'
-                f'\nApague as células informadas com valores duplicados e execute o programa novamente.')
-        else:
-            self.mensagem_de_log_completa(f'\nReferência encontrada na célula {self.listareferencia[0]}', self.caminho_de_log)
+            self.mensagem_de_log_completa(
+                DATA_NAO_ENCONTRADA[1],
+                self.caminho_de_log
+            )
+            messagebox.showerror(
+                DATA_NAO_ENCONTRADA[0],
+                DATA_NAO_ENCONTRADA[1]
+            )
+            raise Exception(DATA_NAO_ENCONTRADA[1])
 
+        elif len(self.listareferencia) > 1:
+            mensagem_de_erro = (
+                    f'{DATAS_MULTIPLAS[1]}\n\n'
+                    f'{self.listareferencia}\n'
+                    f'{DATAS_MULTIPLAS[2]}'
+                 )
+            self.mensagem_de_log_completa(
+                mensagem_de_erro,
+                self.caminho_de_log
+            )
+            messagebox.showerror(
+                DATAS_MULTIPLAS[0],
+                mensagem_de_erro
+            )
+            raise Exception(mensagem_de_erro)
+        else:
+            self.mensagem_de_log_completa(
+                f'\n{REFERENCIA}{self.listareferencia[0]}',
+                self.caminho_de_log
+            )
+
+#continuar refatoração desse ponto
     def pega_fornecedores(self):
         referencia = self.listareferencia[0]
         desloca = 2
@@ -195,7 +227,7 @@ Se deseja fazer nova transferência apague o diretório:
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for item in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 itens.append(item.split()[0])
-            for orgao in self.orgaos:
+            for orgao in ORGAOS:
                 if orgao not in itens:
                     faltando.append(orgao)
             if faltando != []:
@@ -222,7 +254,7 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
                         shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
                     else:
                         shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
-                if pdf_file.endswith(".pdf") and pdf_file.split()[0] in self.orgaos:
+                if pdf_file.endswith(".pdf") and pdf_file.split()[0] in ORGAOS:
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
@@ -271,21 +303,21 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
 
                 if len(self.empresas[emp]) > 3:
                     if val == True and cnpj_para_comparação == self.empresas[emp][3]:
-                        empresadic[self.orgaos[index]] = 'OK-MATRIZ'
+                        empresadic[ORGAOS[index]] = 'OK-MATRIZ'
                     elif val == True and cnpj_para_comparação == self.empresas[emp][1]:
-                        empresadic[self.orgaos[index]] = 'OK'
+                        empresadic[ORGAOS[index]] = 'OK'
                     elif cnpj_para_comparação != self.empresas[emp][1] and cnpj_para_comparação != self.empresas[emp][
                         3]:
-                        empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                        empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
                     else:
-                        empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
+                        empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
                 else:
                     if val == True and cnpj_para_comparação == self.empresas[emp][1]:
-                        empresadic[self.orgaos[index]] = 'OK'
+                        empresadic[ORGAOS[index]] = 'OK'
                     elif cnpj_para_comparação != self.empresas[emp][1]:
-                        empresadic[self.orgaos[index]] = 'CNPJ-ERRO'
+                        empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
                     else:
-                        empresadic[self.orgaos[index]] = 'INCOMPATÍVEL'
+                        empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
                 index += 1
             self.empresasdic[emp] = empresadic
 
