@@ -1,5 +1,5 @@
-import sqlite3
 import os
+import sqlite3
 
 class Conexao:
     def caminho_do_arquivo(self):
@@ -38,7 +38,12 @@ class Conexao:
 
     def consulta_urls(self):
         caminho_do_banco_de_dados = self.caminho_do_bd()
-        print(f'caminho de banco de dados dentro da função consulta {caminho_do_banco_de_dados}')
+        print(
+            (
+                f'caminho de banco de dados dentro da função consulta '
+                f'{caminho_do_banco_de_dados}'
+            )
+        )
         with sqlite3.connect(caminho_do_banco_de_dados) as conexao:
             comando = 'SELECT *, oid FROM urls'
             direcionador = conexao.cursor()
@@ -63,8 +68,11 @@ class Conexao:
         enderecos = {'caminho_xlsx': f'{caminho}/listas.xlsx',
                     'pasta_de_certidões': f'{caminho}/Certidões',
                     'caminho_de_log': f'{caminho}/Logs de conferência',
-                    'comprovantes_de_pagamento': f'{caminho}/Comprovantes de pagamento',
-                    'certidões_para_pagamento': f'{caminho}/Certidões para pagamento'}
+                    'comprovantes_de_pagamento': (
+                        f'{caminho}/Comprovantes de pagamento'
+                    ),
+                    'certidões_para_pagamento': (f'{caminho}/Certidões para pagamento')
+                     }
         for endereco in enderecos:
             comando = 'INSERT INTO urls VALUES (:variavel, :url)'
             substituto = {"variavel": endereco, "url": enderecos[endereco]}

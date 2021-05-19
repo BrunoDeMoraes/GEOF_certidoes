@@ -37,6 +37,14 @@ CHECA_URL_4 = (
     'mento.'
 )
 
+CNPJ_EMPRESA = '- o CNPJ encontrado pertence à empresa'
+
+CNPJ_NULO = '- o CNPJ encontrado não possui correspondência'
+
+DATA_NACIONAL = '%d/%m/%Y'
+
+FGTS_INVALIDO = 'arquivo da certidão FGTS da empresa inválido'
+
 INICIO_DA_EXECUCAO = (
     '\n======================================================================'
     '========================================================================'
@@ -52,6 +60,10 @@ LINHA_FINAL = (
     '========================================================================'
     '=\n'
 )
+
+PADRAO_CNPJ = '(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)'
+
+PADRAO_FGTS = '(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)'
 
 PASTA_CRIADA = (
     '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n',
@@ -166,6 +178,15 @@ CERTIDOES_TRANSFERIDAS = (
     'As certidões que validam o pagamento foram transferidas com sucesso!'
 )
 
+CNPJ_NAO_ENCONTRADO = (
+    'Esse arquivo não rola!',
+    (
+        'Não foi possível encontrar o padrão de CNPJ na certidão FGTS da empr'
+        'esa.\nO arquivo pode estar corrompido ou ter sofrido atualizações qu'
+        'e alteraram sua formatação.'
+    )
+)
+
 CRIANDO_IMAGENS = (
     '========================================================================'
     '========================================================================'
@@ -204,6 +225,14 @@ DATA_NAO_ENCONTRADA = (
 DIGITALIZADOS_MESCLADOS = (
     'Mesclou, miserávi!!!',
     'Digitalizações de pagamentos e respectivas certidões mescladas com sucesso!'
+)
+
+EMISSAO_VENCIMENTO = (
+    'Esse arquivo não rola!',
+    ('Não foi possível encontrar o padrão de data de emissão e vencimento na '
+     'certidão  da empresa .\nO arquivo pode estar corrompido ou ter sofrido '
+     'atualizações que alteraram sua formatação.'
+     )
 )
 
 IDENTIFICADOR_DE_CERTIDAO = (
