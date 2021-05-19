@@ -10,13 +10,28 @@ from PIL import Image
 from pdf2image import convert_from_path
 
 from conexao import Conexao
+from constantes import ARQUIVO_CORROMPIDO
+from constantes import ATUALIZAR_XLSX
+from constantes import CERTIDOES_TRANSFERIDAS
+from constantes import CERTIDOES_FALTANDO
+from constantes import CRIANDO_IMAGENS
+from constantes import DADOS_DO_FORNECEDOR_COM_ERRO
 from constantes import DATA_NAO_ENCONTRADA
 from constantes import DATAS_MULTIPLAS
+from constantes import DIGITALIZADOS_MESCLADOS
+from constantes import IDENTIFICADOR_DE_CERTIDAO
+from constantes import IDENTIFICADOR_DE_VALIDADE, IDENTIFICADOR_DE_VALIDADE_2
+from constantes import IDENTIFICADOR_TRADUZIDO
+from constantes import INICIO_DA_ANALISE
 from constantes import ORGAOS
 from constantes import PASTA_CRIADA
+from constantes import PASTA_DE_MESCLAGEM_EXISTENTE
+from constantes import PASTA_DE_PAGAMENTO
 from constantes import PASTA_LOCALIZADA
+from constantes import PASTA_NAO_ENCONTRADA
 from constantes import PLANILHAS
 from constantes import REFERENCIA
+from constantes import RENOMEACAO_EXECUTADA
 from log import Log
 
 
@@ -117,7 +132,6 @@ class Certidao(Log, Conexao):
                 self.caminho_de_log
             )
 
-#continuar refatoração desse ponto
     def pega_fornecedores(self):
         referencia = self.listareferencia[0]
         desloca = 2
@@ -126,7 +140,9 @@ class Certidao(Log, Conexao):
         while self.pag[coluna + str(linha + desloca)].value != None:
             empresa = self.pag[coluna + str(linha + desloca)].value.split()
             if len(empresa) > 2:
-                self.empresas[' '.join(empresa[0:len(empresa) - 1])] = [' '.join(empresa)]
+                self.empresas[' '.join(empresa[0:len(empresa) - 1])] = [
+                    ' '.join(empresa)
+                ]
             else:
                 self.empresas[empresa[0]] = [' '.join(empresa)]
             desloca += 1
@@ -139,7 +155,9 @@ class Certidao(Log, Conexao):
                     if celula.value != self.empresas[emp][0]:
                         continue
                     else:
-                        self.empresas[emp].append(self.forn[f'F{celula.row}'].value)
+                        self.empresas[emp].append(
+                            self.forn[f'F{celula.row}'].value
+                        )
                         cnpj_formatado = self.empresas[emp][1]
                         cnpj_tratado = ''
                         for digito in cnpj_formatado:
@@ -149,7 +167,9 @@ class Certidao(Log, Conexao):
                         if self.forn[f'M{celula.row}'].value == None:
                             continue
                         else:
-                            self.empresas[emp].append(self.forn[f'M{celula.row}'].value)
+                            self.empresas[emp].append(
+                                self.forn[f'M{celula.row}'].value
+                            )
                             cnpj_matriz_formatado = self.empresas[emp][3]
                             cnpj_matriz_tratado = ''
                             for digito in cnpj_matriz_formatado:
@@ -169,8 +189,12 @@ class Certidao(Log, Conexao):
                     if celula.value == None:
                         continue
                     else:
-                        nome_da_empresa = self.forn[f'A{celula.row}'].value.split()
-                        self.lista_de_cnpj[celula.value] = ' '.join(nome_da_empresa[0:len(nome_da_empresa) - 1])
+                        nome_da_empresa = (
+                            self.forn[f'A{celula.row}'].value.split()
+                        )
+                        self.lista_de_cnpj[celula.value] = ' '.join(
+                            nome_da_empresa[0:len(nome_da_empresa) - 1]
+                        )
         return self.lista_de_cnpj
 
     def listar_cnpjs_exceções(self):
@@ -180,7 +204,9 @@ class Certidao(Log, Conexao):
                     if celula.value == None:
                         continue
                     else:
-                        nome_da_empresa = self.forn[f'A{celula.row}'].value.split()
+                        nome_da_empresa = (
+                            self.forn[f'A{celula.row}'].value.split()
+                        )
                         self.lista_de_cnpj_exceções[celula.value] = ' '.join(
                             nome_da_empresa[0:len(nome_da_empresa) - 1])
         return self.lista_de_cnpj_exceções
@@ -194,16 +220,17 @@ class Certidao(Log, Conexao):
                 os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Vencidas')
                 os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Imagens')
                 novos_dir.append(emp)
-        self.mensagem_de_log_completa(f'\nNúmero de novas pastas criadas: {len(novos_dir)} - {novos_dir}.', self.caminho_de_log)
+        self.mensagem_de_log_completa(
+            (f'\n{PASTA_CRIADA[1]}{len(novos_dir)} - {novos_dir}.'),
+            self.caminho_de_log
+        )
 
     def cria_certidoes_para_pagamento(self):
         if os.path.exists(f'{self.certidões_para_pagamento}'):
-            print('Já existe pasta contendo certidões para pagamento na data informada.')
-            messagebox.showwarning('FICA CALMO!!!',
-                                   f'''Já existe pasta contendo certidões para pagamento na data informada!
-
-Se deseja fazer nova transferência apague o diretório:
-{self.certidões_para_pagamento}''')
+            print(PASTA_DE_PAGAMENTO)
+            messagebox.showwarning(
+                PASTA_DE_PAGAMENTO[0],
+                f'{PASTA_DE_PAGAMENTO[1]}{self.certidões_para_pagamento}')
         else:
             os.makedirs(self.certidões_para_pagamento)
             for emp in self.empresas:
@@ -212,12 +239,22 @@ Se deseja fazer nova transferência apague o diretório:
                 os.chdir(f'{pasta_da_empresa}')
                 for pdf_file in os.listdir(f'{pasta_da_empresa}'):
                     if pdf_file.endswith(".pdf"):
-                        shutil.copy(f'{pasta_da_empresa}/{pdf_file}',
-                                    f'{self.certidões_para_pagamento}/{emp}/{pdf_file}')
+                        shutil.copy(
+                            f'{pasta_da_empresa}/{pdf_file}',
+                            (f'{self.certidões_para_pagamento}/{emp}/'
+                             f'{pdf_file}')
+                        )
             self.mensagem_de_log_simples(
-                f'As certidões referentes ao pagamento com data limite para a data de {self.dia}/{self.mes}/{self.ano} foram transferidas para respectiva pasta de pagamento.', self.caminho_de_log)
-            messagebox.showinfo('Transferiu, miserávi!',
-                                'As certidões que validam o pagamento foram transferidas com sucesso!')
+                (
+                    f'{CERTIDOES_TRANSFERIDAS[1]}{self.dia}/{self.mes}/'
+                    f'{self.ano}'
+                ),
+                self.caminho_de_log
+            )
+            messagebox.showinfo(
+                CERTIDOES_TRANSFERIDAS[0],
+                CERTIDOES_TRANSFERIDAS[1]
+            )
 
     def certidoes_n_encontradas(self):
         total_faltando = 0
@@ -234,38 +271,63 @@ Se deseja fazer nova transferência apague o diretório:
                 try:
                     self.empresas[emp][2]
                 except:
-                    messagebox.showerror('Problema com o xlsx', 'O arquivo fonte de dados XLSX parece não ter sido atualizado corretamente.\n\n'
-                                                                                'Tente atualizar a planilha FORNECEDORES usando a oção de colagem  que insere apenas "Valores"')
-                self.mensagem_de_log_completa(f'Para a empresa {emp} não foram encontradas as certidões {faltando} - CNPJ: {self.empresas[emp][2]}', self.caminho_de_log)
+                    messagebox.showerror(
+                        ATUALIZAR_XLSX[0],
+                        ATUALIZAR_XLSX[1]
+                    )
+                self.mensagem_de_log_completa(
+                    (
+                        f'{emp}, CNPJ: {self.empresas[emp][2]}'
+                        f'{CERTIDOES_FALTANDO[0]}{faltando} '
+                    ),
+                    self.caminho_de_log)
                 total_faltando += 1
         if total_faltando != 0:
-            self.mensagem_de_log_completa(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.', self.caminho_de_log)
-            messagebox.showerror('Tá faltando coisa, mano!', f'''Algumas certidões não foram encontradas!
-Consulte o arquivo de log, resolva as pendências indicadas e então execute novamente a análise.''')
-            raise Exception(f'Adicione as certidões às respectivas pastas informadas e execute novamente o programa.')
+            self.mensagem_de_log_completa(
+                CERTIDOES_FALTANDO[1],
+                self.caminho_de_log
+            )
+            messagebox.showerror(CERTIDOES_FALTANDO[2], CERTIDOES_FALTANDO[3])
+            raise Exception(CERTIDOES_FALTANDO[1])
 
     def pdf_para_jpg(self):
         for emp in self.empresas:
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
-            for pdf_file in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
+            for pdf_file in os.listdir(
+                    f'{self.pasta_de_certidões}/{str(emp)}'
+            ):
                 if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}/Merge'):
-                        os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Merge')
-                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
+                    if not os.path.isdir(
+                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                    ):
+                        os.makedirs(
+                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                        )
+                        shutil.move(
+                            pdf_file,
+                            (
+                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                                f'{pdf_file}')
+                        )
                     else:
-                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
-                if pdf_file.endswith(".pdf") and pdf_file.split()[0] in ORGAOS:
+                        shutil.move(
+                            pdf_file,
+                            (
+                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                                f'{pdf_file}'
+                            )
+                        )
+                if (
+                        pdf_file.endswith(".pdf")
+                        and pdf_file.split()[0] in ORGAOS
+                ):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
 
     def analisa_certidoes(self, lista_de_objetos):
-        #objUniao = Uniao(self.dia, self.mes, self.ano)
-        #objTst = Tst(self.dia, self.mes, self.ano)
-        #objFgts = Fgts(self.dia, self.mes, self.ano)
-        #objGdf = Gdf(self.dia, self.mes, self.ano)
         lista_objetos = lista_de_objetos
-        self.mensagem_de_log_completa('\nInicio da conferência de datas de emissão e vencimento:', self.caminho_de_log)
+        self.mensagem_de_log_completa(INICIO_DA_ANALISE, self.caminho_de_log)
         print(f'Total executado: {self.percentual}%')
 
         for emp in self.empresas:
@@ -282,37 +344,41 @@ Consulte o arquivo de log, resolva as pendências indicadas e então execute nov
                 try:
                     self.empresas[emp][1]
                 except IndexError:
-                    messagebox.showerror('Dados do fornecedor estão zuados!', f'Não foi possível localizar o CNPJ da '
-                                                                              f'empresa {emp} na planilha FORNECEDORES'
-                                                                              f' do arquivo: {self.caminho_xls}.\n\n'
-                                                                              f'Verifique se há registro de CNPJ para a'
-                                                                              f' empresa ou se o nome informado na'
-                                                                              f' planilha PAGAMENTO é idêntico ao '
-                                                                              f'inserido na planilha FORNECEDORES.')
-                    self.mensagem_de_log_completa(f'Não foi possível localizar o CNPJ da '
-                                      f'empresa {emp} na planilha FORNECEDORES'
-                                      f' do arquivo: {self.caminho_xls}.\n\n'
-                                      f'Verifique se há registro de CNPJ para a'
-                                      f' empresa ou se o nome informado na'
-                                      f' planilha PAGAMENTO é idêntico ao '
-                                      f'inserido na planilha FORNECEDORES.', self.caminho_de_log)
+                    messagebox.showerror(
+                        DADOS_DO_FORNECEDOR_COM_ERRO[0],
+                        (
+                            f'empresa: {emp}\n\n'
+                            f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                        )
+                    )
+                    self.mensagem_de_log_completa(
+                        (
+                            f'empresa: {emp}\n\n'
+                            f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                        ),
+                        self.caminho_de_log
+                    )
                     raise Exception(
-                        f'''Não foi possível localizar o CNPJ da empresa {emp} na planilha FORNECEDORES do arquivo:
-{self.caminho_xls}.
-Verifique se há registro de CNPJ para a empresa ou se o nome informado na planilha PAGAMENTO é idêntico ao inserido na planilha FORNECEDORES.''')
+                        f'empresa: {emp}\n\n{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                    )
 
                 if len(self.empresas[emp]) > 3:
-                    if val == True and cnpj_para_comparação == self.empresas[emp][3]:
+                    if val and cnpj_para_comparação == self.empresas[emp][3]:
                         empresadic[ORGAOS[index]] = 'OK-MATRIZ'
-                    elif val == True and cnpj_para_comparação == self.empresas[emp][1]:
+                    elif (
+                            val
+                            and cnpj_para_comparação == self.empresas[emp][1]
+                    ):
                         empresadic[ORGAOS[index]] = 'OK'
-                    elif cnpj_para_comparação != self.empresas[emp][1] and cnpj_para_comparação != self.empresas[emp][
-                        3]:
+                    elif (
+                            cnpj_para_comparação != self.empresas[emp][1]
+                            and cnpj_para_comparação != self.empresas[emp][3]
+                    ):
                         empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
                     else:
                         empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
                 else:
-                    if val == True and cnpj_para_comparação == self.empresas[emp][1]:
+                    if val and cnpj_para_comparação == self.empresas[emp][1]:
                         empresadic[ORGAOS[index]] = 'OK'
                     elif cnpj_para_comparação != self.empresas[emp][1]:
                         empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
@@ -324,12 +390,18 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
     def atualizar(self):
         numerador = 0
         for emp in self.empresasdic:
-            self.mensagem_de_log_simples(f'{numerador + 1 :>2} - {emp}\n{self.empresasdic[emp]}\n', self.caminho_de_log)
+            self.mensagem_de_log_simples(
+                f'{numerador + 1 :>2} - {emp}\n{self.empresasdic[emp]}\n',
+                self.caminho_de_log
+            )
             numerador += 1
         for emp in self.empresasdic:
             certidoes_a_atualizar = []
             for orgao in self.empresasdic[emp]:
-                if self.empresasdic[emp][orgao] == 'INCOMPATÍVEL' or self.empresasdic[emp][orgao] == 'CNPJ-ERRO':
+                if (
+                        self.empresasdic[emp][orgao] == 'INCOMPATÍVEL'
+                        or self.empresasdic[emp][orgao] == 'CNPJ-ERRO'
+                ):
                     certidoes_a_atualizar.append(orgao)
             if len(certidoes_a_atualizar) > 0:
                 self.empresas_a_atualizar[emp] = certidoes_a_atualizar
@@ -345,32 +417,53 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                         empresa = celula.value.split()
                         nome_da_empresa = ''
                         if len(empresa) > 2:
-                            nome_da_empresa = ' '.join(empresa[0:len(empresa) - 1])
+                            nome_da_empresa = (
+                                ' '.join(empresa[0:len(empresa) - 1])
+                            )
                         else:
                             nome_da_empresa = empresa[0]
                         if nome_da_empresa != emp:
                             continue
                         else:
-                            cnpj_formatado = str(self.forn['F' + str(celula.row)].value)
+                            cnpj_formatado = (
+                                str(self.forn['F' + str(celula.row)].value)
+                            )
                             cnpj_tratado = ''
                             for digito in cnpj_formatado:
                                 if digito in '0123456789':
                                     cnpj_tratado += digito
-                            self.empresas_a_atualizar[emp].append(cnpj_tratado)
+                            self.empresas_a_atualizar[emp].append(
+                                cnpj_tratado
+                            )
 
     def pdf_para_jpg_renomear(self):
-        print(
-            '\n===================================================================================================\n\n'
-            'Criando imagens:\n')
+        print(CRIANDO_IMAGENS[0])
         for emp in self.empresas:
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
-            for pdf_file in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
+            for pdf_file in os.listdir(
+                    f'{self.pasta_de_certidões}/{str(emp)}'
+            ):
                 if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}/Merge'):
-                        os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Merge')
-                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
+                    if not os.path.isdir(
+                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                    ):
+                        os.makedirs(
+                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                        )
+                        shutil.move(
+                            pdf_file,
+                            (
+                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                                f'{pdf_file}'
+                            )
+                        )
                     else:
-                        shutil.move(pdf_file, f'{self.pasta_de_certidões}/{str(emp)}/Merge/{pdf_file}')
+                        shutil.move(
+                            pdf_file,
+                            (f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                             f'{pdf_file}'
+                             )
+                        )
 
                 elif pdf_file.endswith(".pdf"):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
@@ -379,7 +472,7 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                     self.percentual += (25 / len(self.empresas))
                     print(f'Total de imagens criadas: {self.percentual}%')
         self.mensagem_de_log_completa(
-            '\nImagens criadas com sucesso!',
+            CRIANDO_IMAGENS[1],
             self.caminho_de_log
         )
         self.percentual = 0
@@ -391,43 +484,42 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
             origem = f'{self.pasta_de_certidões}/{emp}'
             for imagem in os.listdir(origem):
                 if imagem.endswith(".jpg"):
-                    certidao = pytesseract.image_to_string(Image.open(f'{origem}/{imagem}'), lang='por')
-                    padroes = ['FGTS - CRF', 'Brasília,', 'JUSTIÇA DO TRABALHO', 'MINISTÉRIO DA FAZENDA',
-                               'GOVERNO DO DISTRITO FEDERAL']
-                    valores = {'FGTS - CRF': 'FGTS', 'Brasília,': 'GDF', 'JUSTIÇA DO TRABALHO': 'TST',
-                               'MINISTÉRIO DA FAZENDA': 'UNIÃO', 'GOVERNO DO DISTRITO FEDERAL': 'GDF'}
-                    datas = {'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'Brasília,': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                          '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)',
-                             'JUSTIÇA DO TRABALHO': 'Validade: (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'MINISTÉRIO DA FAZENDA': 'Válida até (\d\d)/(\d\d)/(\d\d\d\d)',
-                             'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                                            '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
-                                                            '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'}
-                    datas2 = {
-                        'GOVERNO DO DISTRITO FEDERAL': 'Válida até (\d) de (janeiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?'
-                                                       '(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?'
-                                                       '(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)'}
-                    for frase in padroes:
+                    certidao = pytesseract.image_to_string(
+                        Image.open(f'{origem}/{imagem}'),
+                        lang='por'
+                    )
+                    for frase in IDENTIFICADOR_DE_CERTIDAO:
                         if frase in certidao:
                             self.percentual += (25 / len(self.empresas))
                             print(
-                                f'{emp} - certidão {valores[frase]} renomeada - Total executado: {self.percentual}%\n')
+                                (
+                                    f'{emp} - certidão '
+                                    f'{IDENTIFICADOR_TRADUZIDO[frase]} '
+                                    f'renomeada - Total executado: '
+                                    f'{self.percentual}%\n'
+                                )
+                            )
                             if frase == 'GOVERNO DO DISTRITO FEDERAL':
                                 try:
-                                    data = re.compile(datas2[frase])
+                                    data = re.compile(
+                                        IDENTIFICADOR_DE_VALIDADE_2[frase]
+                                    )
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                                 except AttributeError:
-                                    data = re.compile(datas[frase])
+                                    data = re.compile(
+                                        IDENTIFICADOR_DE_VALIDADE[frase]
+                                    )
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                             else:
-                                data = re.compile(datas[frase])
+                                data = re.compile(
+                                    IDENTIFICADOR_DE_VALIDADE[frase]
+                                )
                                 procura = data.search(certidao)
                                 datanome = procura.group()
                                 separa = datanome.split('/')
@@ -436,16 +528,22 @@ Verifique se há registro de CNPJ para a empresa ou se o nome informado na plani
                                 retira = junta.split(':')
                                 volta = ' '.join(retira)
                                 junta = volta
-                            shutil.move(f'{origem}/{imagem[0:-4]}.pdf', f'{valores[frase]} - {junta}.pdf')
-        print('\nProcesso de renomeação de certidões executado com sucesso!')
+                            shutil.move(
+                                f'{origem}/{imagem[0:-4]}.pdf',
+                                (
+                                    f'{IDENTIFICADOR_TRADUZIDO[frase]} - '
+                                    f'{junta}.pdf'
+                                )
+                            )
+        print(RENOMEACAO_EXECUTADA[2])
 
     def merge(self):
         if os.path.exists(f'{self.comprovantes_de_pagamento}/Mesclados'):
-            print('Já existe pasta para mesclagem na data informada')
-            messagebox.showwarning('FICA CALMO!!!', f'''Já existe pasta para mesclagem na data informada!
-
-Se deseja fazer nova mesclagem apague o diretório:
-{self.comprovantes_de_pagamento}/Mesclados.''')
+            print(PASTA_DE_MESCLAGEM_EXISTENTE[1])
+            messagebox.showwarning(
+                PASTA_DE_MESCLAGEM_EXISTENTE[0],
+                f'{PASTA_DE_MESCLAGEM_EXISTENTE[1]}'
+                f'{self.comprovantes_de_pagamento}/Mesclados.')
         else:
             os.makedirs(f'{self.comprovantes_de_pagamento}/Mesclados')
             os.chdir(self.comprovantes_de_pagamento)
@@ -456,11 +554,16 @@ Se deseja fazer nova mesclagem apague o diretório:
                         validação_de_partes_do_nome = []
                         retira_espaço_empresa = emp.replace(' ', '-')
                         nome_separado = retira_espaço_empresa.split('-')
-                        retira_espaço_do_arquivo = arquivo_pdf.replace(' ', '-')
+                        retira_espaço_do_arquivo = arquivo_pdf.replace(
+                            ' ', '-'
+                        )
                         arquivo_separado = retira_espaço_do_arquivo.split('-')
                         for parte_do_nome in nome_separado:
                             contador = 0
-                            if nome_separado[contador] == arquivo_separado[contador + 1]:
+                            if (
+                                    nome_separado[contador]
+                                    == arquivo_separado[contador + 1]
+                            ):
                                 validação_de_partes_do_nome.append('OK')
                                 contador += 1
                             else:
@@ -471,39 +574,68 @@ Se deseja fazer nova mesclagem apague o diretório:
                             pdf_temporário = PyPDF2.PdfFileWriter()
                             pagamento = open(arquivo_pdf, 'rb')
                             try:
-                                pagamento_lido = PyPDF2.PdfFileReader(pagamento, strict=False)
+                                pagamento_lido = PyPDF2.PdfFileReader(
+                                    pagamento, strict=False
+                                )
                             except:
-                                messagebox.showerror('Arquivo zuado!!!', f"o arquivo {arquivo_pdf} está corrompido")
+                                messagebox.showerror(
+                                    ARQUIVO_CORROMPIDO[0],
+                                    f'{ARQUIVO_CORROMPIDO[1]}{arquivo_pdf}'
+                                )
                             for página in range(pagamento_lido.numPages):
                                 objeto_pagina = pagamento_lido.getPage(página)
                                 pdf_temporário.addPage(objeto_pagina)
-                            pasta_da_empresa = f'{self.certidões_para_pagamento}/{emp}'
+                            pasta_da_empresa = (
+                                f'{self.certidões_para_pagamento}/{emp}'
+                            )
                             os.chdir(pasta_da_empresa)
-                            for arquivo_certidão in os.listdir(pasta_da_empresa):
+                            for arquivo_certidão in os.listdir(
+                                    pasta_da_empresa
+                            ):
                                 if '00.MERGE' not in arquivo_certidão:
                                     certidão = open(arquivo_certidão, 'rb')
-                                    certidão_lida = PyPDF2.PdfFileReader(certidão)
-                                    for página_da_certidão in range(certidão_lida.numPages):
-                                        objeto_pagina_da_certidão = certidão_lida.getPage(página_da_certidão)
-                                        pdf_temporário.addPage(objeto_pagina_da_certidão)
+                                    certidão_lida = PyPDF2.PdfFileReader(
+                                        certidão
+                                    )
+                                    for página_da_certidão in range(
+                                            certidão_lida.numPages
+                                    ):
+                                        pagina_lida = certidão_lida.getPage(
+                                            página_da_certidão
+                                        )
+                                        pdf_temporário.addPage(pagina_lida)
                             compilado = open(
-                                f'{self.comprovantes_de_pagamento}/Mesclados/{arquivo_pdf[0:-4]}_mesclado.pdf', 'wb')
+                                (
+                                    f'{self.comprovantes_de_pagamento}/'
+                                    f'Mesclados/{arquivo_pdf[0:-4]}_mesclado.'
+                                    f'pdf'
+                                ),
+                                'wb'
+                            )
                             pdf_temporário.write(compilado)
                             compilado.close()
                             pagamento.close()
                             certidão.close()
-            messagebox.showinfo('Mesclou, miserávi!!!',
-                                'Digitalizações de pagamentos e respectivas certidões mescladas com sucesso!')
+            messagebox.showinfo(
+                DIGITALIZADOS_MESCLADOS[0],
+                DIGITALIZADOS_MESCLADOS[1]
+            )
 
     def apaga_imagem(self):
         for emp in self.empresas:
             if not os.path.exists(f'{self.pasta_de_certidões}/{str(emp)}'):
-                messagebox.showerror('Tem essa pasta aí não, locão!',
-                                     f'A pasta {self.pasta_de_certidões}/{str(emp)} ainda não existe.\n\n'
-                                     f'Antes de tentar renomear as certidões, execute a opção "Analisar certidões". '
-                                     f'A referida opção criará as pastas necessárias e indicará o que '
-                                     f'precisa ser atualizado antes do processo de renomeação.')
+                messagebox.showerror(
+                    PASTA_NAO_ENCONTRADA[0],
+                    (
+                        f'{self.pasta_de_certidões}/{str(emp)}'
+                        f'{PASTA_NAO_ENCONTRADA[1]}'
+                    )
+                )
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
-            for arquivo in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
+            for arquivo in os.listdir(
+                    f'{self.pasta_de_certidões}/{str(emp)}'
+            ):
                 if arquivo.endswith(".jpg"):
-                    os.unlink(f'{self.pasta_de_certidões}/{str(emp)}/{arquivo}')
+                    os.unlink(
+                        f'{self.pasta_de_certidões}/{str(emp)}/{arquivo}'
+                    )

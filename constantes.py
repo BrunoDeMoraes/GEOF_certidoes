@@ -43,6 +43,10 @@ INICIO_DA_EXECUCAO = (
     '\n\nInício da execução'
 )
 
+INICIO_DA_ANALISE = (
+    '\nInicio da conferência de datas de emissão e vencimento:'
+)
+
 LINHA_FINAL = (
     '\n\n===================================================================='
     '========================================================================'
@@ -50,7 +54,14 @@ LINHA_FINAL = (
 )
 
 PASTA_CRIADA = (
-    '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n'
+    '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n',
+    'Número de novas pastas criadas: '
+)
+
+PASTA_DE_PAGAMENTO = (
+    'FICA CALMO!!!',
+    ('Já existe pasta contendo certidões para pagamento na data informada.\nS'
+     'e deseja fazer nova transferência apague o diretório: ')
 )
 
 PASTA_LOCALIZADA = (
@@ -105,6 +116,10 @@ ANALISE_EXECUTADA = (
     'Processo de análise de certidões executado com sucesso!'
 )
 
+ARQUIVO_CORROMPIDO = (
+    'Arquivo zuado!!!',
+    f"Arquivo corrompido: ")
+
 
 ARQUIVO_INEXISTENTE = (
     'O arquivo selecionado não existe.',
@@ -122,16 +137,48 @@ ATUALIZAR_CAMINHOS = (
     'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
 )
 
+ATUALIZAR_XLSX = (
+    'Problema com o xlsx',
+    (
+        'O arquivo fonte de dados XLSX parece não ter sido atualizado correta'
+        'mente.\n\nTente atualizar a planilha FORNECEDORES usando a oção de c'
+        'olagem  que insere apenas "Valores"'
+    )
+)
+
 CAMINHOS_ATUALIZADOS = (
     'Fez porque quis!',
     'Caminhos de pastas e arquivos utilizados pelo sistema atualizados.'
 )
 
+CERTIDOES_FALTANDO = (
+    ', não foram encontradas as certidões:',
+    f'Adicione as certidões às respectivas pastas informadas e execute novame'
+    f'nte o programa.',
+    f'Tá faltando coisa, mano!',
+    f'Algumas certidões não foram encontradas!\nConsulte o arquivo de log, re'
+    f'solva as pendências indicadas e então execute novamente a análise.'
+)
+
+
+CERTIDOES_TRANSFERIDAS = (
+    'Transferiu, miserávi!',
+    'As certidões que validam o pagamento foram transferidas com sucesso!'
+)
+
 CRIANDO_IMAGENS = (
     '========================================================================'
     '========================================================================'
-    '\nCriando imagem:\n',
-    '\nImagem criada com sucesso!\n'
+    '\nCriando imagens:\n',
+    '\nImagens criadas com sucesso!\n'
+)
+
+DADOS_DO_FORNECEDOR_COM_ERRO = (
+    'Dados do fornecedor estão zuados!',
+    f'Não foi possível localizar o CNPJ da empresa na planilha FORNECEDORES d'
+    f'o arquivo xlsx utilizado como fonte de dados.\n\nVerifique se há regist'
+    f'ro de CNPJ para a empresa ou se o nome informado na planilha PAGAMENTO '
+    f'é idêntico ao inserido na planilha FORNECEDORES.'
 )
 
 DATAS_MULTIPLAS = (
@@ -152,6 +199,11 @@ DATA_NAO_ENCONTRADA = (
         '\nA data informada não foi encontrada na lista de datas para pagamen'
         'to ou não existe!'
     )
+)
+
+DIGITALIZADOS_MESCLADOS = (
+    'Mesclou, miserávi!!!',
+    'Digitalizações de pagamentos e respectivas certidões mescladas com sucesso!'
 )
 
 IDENTIFICADOR_DE_CERTIDAO = (
@@ -181,9 +233,26 @@ OPCOES_DE_RENOMEAR_VAZIA = (
 
 ORGAOS = ('UNIÃO', 'TST', 'FGTS', 'GDF')
 
+PASTA_DE_MESCLAGEM_EXISTENTE = (
+    'FICA CALMO!!!',
+    f'Já existe pasta para mesclagem na data informada!\nSe deseja fazer nova'
+    f' mesclagem apague o diretório: '
+)
+
+
+PASTA_NAO_ENCONTRADA = (
+    'Tem essa pasta aí não, locão!',
+    (
+        ' ainda não existe.\n\nAntes de tentar renomear as certidões, execute'
+        ' a opção "Analisar certidões". A referida opção criará as pastas nec'
+        'essárias e indicará o que precisa ser atualizado antes do processo d'
+        'e renomeação.'
+    )
+)
+
 PASTA_NAO_SELECIONADA = (
     'Se não selecionar a pasta, não vai rolar!',
-    ('Selecione uma pasta para renomear todos os seu arquivos de certidões.')
+    'Selecione uma pasta para renomear todos os seu arquivos de certidões.'
 )
 
 PLANILHAS = (
@@ -205,9 +274,6 @@ RENOMEACAO_EXECUTADA = (
     'm sucesso!'
 )
 
-
-
-
 #dicionários de strings
 
 IDENTIFICADOR_TRADUZIDO = {
@@ -215,7 +281,7 @@ IDENTIFICADOR_TRADUZIDO = {
     'Brasília,': 'GDF',
     'JUSTIÇA DO TRABALHO': 'TST',
     'MINISTÉRIO DA FAZENDA': 'UNIÃO',
-    'GOVERNO DO DISTRITO FEDERAL':'GDF'
+    'GOVERNO DO DISTRITO FEDERAL': 'GDF'
 }
 
 IDENTIFICADOR_DE_VALIDADE = {
