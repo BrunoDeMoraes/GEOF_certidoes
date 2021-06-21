@@ -43,7 +43,7 @@ class Fgts(Certidao):
             )
             messagebox.showerror(
                 CNPJ_NAO_ENCONTRADO[0],
-                f'{emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
+                f'FGTS - {emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
             )
             raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[0]}.')
         texto = []

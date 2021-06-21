@@ -4,25 +4,23 @@ import sqlite3
 class Conexao:
     def caminho_do_arquivo(self):
         caminho_py = __file__
-        print(f'esse é o caminho do arquivo {caminho_py}')
         caminho_do_dir = caminho_py.split('\\')
-        print(f'esse é o caminho do diretóriio {caminho_do_dir}' )
         caminho_de_uso = ('/').join(caminho_do_dir[0:-1])
-        print(f'esse é o {caminho_de_uso}')
         return caminho_de_uso
 
     def caminho_do_bd(self):
         caminho = self.caminho_do_arquivo()
         banco_de_dados = f'{caminho}/caminhos.db'
-        print(f'Esse é caminho do banco de {banco_de_dados}')
         return banco_de_dados
 
     def cria_pastas_de_trabalho(self):
         caminho = self.caminho_do_arquivo()
-        pastas_de_trabalho = ['Certidões',
-                              'Logs de conferência',
-                              'Certidões para pagamento',
-                              'Comprovantes de pagamento']
+        pastas_de_trabalho = [
+            'Certidões',
+            'Logs de conferência',
+            'Certidões para pagamento',
+            'Comprovantes de pagamento'
+        ]
         for pasta in pastas_de_trabalho:
             if not os.path.exists(f'{caminho}/{pasta}'):
                 os.makedirs(f'{caminho}/{pasta}')
@@ -49,7 +47,6 @@ class Conexao:
             direcionador = conexao.cursor()
             direcionador.execute(comando)
             urls = direcionador.fetchall()
-            print(f'urls dentro da função de consulta {urls}')
             for registro in urls:
                 print(f'{registro[0]}: {registro[1]}\n')
             return urls

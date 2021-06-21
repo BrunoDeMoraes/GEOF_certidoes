@@ -86,6 +86,16 @@ PADRAO_GDF_4 = (
     'bro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'
 )
 
+PADRAO_TST = (
+    'Expedição: (\d\d)/(\d\d)/(\d\d\d\d)',
+    'Validade: (\d\d)/(\d\d)/(\d\d\d\d)'
+)
+
+PADRAO_UNIAO = (
+    'do dia (\d\d)/(\d\d)/(\d\d\d\d)',
+    'Válida até (\d\d)/(\d\d)/(\d\d\d\d)'
+)
+
 PASTA_CRIADA = (
     '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n',
     'Número de novas pastas criadas: '

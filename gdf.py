@@ -1,5 +1,4 @@
 import os
-import re
 import time
 from tkinter import *
 from tkinter import messagebox
@@ -46,7 +45,7 @@ class Gdf(Certidao):
             )
             messagebox.showerror(
                 CNPJ_NAO_ENCONTRADO[0],
-                f'{emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
+                f'GDF - {emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
             )
             raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[1]}.')
         texto = []
