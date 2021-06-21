@@ -12,7 +12,7 @@ from constantes import CNPJ_NAO_ENCONTRADO
 from constantes import CNPJ_NULO
 from constantes import DATA_NACIONAL
 from constantes import EMISSAO_VENCIMENTO
-from constantes import FGTS_INVALIDO
+from constantes import ARQUIVOS_INVALIDOS
 from constantes import PADRAO_CNPJ
 from constantes import PADRAO_FGTS
 
@@ -38,14 +38,14 @@ class Fgts(Certidao):
             validação_de_cnpj = padrão_cnpj.search(certidao).group()
         except AttributeError:
             self.mensagem_de_log_completa(
-                f'{emp}\n{CNPJ_NAO_ENCONTRADO[1]}',
+                f'FGTS - {emp}\n{CNPJ_NAO_ENCONTRADO[1]}',
                 self.caminho_de_log
             )
             messagebox.showerror(
                 CNPJ_NAO_ENCONTRADO[0],
                 f'{emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
             )
-            raise Exception(f'{emp} - {FGTS_INVALIDO}.')
+            raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[0]}.')
         texto = []
         padrao = re.compile(PADRAO_FGTS)
         emissao_string = padrao.search(certidao)
@@ -83,7 +83,7 @@ class Fgts(Certidao):
         else:
             self.mensagem_de_log_simples(
                 (
-                    f'   {validação_de_cnpj} {CNPJ_NULO}\n'
+                    f'    {validação_de_cnpj} {CNPJ_NULO}\n'
                 ),
                 self.caminho_de_log
             )

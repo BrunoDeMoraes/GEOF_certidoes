@@ -43,8 +43,6 @@ CNPJ_NULO = '- o CNPJ encontrado não possui correspondência'
 
 DATA_NACIONAL = '%d/%m/%Y'
 
-FGTS_INVALIDO = 'arquivo da certidão FGTS da empresa inválido'
-
 INICIO_DA_EXECUCAO = (
     '\n======================================================================'
     '========================================================================'
@@ -64,6 +62,29 @@ LINHA_FINAL = (
 PADRAO_CNPJ = '(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)'
 
 PADRAO_FGTS = '(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)'
+
+PADRAO_GDF = (
+    'Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)'
+    '?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?('
+    'fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?(setembro)?(o'
+    'utubro)?(novembro)?(dezembro)? de (\d\d\d\d)'
+)
+
+PADRAO_GDF_2 = (
+    'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho'
+    ')?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?'
+    '(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?(setembro)?('
+    'outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'
+)
+
+PADRAO_GDF_3 = 'Certidão emitida via internet em (\d\d)/(\d\d)/(\d\d\d\d)'
+
+PADRAO_GDF_4 = (
+    'Válida até (\d)?(\d\d)? de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?'
+    '(Junho)?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(jan'
+    'eiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?(setem'
+    'bro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'
+)
 
 PASTA_CRIADA = (
     '\nPasta para inclusão de arquivos de pagamento criada com sucesso.\n',
@@ -144,6 +165,13 @@ ARQUIVOS_NAO_SELECIONADOS = (
     'Selecione os arquivos que deseja renomear'
 )
 
+ARQUIVOS_INVALIDOS = (
+    'arquivo da certidão FGTS da empresa inválido',
+    'arquivo da certidão GDF da empresa inválido',
+    'arquivo da certidão TST da empresa inválido',
+    'arquivo da certidão UNIÃO da empresa inválido'
+)
+
 ATUALIZAR_CAMINHOS = (
     'Vc sabe o que está fazendo?',
     'Deseja alterar a configuração dos caminhos de pastas e arquivos?'
@@ -181,9 +209,9 @@ CERTIDOES_TRANSFERIDAS = (
 CNPJ_NAO_ENCONTRADO = (
     'Esse arquivo não rola!',
     (
-        'Não foi possível encontrar o padrão de CNPJ na certidão FGTS da empr'
-        'esa.\nO arquivo pode estar corrompido ou ter sofrido atualizações qu'
-        'e alteraram sua formatação.'
+        'Não foi possível encontrar o padrão de CNPJ na certidão.\nO arquivo '
+        'pode estar corrompido ou ter sofrido atualizações que alteraram sua '
+        'formatação.'
     )
 )
 
@@ -338,4 +366,19 @@ IDENTIFICADOR_DE_VALIDADE_2 = {
         'ho)?(julho)?(agosto)?(setembro)?(outubro)?(novembro)?(dezembro)?(Jan'
         'eiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)?(Julho)?(Agosto)?(S'
         'etembro)?(Outubro)?(Novembro)?(Dezembro)? de (\d\d\d\d)')
+}
+
+MESES = {
+    'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04',
+    'Maio': '05', 'Junho': '06', 'Julho': '07', 'Agosto': '08',
+    'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'
+}
+
+MESES2 = {
+    'janeiro': '01', 'fevereiro': '02', 'março': '03', 'abril': '04',
+    'maio': '05', 'junho': '06', 'julho': '07', 'agosto': '08',
+    'setembro': '09', 'outubro': '10', 'novembro': '11', 'dezembro': '12',
+    'Janeiro': '01', 'Fevereiro': '02', 'Março': '03', 'Abril': '04',
+    'Maio': '05', 'Junho': '06', 'Julho': '07', 'Agosto': '08',
+    'Setembro': '09', 'Outubro': '10', 'Novembro': '11', 'Dezembro': '12'
 }
