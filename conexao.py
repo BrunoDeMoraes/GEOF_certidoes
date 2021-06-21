@@ -71,7 +71,9 @@ class Conexao:
                     'comprovantes_de_pagamento': (
                         f'{caminho}/Comprovantes de pagamento'
                     ),
-                    'certidões_para_pagamento': (f'{caminho}/Certidões para pagamento')
+                    'certidões_para_pagamento': (
+                        f'{caminho}/Certidões para pagamento'
+                    )
                      }
         for endereco in enderecos:
             comando = 'INSERT INTO urls VALUES (:variavel, :url)'
