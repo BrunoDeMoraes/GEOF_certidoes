@@ -271,11 +271,10 @@ class Certidao(Log, Conexao):
                 try:
                     self.empresas[emp][2]
                 except:
-                    for item in self.empresas:
-                        messagebox.showerror(
-                            ATUALIZAR_XLSX[0],
-                            ATUALIZAR_XLSX[1]
-                        )
+                    messagebox.showerror(
+                        ATUALIZAR_XLSX[0],
+                        ATUALIZAR_XLSX[1]
+                    )
                 self.mensagem_de_log_completa(
                     (
                         f'{emp}, CNPJ: {self.empresas[emp][2]}'
