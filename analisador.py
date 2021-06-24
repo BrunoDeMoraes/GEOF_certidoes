@@ -3,8 +3,9 @@ import pytesseract
 import shutil
 import sqlite3
 import time
+import PIL.Image
 from pdf2image import convert_from_path
-from PIL import Image
+#from PIL import Image
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
@@ -643,7 +644,7 @@ class Analisador(Certidao):
                 print(CRIANDO_IMAGENS[1])
 
                 certidao_jpg = pytesseract.image_to_string(
-                    Image.open(imagem_da_certidao), lang='por'
+                    PIL.Image.open(imagem_da_certidao), lang='por'
                 )
 
                 #lixo de debbug
@@ -790,7 +791,7 @@ class Analisador(Certidao):
             for imagem in os.listdir(origem):
                 if imagem.endswith(".jpg"):
                     certidao = pytesseract.image_to_string(
-                        Image.open(f'{origem}/{imagem}'), lang='por'
+                        PIL.Image.open(f'{origem}/{imagem}'), lang='por'
                     )
 
                     for frase in IDENTIFICADOR_DE_CERTIDAO:

@@ -271,10 +271,11 @@ class Certidao(Log, Conexao):
                 try:
                     self.empresas[emp][2]
                 except:
-                    messagebox.showerror(
-                        ATUALIZAR_XLSX[0],
-                        ATUALIZAR_XLSX[1]
-                    )
+                    for item in self.empresas:
+                        messagebox.showerror(
+                            ATUALIZAR_XLSX[0],
+                            ATUALIZAR_XLSX[1]
+                        )
                 self.mensagem_de_log_completa(
                     (
                         f'{emp}, CNPJ: {self.empresas[emp][2]}'
@@ -558,8 +559,11 @@ class Certidao(Log, Conexao):
                             ' ', '-'
                         )
                         arquivo_separado = retira_espaço_do_arquivo.split('-')
+                        while len(arquivo_separado) <= len(nome_separado):
+                            arquivo_separado.append('item de correção')
+                        contador = 0
                         for parte_do_nome in nome_separado:
-                            contador = 0
+
                             if (
                                     nome_separado[contador]
                                     == arquivo_separado[contador + 1]
