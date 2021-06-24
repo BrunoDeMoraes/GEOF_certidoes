@@ -191,8 +191,11 @@ ATUALIZAR_XLSX = (
     'Problema com o xlsx',
     (
         'O arquivo fonte de dados XLSX parece não ter sido atualizado correta'
-        'mente.\n\nTente atualizar a planilha FORNECEDORES usando a oção de c'
-        'olagem  que insere apenas "Valores"'
+        'mente.\n\nTente atualizar a planilha FORNECEDORES usando a opção de c'
+        'olagem  que insere apenas "Valores". Caso o erro persista, verifique '
+        'se cada nome de empresa inserido na lista da planilha PAGAMENTO possu'
+        'i correspondência exata com o nome da empresa descrito na coluna "A" '
+        'da planilha FORNECEDORES.'
     )
 )
 
