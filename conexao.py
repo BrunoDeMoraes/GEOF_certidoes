@@ -56,9 +56,11 @@ class Conexao:
         if not os.path.exists(caminho_do_banco_de_dados):
             comando = 'CREATE TABLE urls (variavel text, url text)'
             self.conexao(comando)
+            return True
         else:
             print('Banco de dados localizado.')
             self.consulta_urls()
+            return False
 
     def configura_bd(self):
         caminho = self.caminho_do_arquivo()
@@ -80,3 +82,7 @@ class Conexao:
                 direcionador = conexao.cursor()
                 direcionador.execute(comando, substituto)
         self.consulta_urls()
+
+    # def consulta_url_ou_cria_bd(self):
+    #     if self.cria_bd():
+    #         self.configura_bd()

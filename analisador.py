@@ -3,9 +3,9 @@ import pytesseract
 import shutil
 import sqlite3
 import time
+import threading
 import PIL.Image
 from pdf2image import convert_from_path
-#from PIL import Image
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
@@ -43,6 +43,8 @@ from união import Uniao
 
 class Analisador(Certidao):
     def __init__(self, tela):
+        if self.cria_bd():
+            self.configura_bd()
         self.frame_mestre = LabelFrame(tela, padx=0, pady=0)
         self.frame_mestre.pack(padx=1, pady=1)
         self.frame_data = LabelFrame(self.frame_mestre, padx=0, pady=0)
@@ -92,6 +94,9 @@ class Analisador(Certidao):
             bd=1
         )
 
+        self.botao_abrir_log.bind("<Enter>", self.altera_botao_log)
+        self.botao_abrir_log.bind("<Leave>", self.restaura_botao_log)
+
         self.validacao1 = OptionMenu(
             self.frame_data, self.variavel, *self.dias)
         self.validacao2 = OptionMenu(
@@ -106,9 +111,11 @@ class Analisador(Certidao):
 
         self.botao_analisar = Button(
             self.frame_mestre, text='Analisar\ncertidões',
-            command=self.executa, padx=30, pady=1, bg='green',
-            fg='white', font=('Helvetica', 9, 'bold'), bd=1
+            command=self.thread_analisar, padx=30, pady=1, bg='green', fg='white',
+            font=('Helvetica', 9, 'bold'), bd=1
         )
+        self.botao_analisar.bind("<Enter>", self.altera_botao_analisar)
+        self.botao_analisar.bind("<Leave>", self.restaura_botao_analisar)
 
         self.titulo_renomear = Label(
             self.frame_mestre, text=TEXTO_RENOMEAR, pady=0, padx=0,
@@ -123,9 +130,12 @@ class Analisador(Certidao):
 
         self.botao_renomear_tudo = Button(
             self.frame_mestre, text='Renomear\ncertidões',
-            command=self.selecionador_de_opções, padx=30, pady=1,
+            command=self.thread_selecionador_de_opções, padx=30, pady=1,
             bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
         )
+
+        self.botao_renomear_tudo.bind("<Enter>", self.altera_botao_renomear)
+        self.botao_renomear_tudo.bind("<Leave>", self.restaura_botao_renomear)
 
         self.titulo_transfere_arquivos = Label(
             self.frame_mestre, text=TEXTO_TRANSFERE_ARQUIVOS,
@@ -135,9 +145,12 @@ class Analisador(Certidao):
 
         self.botao_transfere_arquivos = Button(
             self.frame_mestre, text='Transferir\ncertidões',
-            command=self.transfere_certidoes, padx=30, pady=1,
+            command=self.thread_transfere_certidoes, padx=30, pady=1,
             bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
         )
+
+        self.botao_transfere_arquivos.bind("<Enter>", self.altera_botao_transfere)
+        self.botao_transfere_arquivos.bind("<Leave>", self.restaura_botao_transfere)
 
         self.titulo_mescla_arquivos = Label(
             self.frame_mestre, text=TEXTO_MESCLA_ARQUIVOS, pady=0, padx=0,
@@ -146,9 +159,12 @@ class Analisador(Certidao):
 
         self.botao_mescla_arquivos = Button(
             self.frame_mestre, text='Mesclar\narquivos',
-            command=self.mescla_certidoes, padx=30, pady=1,
+            command=self.thread_mescla_certidoes, padx=30, pady=1,
             bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
         )
+
+        self.botao_mescla_arquivos.bind("<Enter>", self.altera_botao_mesclar)
+        self.botao_mescla_arquivos.bind("<Leave>", self.restaura_botao_mesclar)
 
         self.roda_pe = Label(
             self.frame_mestre, text="SRSSU/DA/GEOF    ", pady=0, padx=0,
@@ -268,10 +284,12 @@ class Analisador(Certidao):
         self.certidões_para_pagamento = Button(
             self.frame_de_caminhos, text='Certidões para\npagamento',
             command=lambda: (
-                self.altera_caminho(self.caminho_certidões_para_pagamento)),
+                self.altera_caminho(self.caminho_certidões_para_pagamento)
+            ),
             padx=0, pady=0, bg='green', fg='white',
             font=('Helvetica', 8, 'bold'), bd=1
         )
+
         self.caminho_certidões_para_pagamento = Entry(
             self.frame_de_caminhos, width=70
         )
@@ -333,10 +351,47 @@ class Analisador(Certidao):
             ipady=13
         )
 
-    def criar_estrutura(self):
-        self.cria_pastas_de_trabalho()
-        self.cria_bd()
-        self.configura_bd()
+    def altera_botao_log(self, evento):
+        self.botao_abrir_log['fg'] = "#8FBC8F"
+
+    def restaura_botao_log(self, evento):
+        self.botao_abrir_log['fg'] = "green"
+
+    def altera_botao_analisar(self, evento):
+        self.botao_analisar['bg'] = "#8FBC8F"
+
+    def restaura_botao_analisar(self, evento):
+        self.botao_analisar['bg'] = "green"
+
+    def altera_botao_renomear(self, evento):
+        self.botao_renomear_tudo['bg'] = "#8FBC8F"
+
+    def restaura_botao_renomear(self, evento):
+        self.botao_renomear_tudo['bg'] = "green"
+
+    def altera_botao_transfere(self, evento):
+        self.botao_transfere_arquivos['bg'] = "#8FBC8F"
+
+    def restaura_botao_transfere(self, evento):
+        self.botao_transfere_arquivos['bg'] = "green"
+
+    def altera_botao_mesclar(self, evento):
+        self.botao_mescla_arquivos['bg'] = "#8FBC8F"
+
+    def restaura_botao_mesclar(self, evento):
+        self.botao_mescla_arquivos['bg'] = "green"
+
+    def thread_analisar(self):
+        threading.Thread(target=self.executa).start()
+
+    def thread_selecionador_de_opções(self):
+        threading.Thread(target=self.selecionador_de_opções).start()
+
+    def thread_transfere_certidoes(self):
+        threading.Thread(target=self.transfere_certidoes).start()
+
+    def thread_mescla_certidoes(self):
+        threading.Thread(target=self.mescla_certidoes).start()
 
     def altera_caminho(self, entrada, xlsx=False):
         if xlsx == True:
@@ -441,7 +496,6 @@ class Analisador(Certidao):
         self.cria_meses()
         self.cria_anos()
 
-    #Continuar refatoramento a partir daqui.
     def checa_urls(self):
         urls = self.consulta_urls()
         if not os.path.exists(urls[0][1]):
@@ -454,7 +508,6 @@ class Analisador(Certidao):
             messagebox.showerror('Sumiu!!!', CHECA_URL_3)
         elif not os.path.exists(urls[4][1]):
             messagebox.showerror('Sumiu!!!', CHECA_URL_4)
-
 
     def executa(self):
         tempo_inicial = time.time()
@@ -601,7 +654,6 @@ class Analisador(Certidao):
             obj1.pega_fornecedores()
             obj1.merge()
 
-    #continuar limpeza de constantes a partir daqui
     def pdf_para_jpg_para_renomear_arquivo(self):
         arquivo_selecionado = filedialog.askopenfilenames(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões',
@@ -628,9 +680,6 @@ class Analisador(Certidao):
 
             certidão_pdf = list(arquivo_selecionado)
 
-            #lixo de debbug
-            print(f'Arquivo que está sendo renomeado: {certidão_pdf}\n')
-
             for arquivo_a_renomear in certidão_pdf:
                 ultima_barra: int = arquivo_a_renomear[::-1].find('/')+1
                 os.chdir(arquivo_a_renomear[0:-(ultima_barra)])
@@ -646,9 +695,6 @@ class Analisador(Certidao):
                 certidao_jpg = pytesseract.image_to_string(
                     PIL.Image.open(imagem_da_certidao), lang='por'
                 )
-
-                #lixo de debbug
-                print('Renomeando certidão')
 
                 for frase in IDENTIFICADOR_DE_CERTIDAO:
                     if frase in certidao_jpg:
@@ -838,7 +884,6 @@ if __name__ == '__main__':
     objeto_tela = Analisador(tela)
     tela.resizable(False, False)
     tela.title(TITULO_DA_INTERFACE)
-    #tela.iconbitmap('D:/Leiturapdf/GEOF_logo.ico')
     tela.config(menu=objeto_tela.menu_certidões)
 
     tela.mainloop()
