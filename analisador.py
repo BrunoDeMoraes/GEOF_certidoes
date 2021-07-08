@@ -9,6 +9,7 @@ from pdf2image import convert_from_path
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import ttk
 
 from certidão import Certidao
 from constantes import ANALISADOS
@@ -60,21 +61,21 @@ class Analisador(Certidao):
         self.menu_configurações.add_separator()
 
         self.titulo = Label(
-            self.frame_data, text=TEXTO_PRINCIPAL, pady=0, padx=0, bg='green',
-            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold')
+            self.frame_data, text=TEXTO_PRINCIPAL, pady=3, padx=0, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Berlin Sans FB', 11)
         )
 
         self.dia_etiqueta = Label(
-            self.frame_data, text='Dia', padx=22, pady=0, bg='green',
-            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold')
+            self.frame_data, text='Dia', padx=20, pady=3, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Berlin Sans FB', 11)
         )
         self.mes_etiqueta = Label(
-            self.frame_data, text='Mês', padx=22, pady=0, bg='green',
-            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold')
+            self.frame_data, text='Mês', padx=20, pady=3, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Berlin Sans FB', 11)
         )
         self.ano_etiqueta = Label(
-            self.frame_data, text='Ano', padx=22, pady=0, bg='green',
-            fg='white', bd=2, relief=SUNKEN, font=('Helvetica', 10, 'bold')
+            self.frame_data, text='Ano', padx=20, pady=3, bg='green',
+            fg='white', bd=2, relief=SUNKEN, font=('Berlin Sans FB', 11)
         )
 
         self.variavel = StringVar()
@@ -106,7 +107,7 @@ class Analisador(Certidao):
 
         self.titulo_analisar = Label(
             self.frame_mestre, text=TEXTO_ANALISAR, pady=0, padx=0,
-            bg='white', fg='black', font=('Helvetica', 9, 'bold')
+            bg='white', fg='black', font=('Arial Narrow', 11)
         )
 
         self.botao_analisar = Button(
@@ -119,7 +120,7 @@ class Analisador(Certidao):
 
         self.titulo_renomear = Label(
             self.frame_mestre, text=TEXTO_RENOMEAR, pady=0, padx=0,
-            bg='white', fg='black', font=('Helvetica', 9, 'bold')
+            bg='white', fg='black', font=('Arial Narrow', 11)
         )
 
         self.variavel_de_opções = StringVar()
@@ -140,7 +141,7 @@ class Analisador(Certidao):
         self.titulo_transfere_arquivos = Label(
             self.frame_mestre, text=TEXTO_TRANSFERE_ARQUIVOS,
             pady=0, padx=0, bg='white', fg='black',
-            font=('Helvetica', 9, 'bold')
+            font=('Arial Narrow', 11)
         )
 
         self.botao_transfere_arquivos = Button(
@@ -154,7 +155,7 @@ class Analisador(Certidao):
 
         self.titulo_mescla_arquivos = Label(
             self.frame_mestre, text=TEXTO_MESCLA_ARQUIVOS, pady=0, padx=0,
-            bg='white', fg='black', font=('Helvetica', 9, 'bold')
+            bg='white', fg='black', font=('Arial Narrow', 11)
         )
 
         self.botao_mescla_arquivos = Button(
@@ -350,6 +351,7 @@ class Analisador(Certidao):
             row=6, column=2, columnspan=1, padx=15, pady=10, ipadx=10,
             ipady=13
         )
+
 
     def altera_botao_log(self, evento):
         self.botao_abrir_log['fg'] = "#8FBC8F"
@@ -577,6 +579,7 @@ class Analisador(Certidao):
                 LINHA_FINAL, obj1.caminho_de_log)
 
             messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
+            obj1.destruir_barra_de_progresso()
 
     def selecionador_de_opções(self):
         print(self.variavel_de_opções.get())

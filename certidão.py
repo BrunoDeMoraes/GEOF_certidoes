@@ -1,5 +1,6 @@
 import os
 import shutil
+import threading
 from tkinter import *
 from tkinter import messagebox
 
@@ -9,6 +10,7 @@ import pytesseract
 from PIL import Image
 from pdf2image import convert_from_path
 
+from barra_de_progresso import Barra
 from conexao import Conexao
 from constantes import ARQUIVO_CORROMPIDO
 from constantes import ATUALIZAR_XLSX
@@ -35,7 +37,7 @@ from constantes import RENOMEACAO_EXECUTADA
 from log import Log
 
 
-class Certidao(Log, Conexao):
+class Certidao(Log, Conexao, Barra):
     def __init__(self, dia, mes, ano):
         self.dia = dia
         self.mes = mes
@@ -291,6 +293,7 @@ class Certidao(Log, Conexao):
             raise Exception(CERTIDOES_FALTANDO[1])
 
     def pdf_para_jpg(self):
+        self.thread_barra_de_progresso('Analisando certidões', self.percentual)
         for emp in self.empresas:
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for pdf_file in os.listdir(
@@ -321,6 +324,7 @@ class Certidao(Log, Conexao):
                         pdf_file.endswith(".pdf")
                         and pdf_file.split()[0] in ORGAOS
                 ):
+
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
@@ -340,6 +344,7 @@ class Certidao(Log, Conexao):
                 certidao = objeto.pega_string(emp)
                 self.percentual += (25 / len(self.empresas))
                 print(f'   Total executado: {self.percentual}%')
+                self.valor_da_barra(self.percentual)
                 val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
                 try:
                     self.empresas[emp][1]
