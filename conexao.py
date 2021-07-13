@@ -82,7 +82,3 @@ class Conexao:
                 direcionador = conexao.cursor()
                 direcionador.execute(comando, substituto)
         self.consulta_urls()
-
-    # def consulta_url_ou_cria_bd(self):
-    #     if self.cria_bd():
-    #         self.configura_bd()

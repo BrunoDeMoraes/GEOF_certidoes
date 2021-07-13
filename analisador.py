@@ -9,7 +9,6 @@ from pdf2image import convert_from_path
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
-from tkinter import ttk
 
 from certidão import Certidao
 from constantes import ANALISADOS
@@ -124,9 +123,9 @@ class Analisador(Certidao):
         )
 
         self.variavel_de_opções = StringVar()
-        self.variavel_de_opções.set("Selecione uma opção")
+        self.variavel_de_opções.set('                           Selecione uma opção                          ')
         self.validacao = OptionMenu(
-            self.frame_mestre, self.variavel_de_opções, *OPCOES_DE_RENOMEACAO
+            self.frame_mestre, self.variavel_de_opções, *OPCOES_DE_RENOMEACAO,
         )
 
         self.botao_renomear_tudo = Button(
@@ -200,7 +199,7 @@ class Analisador(Certidao):
             pady=0, ipadx=0, ipady=8, sticky=W+E
         )
 
-        self.validacao.grid(row=4, column=1, columnspan=7, padx=0, pady=10)
+        self.validacao.grid(row=4, column=1, columnspan=7, ipadx=0, pady=10)
 
         self.botao_renomear_tudo.grid(
             row=5, column=1, columnspan=7, padx=0, pady=10
@@ -549,6 +548,7 @@ class Analisador(Certidao):
             obj1.apaga_imagem()
             obj1.certidoes_n_encontradas()
             obj1.pdf_para_jpg()
+            obj1.destruir_barra_de_progresso()
             obj1.analisa_certidoes(lista_de_objetos)
 
             obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
@@ -613,6 +613,7 @@ class Analisador(Certidao):
             obj1.pega_fornecedores()
             obj1.apaga_imagem()
             obj1.pdf_para_jpg_renomear()
+            obj1.destruir_barra_de_progresso()
             obj1.gera_nome()
             obj1.apaga_imagem()
 
@@ -620,6 +621,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[0],
                 RENOMEACAO_EXECUTADA[1]
             )
+            obj1.destruir_barra_de_progresso()
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
@@ -681,6 +683,9 @@ class Analisador(Certidao):
         else:
             print(CRIANDO_IMAGENS[0])
 
+            self.renomeadas = 0
+            self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+
             certidão_pdf = list(arquivo_selecionado)
 
             for arquivo_a_renomear in certidão_pdf:
@@ -698,6 +703,9 @@ class Analisador(Certidao):
                 certidao_jpg = pytesseract.image_to_string(
                     PIL.Image.open(imagem_da_certidao), lang='por'
                 )
+                self.renomeadas += (1 / len(certidão_pdf)) * 100
+                print(self.renomeadas)
+                self.valor_da_barra(self.renomeadas)
 
                 for frase in IDENTIFICADOR_DE_CERTIDAO:
                     if frase in certidao_jpg:
@@ -737,6 +745,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[0],
                 RENOMEACAO_EXECUTADA[2]
             )
+            self.destruir_barra_de_progresso()
 
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
@@ -805,10 +814,13 @@ class Analisador(Certidao):
             )
 
         else:
+            self.renomeadas = 0
+            self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
             print(CRIANDO_IMAGENS[0])
             os.chdir(self.pasta_selecionada)
-            self.apaga_imagens_da_pasta()
+
             for pdf_file in os.listdir(self.pasta_selecionada):
+
                 if '00.MERGE' in pdf_file:
                     if not os.path.isdir(
                             f'{self.pasta_selecionada}/Mesclados'
@@ -837,7 +849,15 @@ class Analisador(Certidao):
 
             os.chdir(f'{self.pasta_selecionada}')
             origem = f'{self.pasta_selecionada}'
+
+
+
             for imagem in os.listdir(origem):
+
+                self.renomeadas += (1 / len(os.listdir(origem))) * 100
+                print(self.renomeadas)
+                self.valor_da_barra(self.renomeadas)
+
                 if imagem.endswith(".jpg"):
                     certidao = pytesseract.image_to_string(
                         PIL.Image.open(f'{origem}/{imagem}'), lang='por'
@@ -873,6 +893,7 @@ class Analisador(Certidao):
                                 f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
                             )
                             print(imagem.split()[0])
+
             self.apaga_imagens_da_pasta()
             print(RENOMEACAO_EXECUTADA[2])
 
@@ -880,6 +901,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[0],
                 RENOMEACAO_EXECUTADA[3]
             )
+        self.destruir_barra_de_progresso()
 
 if __name__ == '__main__':
     tela = Tk()

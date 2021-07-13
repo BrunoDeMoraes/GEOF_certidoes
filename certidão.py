@@ -1,6 +1,5 @@
 import os
 import shutil
-import threading
 from tkinter import *
 from tkinter import messagebox
 
@@ -291,10 +290,14 @@ class Certidao(Log, Conexao, Barra):
             )
             messagebox.showerror(CERTIDOES_FALTANDO[2], CERTIDOES_FALTANDO[3])
             raise Exception(CERTIDOES_FALTANDO[1])
+        else:
+            self.imagens_criadas = 0
+            self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
 
     def pdf_para_jpg(self):
-        self.thread_barra_de_progresso('Analisando certidões', self.percentual)
         for emp in self.empresas:
+            self.imagens_criadas += (1/len(self.empresas))*100
+            print(self.imagens_criadas)
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for pdf_file in os.listdir(
                     f'{self.pasta_de_certidões}/{str(emp)}'
@@ -328,8 +331,10 @@ class Certidao(Log, Conexao, Barra):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
+                    self.valor_da_barra(self.imagens_criadas)
 
     def analisa_certidoes(self, lista_de_objetos):
+        self.thread_barra_de_progresso('Analisando certidões', self.percentual)
         lista_objetos = lista_de_objetos
         self.mensagem_de_log_completa(INICIO_DA_ANALISE, self.caminho_de_log)
         print(f'Total executado: {self.percentual}%')
@@ -442,8 +447,12 @@ class Certidao(Log, Conexao, Barra):
                             )
 
     def pdf_para_jpg_renomear(self):
+        self.imagens_criadas = 0
+        self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
         print(CRIANDO_IMAGENS[0])
         for emp in self.empresas:
+            self.imagens_criadas += (1 / len(self.empresas)) * 100
+            print(self.imagens_criadas)
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for pdf_file in os.listdir(
                     f'{self.pasta_de_certidões}/{str(emp)}'
@@ -476,15 +485,21 @@ class Certidao(Log, Conexao, Barra):
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
                     self.percentual += (25 / len(self.empresas))
                     print(f'Total de imagens criadas: {self.percentual}%')
+                    self.valor_da_barra(self.imagens_criadas)
         self.mensagem_de_log_completa(
             CRIANDO_IMAGENS[1],
             self.caminho_de_log
         )
-        self.percentual = 0
+        self.imagens_criadas = 0
 
     def gera_nome(self):
+        self.renomeadas = 0
+        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        print(CRIANDO_IMAGENS[0])
         print('\nRenomeando certidões:\n\n')
         for emp in self.empresas:
+            self.renomeadas += (1 / len(self.empresas)) * 100
+            print(self.renomeadas)
             os.chdir(f'{self.pasta_de_certidões}/{(emp)}')
             origem = f'{self.pasta_de_certidões}/{emp}'
             for imagem in os.listdir(origem):
@@ -540,9 +555,11 @@ class Certidao(Log, Conexao, Barra):
                                     f'{junta}.pdf'
                                 )
                             )
+                            self.valor_da_barra(self.renomeadas)
         print(RENOMEACAO_EXECUTADA[2])
 
     def merge(self):
+        nomes_errados = []
         if os.path.exists(f'{self.comprovantes_de_pagamento}/Mesclados'):
             print(PASTA_DE_MESCLAGEM_EXISTENTE[1])
             messagebox.showwarning(
@@ -628,6 +645,7 @@ class Certidao(Log, Conexao, Barra):
                 DIGITALIZADOS_MESCLADOS[0],
                 DIGITALIZADOS_MESCLADOS[1]
             )
+            print(nomes_errados)
 
     def apaga_imagem(self):
         for emp in self.empresas:

@@ -31,3 +31,5 @@ class Barra:
 
     def destruir_barra_de_progresso(self):
         self.janela_da_barra_de_progresso.destroy()
+
+

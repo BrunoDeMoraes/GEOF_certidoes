@@ -290,10 +290,12 @@ LOG_INEXISTENTE = (
 )
 
 OPCOES_DE_RENOMEACAO = (
-    'Selecione uma opção',
-    'Renomear arquivos',
-    'Renomear todos os arquivos de uma pasta',
-    'Renomear todas as certidões da lista de pagamento'
+    ('                           Selecione uma opção                         '
+     ' '),
+    ('                            Renomear arquivos                          '
+     '   '),
+    '       Renomear todos os arquivos de uma pasta         ',
+    'Renomear todas as certidões da lista de pagamento',
 )
 
 OPCOES_DE_RENOMEAR_VAZIA = (
