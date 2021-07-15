@@ -36,19 +36,11 @@ class Conexao:
 
     def consulta_urls(self):
         caminho_do_banco_de_dados = self.caminho_do_bd()
-        print(
-            (
-                f'caminho de banco de dados dentro da função consulta '
-                f'{caminho_do_banco_de_dados}'
-            )
-        )
         with sqlite3.connect(caminho_do_banco_de_dados) as conexao:
             comando = 'SELECT *, oid FROM urls'
             direcionador = conexao.cursor()
             direcionador.execute(comando)
             urls = direcionador.fetchall()
-            for registro in urls:
-                print(f'{registro[0]}: {registro[1]}\n')
             return urls
 
     def cria_bd(self):

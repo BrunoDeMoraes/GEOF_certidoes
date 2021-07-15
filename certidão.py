@@ -297,7 +297,6 @@ class Certidao(Log, Conexao, Barra):
     def pdf_para_jpg(self):
         for emp in self.empresas:
             self.imagens_criadas += (1/len(self.empresas))*100
-            print(self.imagens_criadas)
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for pdf_file in os.listdir(
                     f'{self.pasta_de_certidões}/{str(emp)}'
@@ -337,7 +336,7 @@ class Certidao(Log, Conexao, Barra):
         self.thread_barra_de_progresso('Analisando certidões', self.percentual)
         lista_objetos = lista_de_objetos
         self.mensagem_de_log_completa(INICIO_DA_ANALISE, self.caminho_de_log)
-        print(f'Total executado: {self.percentual}%')
+        print(f'Total executado: {self.percentual:.2f}%')
 
         for emp in self.empresas:
             empresadic = {}
@@ -348,7 +347,7 @@ class Certidao(Log, Conexao, Barra):
                 objeto.lista_de_cnpj = self.lista_de_cnpj
                 certidao = objeto.pega_string(emp)
                 self.percentual += (25 / len(self.empresas))
-                print(f'   Total executado: {self.percentual}%')
+                print(f'   Total executado: {self.percentual:.2f}%')
                 self.valor_da_barra(self.percentual)
                 val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
                 try:
@@ -452,7 +451,6 @@ class Certidao(Log, Conexao, Barra):
         print(CRIANDO_IMAGENS[0])
         for emp in self.empresas:
             self.imagens_criadas += (1 / len(self.empresas)) * 100
-            print(self.imagens_criadas)
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
             for pdf_file in os.listdir(
                     f'{self.pasta_de_certidões}/{str(emp)}'
@@ -479,13 +477,14 @@ class Certidao(Log, Conexao, Barra):
                              )
                         )
 
+
                 elif pdf_file.endswith(".pdf"):
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
                     self.percentual += (25 / len(self.empresas))
-                    print(f'Total de imagens criadas: {self.percentual}%')
-                    self.valor_da_barra(self.imagens_criadas)
+                    print(f'Total de imagens criadas: {self.percentual:.2f}%')
+                    self.valor_da_barra(self.percentual)
         self.mensagem_de_log_completa(
             CRIANDO_IMAGENS[1],
             self.caminho_de_log
@@ -493,13 +492,12 @@ class Certidao(Log, Conexao, Barra):
         self.imagens_criadas = 0
 
     def gera_nome(self):
+        self.percentual = 0
         self.renomeadas = 0
         self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
-        print(CRIANDO_IMAGENS[0])
         print('\nRenomeando certidões:\n\n')
         for emp in self.empresas:
             self.renomeadas += (1 / len(self.empresas)) * 100
-            print(self.renomeadas)
             os.chdir(f'{self.pasta_de_certidões}/{(emp)}')
             origem = f'{self.pasta_de_certidões}/{emp}'
             for imagem in os.listdir(origem):
@@ -516,7 +514,7 @@ class Certidao(Log, Conexao, Barra):
                                     f'{emp} - certidão '
                                     f'{IDENTIFICADOR_TRADUZIDO[frase]} '
                                     f'renomeada - Total executado: '
-                                    f'{self.percentual}%\n'
+                                    f'{self.percentual:.2f}%\n'
                                 )
                             )
                             if frase == 'GOVERNO DO DISTRITO FEDERAL':
@@ -555,7 +553,7 @@ class Certidao(Log, Conexao, Barra):
                                     f'{junta}.pdf'
                                 )
                             )
-                            self.valor_da_barra(self.renomeadas)
+            self.valor_da_barra(self.renomeadas)
         print(RENOMEACAO_EXECUTADA[2])
 
     def merge(self):

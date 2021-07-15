@@ -123,7 +123,12 @@ class Analisador(Certidao):
         )
 
         self.variavel_de_opções = StringVar()
-        self.variavel_de_opções.set('                           Selecione uma opção                          ')
+        self.variavel_de_opções.set(
+            (
+                '                           Selecione uma opção              '
+                '            '
+            )
+        )
         self.validacao = OptionMenu(
             self.frame_mestre, self.variavel_de_opções, *OPCOES_DE_RENOMEACAO,
         )
@@ -237,7 +242,7 @@ class Analisador(Certidao):
 
         self.criar_estrutura = Label(
             self.frame_de_caminhos, text=TEXTO_CRIA_ESTRUTURA,
-            bg='white', fg='green', font=('Helvetica', 10, 'bold')
+            bg='white', fg='green', font=('Arial Narrow', 11)
         )
 
         self.botão_criar_estrutura = Button(
@@ -582,7 +587,6 @@ class Analisador(Certidao):
             obj1.destruir_barra_de_progresso()
 
     def selecionador_de_opções(self):
-        print(self.variavel_de_opções.get())
         if self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[1]:
             self.pdf_para_jpg_para_renomear_arquivo()
         elif self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[2]:
@@ -698,13 +702,12 @@ class Analisador(Certidao):
 
                 imagem_da_certidao = f'{arquivo_a_renomear[:-4]}.jpg'
                 pages[0].save(imagem_da_certidao, "JPEG")
-                print(CRIANDO_IMAGENS[1])
+                print(imagem_da_certidao)
 
                 certidao_jpg = pytesseract.image_to_string(
                     PIL.Image.open(imagem_da_certidao), lang='por'
                 )
                 self.renomeadas += (1 / len(certidão_pdf)) * 100
-                print(self.renomeadas)
                 self.valor_da_barra(self.renomeadas)
 
                 for frase in IDENTIFICADOR_DE_CERTIDAO:
@@ -781,7 +784,6 @@ class Analisador(Certidao):
                 ipady=8, sticky=W+E
             )
 
-
     def apaga_imagens_da_pasta(self):
             os.chdir(self.pasta_selecionada)
             for arquivo in os.listdir(self.pasta_selecionada):
@@ -855,7 +857,6 @@ class Analisador(Certidao):
             for imagem in os.listdir(origem):
 
                 self.renomeadas += (1 / len(os.listdir(origem))) * 100
-                print(self.renomeadas)
                 self.valor_da_barra(self.renomeadas)
 
                 if imagem.endswith(".jpg"):
