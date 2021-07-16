@@ -46,9 +46,9 @@ class Certidao(Log, Conexao, Barra):
 
         self.caminho_xls = self.lista_de_urls[0][1]
         self.wb = openpyxl.load_workbook(self.caminho_xls)
+        self.checagem_de_planilhas()
         self.forn = self.wb[PLANILHAS[0]]
         self.pag = self.wb[PLANILHAS[1]]
-        self.checagem_de_planilhas()
 
         self.listareferencia = []
         self.empresas = {}
@@ -70,9 +70,7 @@ class Certidao(Log, Conexao, Barra):
         )
 
     def checagem_de_planilhas(self):
-        try:
-            self.forn and self.pag
-        except KeyError:
+        if (PLANILHAS[0] and PLANILHAS[1]) not in self.wb.sheetnames:
             messagebox.showerror(PLANILHAS[2], PLANILHAS[3])
 
     def checa_pasta_de_comprovantes(self):
@@ -349,7 +347,11 @@ class Certidao(Log, Conexao, Barra):
                 self.percentual += (25 / len(self.empresas))
                 print(f'   Total executado: {self.percentual:.2f}%')
                 self.valor_da_barra(self.percentual)
-                val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
+                try:
+                    val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
+                except:
+                    self.destruir_barra_de_progresso()
+                    sys.exit()
                 try:
                     self.empresas[emp][1]
                 except IndexError:
@@ -367,6 +369,7 @@ class Certidao(Log, Conexao, Barra):
                         ),
                         self.caminho_de_log
                     )
+                    self.destruir_barra_de_progresso()
                     raise Exception(
                         f'empresa: {emp}\n\n{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
                     )
@@ -605,6 +608,7 @@ class Certidao(Log, Conexao, Barra):
                                     ARQUIVO_CORROMPIDO[0],
                                     f'{ARQUIVO_CORROMPIDO[1]}{arquivo_pdf}'
                                 )
+                                self.destruir_barra_de_progresso()
                             for página in range(pagamento_lido.numPages):
                                 objeto_pagina = pagamento_lido.getPage(página)
                                 pdf_temporário.addPage(objeto_pagina)

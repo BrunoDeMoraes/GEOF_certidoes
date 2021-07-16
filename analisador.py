@@ -1,21 +1,22 @@
 import os
-import pytesseract
 import shutil
 import sqlite3
-import time
 import threading
-import PIL.Image
-from pdf2image import convert_from_path
+import time
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 
+import PIL.Image
+import pytesseract
+from pdf2image import convert_from_path
+
 from certidão import Certidao
 from constantes import ANALISADOS
 from constantes import ANALISE_EXECUTADA
+from constantes import ARQUIVOS_NAO_SELECIONADOS
 from constantes import ARQUIVO_INEXISTENTE
 from constantes import ATUALIZAR_CAMINHOS
-from constantes import ARQUIVOS_NAO_SELECIONADOS
 from constantes import CAMINHOS_ATUALIZADOS
 from constantes import CHECA_URL_0, CHECA_URL_1, CHECA_URL_2
 from constantes import CHECA_URL_3, CHECA_URL_4
@@ -387,6 +388,22 @@ class Analisador(Certidao):
     def restaura_botao_mesclar(self, evento):
         self.botao_mescla_arquivos['bg'] = "green"
 
+    def desabilita_botoes_de_execucao(self):
+        self.menu_certidões.entryconfig('Configurações', state='disabled')
+        self.botao_abrir_log['state'] = 'disabled'
+        self.botao_analisar['state'] = 'disabled'
+        self.botao_renomear_tudo['state'] = 'disabled'
+        self.botao_transfere_arquivos['state'] = 'disabled'
+        self.botao_mescla_arquivos['state'] = 'disabled'
+
+    def habilita_botoes_de_execucao(self):
+        self.menu_certidões.entryconfig('Configurações', state='normal')
+        self.botao_abrir_log['state'] = 'normal'
+        self.botao_analisar['state'] = 'normal'
+        self.botao_renomear_tudo['state'] = 'normal'
+        self.botao_transfere_arquivos['state'] = 'normal'
+        self.botao_mescla_arquivos['state'] = 'normal'
+
     def thread_analisar(self):
         threading.Thread(target=self.executa).start()
 
@@ -528,63 +545,69 @@ class Analisador(Certidao):
                 or not os.path.exists(urls[3][1])):
             self.checa_urls()
         else:
-            obj1 = Certidao(dia, mes, ano)
-            objUniao = Uniao(dia, mes, ano)
-            objTst = Tst(dia, mes, ano)
-            objFgts = Fgts(dia, mes, ano)
-            objGdf = Gdf(dia, mes, ano)
-            lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
+            self.desabilita_botoes_de_execucao()
+            try:
+                obj1 = Certidao(dia, mes, ano)
+                objUniao = Uniao(dia, mes, ano)
+                objTst = Tst(dia, mes, ano)
+                objFgts = Fgts(dia, mes, ano)
+                objGdf = Gdf(dia, mes, ano)
+                lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
 
-            obj1.mensagem_de_log_completa(
-                INICIO_DA_EXECUCAO, obj1.caminho_de_log
-            )
+                obj1.mensagem_de_log_completa(
+                    INICIO_DA_EXECUCAO, obj1.caminho_de_log
+                )
 
-            obj1.analisa_referencia()
-            obj1.dados_completos_dos_fornecedores()
-            obj1.listar_cnpjs()
-            obj1.listar_cnpjs_exceções()
+                obj1.analisa_referencia()
+                obj1.dados_completos_dos_fornecedores()
+                obj1.listar_cnpjs()
+                obj1.listar_cnpjs_exceções()
 
-            obj1.mensagem_de_log_simples(ANALISADOS, obj1.caminho_de_log)
+                obj1.mensagem_de_log_simples(ANALISADOS, obj1.caminho_de_log)
 
-            for emp in obj1.empresas:
-                obj1.mensagem_de_log_simples(f'{emp}', obj1.caminho_de_log)
+                for emp in obj1.empresas:
+                    obj1.mensagem_de_log_simples(f'{emp}', obj1.caminho_de_log)
 
-            obj1.cria_diretorio()
-            obj1.apaga_imagem()
-            obj1.certidoes_n_encontradas()
-            obj1.pdf_para_jpg()
-            obj1.destruir_barra_de_progresso()
-            obj1.analisa_certidoes(lista_de_objetos)
+                obj1.cria_diretorio()
+                obj1.apaga_imagem()
+                obj1.certidoes_n_encontradas()
+                obj1.pdf_para_jpg()
+                obj1.destruir_barra_de_progresso()
+                obj1.analisa_certidoes(lista_de_objetos)
 
-            obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
+                obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
 
-            obj1.pega_cnpj()
+                obj1.pega_cnpj()
 
-            obj1.mensagem_de_log_simples(PENDENCIAS, obj1.caminho_de_log)
+                obj1.mensagem_de_log_simples(PENDENCIAS, obj1.caminho_de_log)
 
-            for emp in obj1.empresas_a_atualizar:
-                obj1.mensagem_de_log_simples(
-                    (f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} '
-                     f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
+                for emp in obj1.empresas_a_atualizar:
+                    obj1.mensagem_de_log_simples(
+                        (f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} '
+                         f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
+                        obj1.caminho_de_log
+                    )
+
+                obj1.apaga_imagem()
+
+                tempo_final = time.time()
+                tempo_de_execução = int((tempo_final - tempo_inicial))
+
+                obj1.mensagem_de_log_completa(
+                    (f'\n\nTempo total de execução: {tempo_de_execução // 60} '
+                     f'minutos e {tempo_de_execução % 60} segundos.'),
                     obj1.caminho_de_log
                 )
 
-            obj1.apaga_imagem()
+                obj1.mensagem_de_log_simples(
+                    LINHA_FINAL, obj1.caminho_de_log)
 
-            tempo_final = time.time()
-            tempo_de_execução = int((tempo_final - tempo_inicial))
-
-            obj1.mensagem_de_log_completa(
-                (f'\n\nTempo total de execução: {tempo_de_execução // 60} '
-                 f'minutos e {tempo_de_execução % 60} segundos.'),
-                obj1.caminho_de_log
-            )
-
-            obj1.mensagem_de_log_simples(
-                LINHA_FINAL, obj1.caminho_de_log)
-
-            messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
-            obj1.destruir_barra_de_progresso()
+                messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
+                obj1.destruir_barra_de_progresso()
+                self.habilita_botoes_de_execucao()
+            except:
+                self.habilita_botoes_de_execucao()
+                sys.exit()
 
     def selecionador_de_opções(self):
         if self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[1]:
@@ -612,20 +635,26 @@ class Analisador(Certidao):
                 or not os.path.exists(urls[3][1])):
             self.checa_urls()
         else:
-            obj1 = Certidao(dia, mes, ano)
-            obj1.analisa_referencia()
-            obj1.pega_fornecedores()
-            obj1.apaga_imagem()
-            obj1.pdf_para_jpg_renomear()
-            obj1.destruir_barra_de_progresso()
-            obj1.gera_nome()
-            obj1.apaga_imagem()
+            self.desabilita_botoes_de_execucao()
+            try:
+                obj1 = Certidao(dia, mes, ano)
+                obj1.analisa_referencia()
+                obj1.pega_fornecedores()
+                obj1.apaga_imagem()
+                obj1.pdf_para_jpg_renomear()
+                obj1.destruir_barra_de_progresso()
+                obj1.gera_nome()
+                obj1.apaga_imagem()
 
-            messagebox.showinfo(
-                RENOMEACAO_EXECUTADA[0],
-                RENOMEACAO_EXECUTADA[1]
-            )
-            obj1.destruir_barra_de_progresso()
+                messagebox.showinfo(
+                    RENOMEACAO_EXECUTADA[0],
+                    RENOMEACAO_EXECUTADA[1]
+                )
+                obj1.destruir_barra_de_progresso()
+                self.habilita_botoes_de_execucao()
+            except:
+                self.habilita_botoes_de_execucao()
+                sys.exit()
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
@@ -640,10 +669,16 @@ class Analisador(Certidao):
                 or not os.path.exists(urls[3][1])):
             self.checa_urls()
         else:
-            obj1 = Certidao(dia, mes, ano)
-            obj1.analisa_referencia()
-            obj1.pega_fornecedores()
-            obj1.cria_certidoes_para_pagamento()
+            self.desabilita_botoes_de_execucao()
+            try:
+                obj1 = Certidao(dia, mes, ano)
+                obj1.analisa_referencia()
+                obj1.pega_fornecedores()
+                obj1.cria_certidoes_para_pagamento()
+                self.habilita_botoes_de_execucao()
+            except:
+                self.habilita_botoes_de_execucao()
+                sys.exit()
 
     def mescla_certidoes(self):
         dia = self.variavel.get()
@@ -658,12 +693,20 @@ class Analisador(Certidao):
                 or not os.path.exists(urls[3][1])):
             self.checa_urls()
         else:
-            obj1 = Certidao(dia, mes, ano)
-            obj1.analisa_referencia()
-            obj1.pega_fornecedores()
-            obj1.merge()
+            self.desabilita_botoes_de_execucao()
+            try:
+                obj1 = Certidao(dia, mes, ano)
+                obj1.analisa_referencia()
+                obj1.pega_fornecedores()
+                obj1.merge()
+                self.habilita_botoes_de_execucao()
+            except:
+                self.habilita_botoes_de_execucao()
+                sys.exit()
+
 
     def pdf_para_jpg_para_renomear_arquivo(self):
+        self.desabilita_botoes_de_execucao()
         arquivo_selecionado = filedialog.askopenfilenames(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões',
             filetypes=(('PDF', '*.pdf'), ("Tudo", '*.*'))
@@ -749,6 +792,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[2]
             )
             self.destruir_barra_de_progresso()
+        self.habilita_botoes_de_execucao()
 
     def caminho_de_pastas(self):
         pasta = 'Nenhuma pasta selecionada'
@@ -791,6 +835,7 @@ class Analisador(Certidao):
                     os.unlink(f'{self.pasta_selecionada}/{arquivo}')
 
     def pdf_para_jpg_renomear_conteudo_da_pasta(self):
+        self.desabilita_botoes_de_execucao()
         self.pasta_selecionada = filedialog.askdirectory(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões'
         )
@@ -903,6 +948,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[3]
             )
         self.destruir_barra_de_progresso()
+        self.habilita_botoes_de_execucao()
 
 if __name__ == '__main__':
     tela = Tk()
