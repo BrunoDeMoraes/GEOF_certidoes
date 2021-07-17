@@ -112,7 +112,8 @@ class Analisador(Certidao):
 
         self.botao_analisar = Button(
             self.frame_mestre, text='Analisar\ncertidões',
-            command=self.thread_analisar, padx=30, pady=1, bg='green', fg='white',
+            disabledforeground='white', command=self.thread_analisar,
+            padx=30, pady=1, bg='green', fg='white',
             font=('Helvetica', 9, 'bold'), bd=1
         )
         self.botao_analisar.bind("<Enter>", self.altera_botao_analisar)
@@ -136,6 +137,7 @@ class Analisador(Certidao):
 
         self.botao_renomear_tudo = Button(
             self.frame_mestre, text='Renomear\ncertidões',
+            disabledforeground='white',
             command=self.thread_selecionador_de_opções, padx=30, pady=1,
             bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
         )
@@ -151,6 +153,7 @@ class Analisador(Certidao):
 
         self.botao_transfere_arquivos = Button(
             self.frame_mestre, text='Transferir\ncertidões',
+            disabledforeground='white',
             command=self.thread_transfere_certidoes, padx=30, pady=1,
             bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
         )
@@ -166,11 +169,16 @@ class Analisador(Certidao):
         self.botao_mescla_arquivos = Button(
             self.frame_mestre, text='Mesclar\narquivos',
             command=self.thread_mescla_certidoes, padx=30, pady=1,
-            bg='green', fg='white', font=('Helvetica', 9, 'bold'), bd=1
+            disabledforeground='white', bg='green', fg='white',
+            font=('Helvetica', 9, 'bold'), bd=1
         )
 
-        self.botao_mescla_arquivos.bind("<Enter>", self.altera_botao_mesclar)
-        self.botao_mescla_arquivos.bind("<Leave>", self.restaura_botao_mesclar)
+        self.botao_mescla_arquivos.bind(
+            "<Enter>", self.altera_botao_mesclar
+        )
+        self.botao_mescla_arquivos.bind(
+            "<Leave>", self.restaura_botao_mesclar
+        )
 
         self.roda_pe = Label(
             self.frame_mestre, text="SRSSU/DA/GEOF    ", pady=0, padx=0,
