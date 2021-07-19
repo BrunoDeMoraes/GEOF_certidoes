@@ -228,6 +228,11 @@ CNPJ_NAO_ENCONTRADO = (
     )
 )
 
+CNPJ_VAZIO = (
+    'Tá faltando coisa na planilha',
+f'CNPJ não preenchido com o padrão "99.999.999/9999-99" na planilha FORNECEDORES da fonte de dados XLSX.'
+)
+
 CRIANDO_IMAGENS = (
     '========================================================================'
     '========================================================================'

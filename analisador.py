@@ -592,7 +592,7 @@ class Analisador(Certidao):
                 for emp in obj1.empresas_a_atualizar:
                     obj1.mensagem_de_log_simples(
                         (f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} '
-                         f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
+                            f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
                         obj1.caminho_de_log
                     )
 
@@ -603,7 +603,7 @@ class Analisador(Certidao):
 
                 obj1.mensagem_de_log_completa(
                     (f'\n\nTempo total de execução: {tempo_de_execução // 60} '
-                     f'minutos e {tempo_de_execução % 60} segundos.'),
+                        f'minutos e {tempo_de_execução % 60} segundos.'),
                     obj1.caminho_de_log
                 )
 
@@ -615,7 +615,9 @@ class Analisador(Certidao):
                 self.habilita_botoes_de_execucao()
             except:
                 self.habilita_botoes_de_execucao()
-                sys.exit()
+                print('execução interrompida')
+                raise
+
 
     def selecionador_de_opções(self):
         if self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[1]:
@@ -858,15 +860,9 @@ class Analisador(Certidao):
 
             print(PASTA_NAO_SELECIONADA[1])
 
-            self.caminho_da_pasta = Label(
-                self.frame_renomear, text='Nenhuma pasta selecionada', pady=0,
-                padx=0, bg='white', fg='gray', font=('Helvetica', 9, 'bold')
-            )
+            self.habilita_botoes_de_execucao()
+            sys.exit()
 
-            self.caminho_da_pasta.grid(
-                row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0,
-                ipady=8, sticky=W+E
-            )
 
         else:
             self.renomeadas = 0

@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from tkinter import *
 from tkinter import messagebox
@@ -15,6 +16,7 @@ from constantes import ARQUIVO_CORROMPIDO
 from constantes import ATUALIZAR_XLSX
 from constantes import CERTIDOES_TRANSFERIDAS
 from constantes import CERTIDOES_FALTANDO
+from constantes import CNPJ_VAZIO
 from constantes import CRIANDO_IMAGENS
 from constantes import DADOS_DO_FORNECEDOR_COM_ERRO
 from constantes import DATA_NAO_ENCONTRADA
@@ -25,6 +27,7 @@ from constantes import IDENTIFICADOR_DE_VALIDADE, IDENTIFICADOR_DE_VALIDADE_2
 from constantes import IDENTIFICADOR_TRADUZIDO
 from constantes import INICIO_DA_ANALISE
 from constantes import ORGAOS
+from constantes import PADRAO_CNPJ
 from constantes import PASTA_CRIADA
 from constantes import PASTA_DE_MESCLAGEM_EXISTENTE
 from constantes import PASTA_DE_PAGAMENTO
@@ -154,27 +157,36 @@ class Certidao(Log, Conexao, Barra):
                     if celula.value != self.empresas[emp][0]:
                         continue
                     else:
-                        self.empresas[emp].append(
-                            self.forn[f'F{celula.row}'].value
-                        )
-                        cnpj_formatado = self.empresas[emp][1]
-                        cnpj_tratado = ''
-                        for digito in cnpj_formatado:
-                            if digito in '0123456789':
-                                cnpj_tratado += digito
-                        self.empresas[emp].append(cnpj_tratado)
-                        if self.forn[f'M{celula.row}'].value == None:
-                            continue
+                        padrão_cnpj = re.compile(PADRAO_CNPJ)
+                        celula_de_cnpj = self.forn[f'F{celula.row}'].value
+                        if (
+                                celula_de_cnpj == None
+                                or padrão_cnpj.search(celula_de_cnpj) == None
+                        ):
+                            messagebox.showerror(CNPJ_VAZIO[0], f'{emp} - {CNPJ_VAZIO[1]}')
+                            sys.exit()
                         else:
                             self.empresas[emp].append(
-                                self.forn[f'M{celula.row}'].value
+                                str(self.forn[f'F{celula.row}'].value)
                             )
-                            cnpj_matriz_formatado = self.empresas[emp][3]
-                            cnpj_matriz_tratado = ''
-                            for digito in cnpj_matriz_formatado:
+                            cnpj_formatado = self.empresas[emp][1]
+                            cnpj_tratado = ''
+                            for digito in cnpj_formatado:
                                 if digito in '0123456789':
-                                    cnpj_matriz_tratado += digito
-                            self.empresas[emp].append(cnpj_matriz_tratado)
+                                    cnpj_tratado += digito
+                            self.empresas[emp].append(cnpj_tratado)
+                            if self.forn[f'M{celula.row}'].value == None:
+                                continue
+                            else:
+                                self.empresas[emp].append(
+                                    self.forn[f'M{celula.row}'].value
+                                )
+                                cnpj_matriz_formatado = self.empresas[emp][3]
+                                cnpj_matriz_tratado = ''
+                                for digito in cnpj_matriz_formatado:
+                                    if digito in '0123456789':
+                                        cnpj_matriz_tratado += digito
+                                self.empresas[emp].append(cnpj_matriz_tratado)
         return self.empresas
 
     def dados_completos_dos_fornecedores(self):
