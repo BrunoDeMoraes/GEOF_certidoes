@@ -664,7 +664,7 @@ class Analisador(Certidao):
                 self.habilita_botoes_de_execucao()
             except:
                 self.habilita_botoes_de_execucao()
-                sys.exit()
+                raise
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
@@ -688,7 +688,7 @@ class Analisador(Certidao):
                 self.habilita_botoes_de_execucao()
             except:
                 self.habilita_botoes_de_execucao()
-                sys.exit()
+                raise
 
     def mescla_certidoes(self):
         dia = self.variavel.get()
@@ -712,7 +712,7 @@ class Analisador(Certidao):
                 self.habilita_botoes_de_execucao()
             except:
                 self.habilita_botoes_de_execucao()
-                sys.exit()
+                raise
 
 
     def pdf_para_jpg_para_renomear_arquivo(self):
@@ -861,7 +861,7 @@ class Analisador(Certidao):
             print(PASTA_NAO_SELECIONADA[1])
 
             self.habilita_botoes_de_execucao()
-            sys.exit()
+            raise
 
 
         else:

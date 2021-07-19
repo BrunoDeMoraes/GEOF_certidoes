@@ -164,7 +164,7 @@ class Certidao(Log, Conexao, Barra):
                                 or padrão_cnpj.search(celula_de_cnpj) == None
                         ):
                             messagebox.showerror(CNPJ_VAZIO[0], f'{emp} - {CNPJ_VAZIO[1]}')
-                            sys.exit()
+                            raise
                         else:
                             self.empresas[emp].append(
                                 str(self.forn[f'F{celula.row}'].value)
@@ -363,7 +363,7 @@ class Certidao(Log, Conexao, Barra):
                     val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
                 except:
                     self.destruir_barra_de_progresso()
-                    sys.exit()
+                    raise
                 try:
                     self.empresas[emp][1]
                 except IndexError:
