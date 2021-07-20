@@ -613,10 +613,10 @@ class Analisador(Certidao):
                 messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
                 obj1.destruir_barra_de_progresso()
                 self.habilita_botoes_de_execucao()
-            except:
+            finally:
                 self.habilita_botoes_de_execucao()
                 print('execução interrompida')
-                raise
+
 
 
     def selecionador_de_opções(self):
@@ -662,9 +662,9 @@ class Analisador(Certidao):
                 )
                 obj1.destruir_barra_de_progresso()
                 self.habilita_botoes_de_execucao()
-            except:
+            finally:
                 self.habilita_botoes_de_execucao()
-                raise
+
 
     def transfere_certidoes(self):
         dia = self.variavel.get()
@@ -686,9 +686,8 @@ class Analisador(Certidao):
                 obj1.pega_fornecedores()
                 obj1.cria_certidoes_para_pagamento()
                 self.habilita_botoes_de_execucao()
-            except:
+            finally:
                 self.habilita_botoes_de_execucao()
-                raise
 
     def mescla_certidoes(self):
         dia = self.variavel.get()
@@ -710,9 +709,8 @@ class Analisador(Certidao):
                 obj1.pega_fornecedores()
                 obj1.merge()
                 self.habilita_botoes_de_execucao()
-            except:
+            finally:
                 self.habilita_botoes_de_execucao()
-                raise
 
 
     def pdf_para_jpg_para_renomear_arquivo(self):
@@ -845,7 +843,6 @@ class Analisador(Certidao):
                     os.unlink(f'{self.pasta_selecionada}/{arquivo}')
 
     def pdf_para_jpg_renomear_conteudo_da_pasta(self):
-        self.desabilita_botoes_de_execucao()
         self.pasta_selecionada = filedialog.askdirectory(
             initialdir=f'{self.caminho_do_arquivo()}/Certidões'
         )
@@ -861,10 +858,10 @@ class Analisador(Certidao):
             print(PASTA_NAO_SELECIONADA[1])
 
             self.habilita_botoes_de_execucao()
-            raise
 
 
         else:
+            self.desabilita_botoes_de_execucao()
             self.renomeadas = 0
             self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
             print(CRIANDO_IMAGENS[0])
@@ -951,7 +948,7 @@ class Analisador(Certidao):
                 RENOMEACAO_EXECUTADA[0],
                 RENOMEACAO_EXECUTADA[3]
             )
-        self.destruir_barra_de_progresso()
+            self.destruir_barra_de_progresso()
         self.habilita_botoes_de_execucao()
 
 if __name__ == '__main__':

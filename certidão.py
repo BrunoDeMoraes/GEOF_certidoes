@@ -164,7 +164,7 @@ class Certidao(Log, Conexao, Barra):
                                 or padrão_cnpj.search(celula_de_cnpj) == None
                         ):
                             messagebox.showerror(CNPJ_VAZIO[0], f'{emp} - {CNPJ_VAZIO[1]}')
-                            raise
+                            raise Exception(f'{emp} - {CNPJ_VAZIO[1]}')
                         else:
                             self.empresas[emp].append(
                                 str(self.forn[f'F{celula.row}'].value)
