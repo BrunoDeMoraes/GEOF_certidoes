@@ -78,12 +78,12 @@ class Analisador(Certidao):
             fg='white', bd=2, relief=SUNKEN, font=('Berlin Sans FB', 11)
         )
 
-        self.variavel = StringVar()
-        self.variavel.set(" ")
-        self.variavel2 = StringVar()
-        self.variavel2.set(" ")
-        self.variavel3 = StringVar()
-        self.variavel3.set(" ")
+        self.dia = StringVar()
+        self.dia.set(" ")
+        self.mes = StringVar()
+        self.mes.set(" ")
+        self.ano = StringVar()
+        self.ano.set(" ")
         self.dias = [' ']
         self.meses = [' ']
         self.anos = [' ']
@@ -99,11 +99,11 @@ class Analisador(Certidao):
         self.botao_abrir_log.bind("<Leave>", self.restaura_botao_log)
 
         self.validacao1 = OptionMenu(
-            self.frame_data, self.variavel, *self.dias)
+            self.frame_data, self.dia, *self.dias)
         self.validacao2 = OptionMenu(
-            self.frame_data, self.variavel2, *self.meses)
+            self.frame_data, self.mes, *self.meses)
         self.validacao3 = OptionMenu(
-            self.frame_data, self.variavel3, *self.anos)
+            self.frame_data, self.ano, *self.anos)
 
         self.titulo_analisar = Label(
             self.frame_mestre, text=TEXTO_ANALISAR, pady=0, padx=0,
@@ -485,9 +485,9 @@ class Analisador(Certidao):
 
     def abrir_log(self):
         urls = self.consulta_urls()
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+        dia = self.dia.get()
+        mes = self.mes.get()
+        ano = self.ano.get()
         if not os.path.exists(f'{urls[2][1]}/{ano}-{mes}-{dia}.txt') \
                 or (dia, mes, ano) == (' ', ' ', ' '):
             messagebox.showerror(LOG_INEXISTENTE[0], LOG_INEXISTENTE[1])
@@ -540,11 +540,18 @@ class Analisador(Certidao):
         elif not os.path.exists(urls[4][1]):
             messagebox.showerror('Sumiu!!!', CHECA_URL_4)
 
-    def executa(self):
-        tempo_inicial = time.time()
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+    def cria_objetos(self):
+        objUniao = Uniao(self.dia.get(), self.mes.get(), self.ano.get())
+        objTst = Tst(self.dia.get(), self.mes.get(), self.ano.get())
+        objFgts = Fgts(self.dia.get(), self.mes.get(), self.ano.get())
+        objGdf = Gdf(self.dia.get(), self.mes.get(), self.ano.get())
+        lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
+        return lista_de_objetos
+
+    def cabecalho_de_execucao(self, corpo_da_funcao):
+        # self.dia = self.variavel.get()
+        # self.mes = self.variavel2.get()
+        # self.ano = self.variavel3.get()
         urls = self.consulta_urls()
         if (not os.path.exists(urls[0][1])
                 or not os.path.exists(urls[1][1])
@@ -553,71 +560,83 @@ class Analisador(Certidao):
                 or not os.path.exists(urls[3][1])):
             self.checa_urls()
         else:
-            self.desabilita_botoes_de_execucao()
-            try:
-                obj1 = Certidao(dia, mes, ano)
-                objUniao = Uniao(dia, mes, ano)
-                objTst = Tst(dia, mes, ano)
-                objFgts = Fgts(dia, mes, ano)
-                objGdf = Gdf(dia, mes, ano)
-                lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
+            corpo_da_funcao()
 
-                obj1.mensagem_de_log_completa(
-                    INICIO_DA_EXECUCAO, obj1.caminho_de_log
-                )
 
-                obj1.analisa_referencia()
-                obj1.dados_completos_dos_fornecedores()
-                obj1.listar_cnpjs()
-                obj1.listar_cnpjs_exceções()
 
-                obj1.mensagem_de_log_simples(ANALISADOS, obj1.caminho_de_log)
+    def executa(self):
+        self.cabecalho_de_execucao(self.corpo_executa)
 
-                for emp in obj1.empresas:
-                    obj1.mensagem_de_log_simples(f'{emp}', obj1.caminho_de_log)
+    def corpo_executa(self):
+        tempo_inicial = time.time()
+        self.desabilita_botoes_de_execucao()
+        try:
 
-                obj1.cria_diretorio()
-                obj1.apaga_imagem()
-                obj1.certidoes_n_encontradas()
-                obj1.pdf_para_jpg()
-                obj1.destruir_barra_de_progresso()
-                obj1.analisa_certidoes(lista_de_objetos)
+            obj1 = Certidao(self.dia.get(), self.mes.get(), self.ano.get())
+            #objUniao = Uniao(self.dia, self.mes, self.ano)
+            # objTst = Tst(self.dia, self.mes, self.ano)
+            # objFgts = Fgts(self.dia, self.mes, self.ano)
+            # objGdf = Gdf(self.dia, self.mes, self.ano)
+            # lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
+            #a, b, c, d = self.cria_objetos()
+            #lista_de_objetos = [a, b, c, d]
+            lista_de_objetos = self.cria_objetos()
+            print(lista_de_objetos)
 
-                obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
+            obj1.mensagem_de_log_completa(
+                INICIO_DA_EXECUCAO, obj1.caminho_de_log
+            )
 
-                obj1.pega_cnpj()
+            obj1.analisa_referencia()
+            obj1.dados_completos_dos_fornecedores()
+            obj1.listar_cnpjs()
+            obj1.listar_cnpjs_exceções()
 
-                obj1.mensagem_de_log_simples(PENDENCIAS, obj1.caminho_de_log)
+            obj1.mensagem_de_log_simples(ANALISADOS, obj1.caminho_de_log)
 
-                for emp in obj1.empresas_a_atualizar:
-                    obj1.mensagem_de_log_simples(
-                        (f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} '
-                            f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
-                        obj1.caminho_de_log
-                    )
+            for emp in obj1.empresas:
+                obj1.mensagem_de_log_simples(f'{emp}', obj1.caminho_de_log)
 
-                obj1.apaga_imagem()
+            obj1.cria_diretorio()
+            obj1.apaga_imagem()
+            obj1.certidoes_n_encontradas()
+            obj1.pdf_para_jpg()
+            obj1.destruir_barra_de_progresso()
+            obj1.analisa_certidoes(lista_de_objetos)
 
-                tempo_final = time.time()
-                tempo_de_execução = int((tempo_final - tempo_inicial))
+            obj1.mensagem_de_log_simples(CONFERENCIA, obj1.caminho_de_log)
 
-                obj1.mensagem_de_log_completa(
-                    (f'\n\nTempo total de execução: {tempo_de_execução // 60} '
-                        f'minutos e {tempo_de_execução % 60} segundos.'),
+            obj1.pega_cnpj()
+
+            obj1.mensagem_de_log_simples(PENDENCIAS, obj1.caminho_de_log)
+
+            for emp in obj1.empresas_a_atualizar:
+                obj1.mensagem_de_log_simples(
+                    (f'{emp} - {obj1.empresas_a_atualizar[emp][0:-1]} '
+                     f'- CNPJ: {obj1.empresas_a_atualizar[emp][-1]}\n'),
                     obj1.caminho_de_log
                 )
 
-                obj1.mensagem_de_log_simples(
-                    LINHA_FINAL, obj1.caminho_de_log)
+            obj1.apaga_imagem()
 
-                messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
-                obj1.destruir_barra_de_progresso()
-                self.habilita_botoes_de_execucao()
-            finally:
-                self.habilita_botoes_de_execucao()
-                print('execução interrompida')
+            tempo_final = time.time()
+            tempo_de_execução = int((tempo_final - tempo_inicial))
 
+            obj1.mensagem_de_log_completa(
+                (f'\n\nTempo total de execução: {tempo_de_execução // 60} '
+                 f'minutos e {tempo_de_execução % 60} segundos.'),
+                obj1.caminho_de_log
+            )
 
+            obj1.mensagem_de_log_simples(
+                LINHA_FINAL, obj1.caminho_de_log)
+
+            messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
+            obj1.destruir_barra_de_progresso()
+            self.habilita_botoes_de_execucao()
+        finally:
+            self.habilita_botoes_de_execucao()
+            print('execução interrompida')
 
     def selecionador_de_opções(self):
         if self.variavel_de_opções.get() == OPCOES_DE_RENOMEACAO[1]:
@@ -633,9 +652,9 @@ class Analisador(Certidao):
             )
 
     def renomeia(self):
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+        dia = self.dia.get()
+        mes = self.mes.get()
+        ano = self.ano.get()
         urls = self.consulta_urls()
         if (
                 not os.path.exists(urls[0][1])
@@ -665,11 +684,10 @@ class Analisador(Certidao):
             finally:
                 self.habilita_botoes_de_execucao()
 
-
     def transfere_certidoes(self):
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+        dia = self.dia.get()
+        mes = self.mes.get()
+        ano = self.ano.get()
         urls = self.consulta_urls()
         if(
                 not os.path.exists(urls[0][1])
@@ -690,9 +708,9 @@ class Analisador(Certidao):
                 self.habilita_botoes_de_execucao()
 
     def mescla_certidoes(self):
-        dia = self.variavel.get()
-        mes = self.variavel2.get()
-        ano = self.variavel3.get()
+        dia = self.dia.get()
+        mes = self.mes.get()
+        ano = self.ano.get()
         urls = self.consulta_urls()
         if(
                 not os.path.exists(urls[0][1])

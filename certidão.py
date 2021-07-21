@@ -1,6 +1,7 @@
 import os
 import re
 import shutil
+import time
 from tkinter import *
 from tkinter import messagebox
 
@@ -41,9 +42,9 @@ from log import Log
 
 class Certidao(Log, Conexao, Barra):
     def __init__(self, dia, mes, ano):
-        self.dia = dia
-        self.mes = mes
-        self.ano = ano
+        self.dia_c = dia
+        self.mes_c = mes
+        self.ano_c = ano
 
         self.lista_de_urls = self.consulta_urls()
 
@@ -63,13 +64,13 @@ class Certidao(Log, Conexao, Barra):
 
         self.pasta_de_certidões = self.lista_de_urls[1][1]
         self.caminho_de_log = (
-            f'{self.lista_de_urls[2][1]}/{self.ano}-{self.mes}-{self.dia}.txt'
+            f'{self.lista_de_urls[2][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}.txt'
         )
         self.comprovantes_de_pagamento = (
-            f'{self.lista_de_urls[3][1]}/{self.ano}-{self.mes}-{self.dia}'
+            f'{self.lista_de_urls[3][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}'
         )
         self.certidões_para_pagamento = (
-            f'{self.lista_de_urls[4][1]}/{self.ano}-{self.mes}-{self.dia}'
+            f'{self.lista_de_urls[4][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}'
         )
 
     def checagem_de_planilhas(self):
@@ -86,7 +87,7 @@ class Certidao(Log, Conexao, Barra):
     def pega_referencia(self):
         self.checa_pasta_de_comprovantes()
         data_para_pagamento = (
-            f'CERTIDÕES PARA {self.dia}/{self.mes}/{self.ano}'
+            f'CERTIDÕES PARA {self.dia_c}/{self.mes_c}/{self.ano_c}'
         )
 
         for linha in self.pag['A1':'F500']:
@@ -257,8 +258,8 @@ class Certidao(Log, Conexao, Barra):
                         )
             self.mensagem_de_log_simples(
                 (
-                    f'{CERTIDOES_TRANSFERIDAS[1]}{self.dia}/{self.mes}/'
-                    f'{self.ano}'
+                    f'{CERTIDOES_TRANSFERIDAS[1]}{self.dia_c}/{self.mes_c}/'
+                    f'{self.ano_c}'
                 ),
                 self.caminho_de_log
             )
@@ -352,7 +353,7 @@ class Certidao(Log, Conexao, Barra):
             empresadic = {}
             index = 0
             self.mensagem_de_log_completa(f'\n{emp}', self.caminho_de_log)
-            for objeto in lista_objetos:
+            for objeto in lista_de_objetos:
                 objeto.empresas = self.empresas
                 objeto.lista_de_cnpj = self.lista_de_cnpj
                 certidao = objeto.pega_string(emp)

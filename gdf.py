@@ -134,7 +134,7 @@ class Gdf(Certidao):
             vencimento = texto[1]
         data_de_emissao = time.strptime(emissao, DATA_NACIONAL)
         data_de_vencimento = time.strptime(vencimento, DATA_NACIONAL)
-        payday = f'{self.dia}/{self.mes}/{self.ano}'
+        payday = f'{self.dia_c}/{self.mes_c}/{self.ano_c}'
         data_do_pagamento = time.strptime(payday, DATA_NACIONAL)
         self.mensagem_de_log_sem_data(
             f'    GDF - emissão: {emissao}; válida até: {vencimento}',
