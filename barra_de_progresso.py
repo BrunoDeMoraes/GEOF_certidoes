@@ -2,13 +2,13 @@ import threading
 from tkinter import *
 from tkinter import ttk
 
+
 class Barra:
     def barra_de_progresso(self, titulo, base):
         self.janela_da_barra_de_progresso = Toplevel()
         self.janela_da_barra_de_progresso.title(titulo)
         self.janela_da_barra_de_progresso.resizable(0, 0)
         self.cria_barra(base)
-
 
     def cria_barra(self, base):
         self.barra = ttk.Progressbar(

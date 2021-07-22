@@ -161,13 +161,7 @@ ANALISE_EXECUTADA = (
 
 ARQUIVO_CORROMPIDO = (
     'Arquivo zuado!!!',
-    f"Arquivo corrompido: ")
-
-
-ARQUIVO_INEXISTENTE = (
-    'O arquivo selecionado não existe.',
-    'Esse arquivo é invenção da sua cabeça, parça!',
-    'O arquivo selecionado não existe ou já foi renomeado!'
+    f"Arquivo corrompido: "
 )
 
 ARQUIVOS_NAO_SELECIONADOS = (

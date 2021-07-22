@@ -1,32 +1,34 @@
 import os
-import re
 import shutil
-import time
 from tkinter import *
 from tkinter import messagebox
 
 import PyPDF2
 import openpyxl
 import pytesseract
-from PIL import Image
+import PIL.Image
 from pdf2image import convert_from_path
 
 from barra_de_progresso import Barra
 from conexao import Conexao
+from constantes import ANALISADOS
 from constantes import ARQUIVO_CORROMPIDO
 from constantes import ATUALIZAR_XLSX
-from constantes import CERTIDOES_TRANSFERIDAS
 from constantes import CERTIDOES_FALTANDO
+from constantes import CERTIDOES_TRANSFERIDAS
 from constantes import CNPJ_VAZIO
+from constantes import CONFERENCIA
 from constantes import CRIANDO_IMAGENS
 from constantes import DADOS_DO_FORNECEDOR_COM_ERRO
-from constantes import DATA_NAO_ENCONTRADA
 from constantes import DATAS_MULTIPLAS
+from constantes import DATA_NAO_ENCONTRADA
 from constantes import DIGITALIZADOS_MESCLADOS
 from constantes import IDENTIFICADOR_DE_CERTIDAO
 from constantes import IDENTIFICADOR_DE_VALIDADE, IDENTIFICADOR_DE_VALIDADE_2
 from constantes import IDENTIFICADOR_TRADUZIDO
 from constantes import INICIO_DA_ANALISE
+from constantes import INICIO_DA_EXECUCAO
+from constantes import LINHA_FINAL
 from constantes import ORGAOS
 from constantes import PADRAO_CNPJ
 from constantes import PASTA_CRIADA
@@ -34,6 +36,7 @@ from constantes import PASTA_DE_MESCLAGEM_EXISTENTE
 from constantes import PASTA_DE_PAGAMENTO
 from constantes import PASTA_LOCALIZADA
 from constantes import PASTA_NAO_ENCONTRADA
+from constantes import PENDENCIAS
 from constantes import PLANILHAS
 from constantes import REFERENCIA
 from constantes import RENOMEACAO_EXECUTADA
@@ -190,9 +193,27 @@ class Certidao(Log, Conexao, Barra):
                                 self.empresas[emp].append(cnpj_matriz_tratado)
         return self.empresas
 
-    def dados_completos_dos_fornecedores(self):
+    def analisa_lista_de_fornecedores(self):
+        self.mensagem_de_log_completa(
+                INICIO_DA_EXECUCAO, self.caminho_de_log
+        )
+        self.analisa_referencia()
         self.pega_fornecedores()
         self.inclui_cnpj_em_fornecedores()
+        self.listar_cnpjs()
+        self.lista_de_cnpj_exceções
+
+        self.mensagem_de_log_simples(ANALISADOS, self.caminho_de_log)
+
+    def analisa_requisitos(self):
+        for emp in self.empresas:
+            self.mensagem_de_log_simples(f'{emp}', self.caminho_de_log)
+
+        self.cria_diretorio()
+        self.apaga_imagem()
+        self.certidoes_n_encontradas()
+        self.pdf_para_jpg_analise()
+        self.destruir_barra_de_progresso()
 
     def listar_cnpjs(self):
         for emp in self.empresas:
@@ -305,7 +326,7 @@ class Certidao(Log, Conexao, Barra):
             self.imagens_criadas = 0
             self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
 
-    def pdf_para_jpg(self):
+    def pdf_para_jpg_analise(self):
         for emp in self.empresas:
             self.imagens_criadas += (1/len(self.empresas))*100
             os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
@@ -412,6 +433,23 @@ class Certidao(Log, Conexao, Barra):
                 index += 1
             self.empresasdic[emp] = empresadic
 
+    def resultado_da_analise(self):
+        self.mensagem_de_log_simples(CONFERENCIA, self.caminho_de_log)
+
+        self.pega_cnpj()
+
+        self.mensagem_de_log_simples(PENDENCIAS, self.caminho_de_log)
+
+        for emp in self.empresas_a_atualizar:
+            self.mensagem_de_log_simples(
+                (f'{emp} - {self.empresas_a_atualizar[emp][0:-1]} '
+                 f'- CNPJ: {self.empresas_a_atualizar[emp][-1]}\n'),
+                self.caminho_de_log
+            )
+
+        self.apaga_imagem()
+        self.destruir_barra_de_progresso()
+
     def atualizar(self):
         numerador = 0
         for emp in self.empresasdic:
@@ -461,99 +499,145 @@ class Certidao(Log, Conexao, Barra):
                                 cnpj_tratado
                             )
 
-    def pdf_para_jpg_renomear(self):
-        self.imagens_criadas = 0
-        self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
+    def pdf_para_jpg_para_renomear_arquivos(self, arquivo_selecionado):
         print(CRIANDO_IMAGENS[0])
-        for emp in self.empresas:
-            self.imagens_criadas += (1 / len(self.empresas)) * 100
-            os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
-            for pdf_file in os.listdir(
-                    f'{self.pasta_de_certidões}/{str(emp)}'
-            ):
+
+        self.renomeadas = 0
+        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+
+        try:
+            certidão_pdf = list(arquivo_selecionado)
+
+            for arquivo_a_renomear in certidão_pdf:
+                ultima_barra: int = arquivo_a_renomear[::-1].find('/') + 1
+                os.chdir(arquivo_a_renomear[0:-(ultima_barra)])
+
+                pages = convert_from_path(
+                    arquivo_a_renomear, 300, last_page=1
+                )
+
+                imagem_da_certidao = f'{arquivo_a_renomear[:-4]}.jpg'
+                pages[0].save(imagem_da_certidao, "JPEG")
+                print(imagem_da_certidao)
+
+                certidao_jpg = pytesseract.image_to_string(
+                    PIL.Image.open(imagem_da_certidao), lang='por'
+                )
+                self.renomeadas += (1 / len(certidão_pdf)) * 100
+                self.valor_da_barra(self.renomeadas)
+
+                for frase in IDENTIFICADOR_DE_CERTIDAO:
+                    if frase in certidao_jpg:
+                        if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                            try:
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
+                                procura = data.search(certidao_jpg)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
+                            except AttributeError:
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
+                                procura = data.search(certidao_jpg)
+                                datanome = procura.group()
+                                separa = datanome.split('/')
+                                junta = '-'.join(separa)
+                        else:
+                            data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
+                            procura = data.search(certidao_jpg)
+                            datanome = procura.group()
+                            separa = datanome.split('/')
+                            junta = '-'.join(separa)
+                        if ':' in junta:
+                            retira = junta.split(':')
+                            volta = ' '.join(retira)
+                            junta = volta
+                        shutil.move(
+                            f'{imagem_da_certidao[0:-4]}.pdf',
+                            f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
+                        )
+                        os.unlink(imagem_da_certidao)
+
+            print(RENOMEACAO_EXECUTADA[2])
+            print(LINHA_FINAL)
+
+            messagebox.showinfo(
+                RENOMEACAO_EXECUTADA[0],
+                RENOMEACAO_EXECUTADA[2]
+            )
+        finally:
+            self.destruir_barra_de_progresso()
+
+    def apaga_imagens_da_pasta(self):
+            os.chdir(self.pasta_selecionada)
+            for arquivo in os.listdir(self.pasta_selecionada):
+                if arquivo.endswith(".jpg"):
+                    os.unlink(f'{self.pasta_selecionada}/{arquivo}')
+
+    def pdf_para_jpg_renomear_conteudo_da_pasta(self):
+        self.renomeadas = 0
+        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        try:
+            print(CRIANDO_IMAGENS[0])
+            os.chdir(self.pasta_selecionada)
+
+            for pdf_file in os.listdir(self.pasta_selecionada):
+
                 if '00.MERGE' in pdf_file:
                     if not os.path.isdir(
-                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                            f'{self.pasta_selecionada}/Mesclados'
                     ):
-                        os.makedirs(
-                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
-                        )
+                        os.makedirs(f'{self.pasta_selecionada}/Mesclados')
                         shutil.move(
                             pdf_file,
-                            (
-                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                                f'{pdf_file}'
-                            )
+                            f'{self.pasta_selecionada}/Mesclados/{pdf_file}'
                         )
                     else:
                         shutil.move(
                             pdf_file,
-                            (f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                             f'{pdf_file}'
-                             )
+                            f'{self.pasta_selecionada}/Mesclados/{pdf_file}'
                         )
 
-
                 elif pdf_file.endswith(".pdf"):
+                    print(pdf_file[:-4])
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
                     pages[0].save(f"{pdf_file}.jpg", "JPEG")
-                    self.percentual += (25 / len(self.empresas))
-                    print(f'Total de imagens criadas: {self.percentual:.2f}%')
-                    self.valor_da_barra(self.percentual)
-        self.mensagem_de_log_completa(
-            CRIANDO_IMAGENS[1],
-            self.caminho_de_log
-        )
-        self.imagens_criadas = 0
 
-    def gera_nome(self):
-        self.percentual = 0
-        self.renomeadas = 0
-        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
-        print('\nRenomeando certidões:\n\n')
-        for emp in self.empresas:
-            self.renomeadas += (1 / len(self.empresas)) * 100
-            os.chdir(f'{self.pasta_de_certidões}/{(emp)}')
-            origem = f'{self.pasta_de_certidões}/{emp}'
+            print(
+                f'\nRenomeando certidões da pasta {self.pasta_selecionada}:\n'
+                f'\n'
+            )
+
+            os.chdir(f'{self.pasta_selecionada}')
+            origem = f'{self.pasta_selecionada}'
+
             for imagem in os.listdir(origem):
+
+                self.renomeadas += (1 / len(os.listdir(origem))) * 100
+                self.valor_da_barra(self.renomeadas)
+
                 if imagem.endswith(".jpg"):
                     certidao = pytesseract.image_to_string(
-                        Image.open(f'{origem}/{imagem}'),
-                        lang='por'
+                        PIL.Image.open(f'{origem}/{imagem}'), lang='por'
                     )
+
                     for frase in IDENTIFICADOR_DE_CERTIDAO:
                         if frase in certidao:
-                            self.percentual += (25 / len(self.empresas))
-                            print(
-                                (
-                                    f'{emp} - certidão '
-                                    f'{IDENTIFICADOR_TRADUZIDO[frase]} '
-                                    f'renomeada - Total executado: '
-                                    f'{self.percentual:.2f}%\n'
-                                )
-                            )
-                            if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                            if frase == IDENTIFICADOR_DE_CERTIDAO[4]:
                                 try:
-                                    data = re.compile(
-                                        IDENTIFICADOR_DE_VALIDADE_2[frase]
-                                    )
+                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                                 except AttributeError:
-                                    data = re.compile(
-                                        IDENTIFICADOR_DE_VALIDADE[frase]
-                                    )
+                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                                     procura = data.search(certidao)
                                     datanome = procura.group()
                                     separa = datanome.split('/')
                                     junta = '-'.join(separa)
                             else:
-                                data = re.compile(
-                                    IDENTIFICADOR_DE_VALIDADE[frase]
-                                )
+                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
                                 procura = data.search(certidao)
                                 datanome = procura.group()
                                 separa = datanome.split('/')
@@ -564,13 +648,154 @@ class Certidao(Log, Conexao, Barra):
                                 junta = volta
                             shutil.move(
                                 f'{origem}/{imagem[0:-4]}.pdf',
+                                f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
+                            )
+                            print(imagem.split()[0])
+
+            self.apaga_imagens_da_pasta()
+            print(RENOMEACAO_EXECUTADA[2])
+
+            messagebox.showinfo(
+                RENOMEACAO_EXECUTADA[0],
+                RENOMEACAO_EXECUTADA[3]
+            )
+        finally:
+            self.destruir_barra_de_progresso()
+
+    def pdf_para_jpg_renomeacao_geral(self):
+        self.imagens_criadas = 0
+        self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
+        try:
+            print(CRIANDO_IMAGENS[0])
+            for emp in self.empresas:
+                self.imagens_criadas += (1 / len(self.empresas)) * 100
+                os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
+                for pdf_file in os.listdir(
+                        f'{self.pasta_de_certidões}/{str(emp)}'
+                ):
+                    if '00.MERGE' in pdf_file:
+                        if not os.path.isdir(
+                                f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                        ):
+                            os.makedirs(
+                                f'{self.pasta_de_certidões}/{str(emp)}/Merge'
+                            )
+                            shutil.move(
+                                pdf_file,
                                 (
-                                    f'{IDENTIFICADOR_TRADUZIDO[frase]} - '
-                                    f'{junta}.pdf'
+                                    f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                                    f'{pdf_file}'
                                 )
                             )
-            self.valor_da_barra(self.renomeadas)
-        print(RENOMEACAO_EXECUTADA[2])
+                        else:
+                            shutil.move(
+                                pdf_file,
+                                (f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
+                                 f'{pdf_file}'
+                                 )
+                            )
+
+
+                    elif pdf_file.endswith(".pdf"):
+                        pages = convert_from_path(pdf_file, 300, last_page=1)
+                        pdf_file = pdf_file[:-4]
+                        pages[0].save(f"{pdf_file}.jpg", "JPEG")
+                        self.percentual += (25 / len(self.empresas))
+                        print(f'Total de imagens criadas: {self.percentual:.2f}%')
+                        self.valor_da_barra(self.percentual)
+            self.mensagem_de_log_completa(
+                CRIANDO_IMAGENS[1],
+                self.caminho_de_log
+            )
+            self.imagens_criadas = 0
+        finally:
+            self.destruir_barra_de_progresso()
+
+    def gera_nome(self):
+        self.percentual = 0
+        self.renomeadas = 0
+        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        try:
+            print('\nRenomeando certidões:\n\n')
+            for emp in self.empresas:
+                self.renomeadas += (1 / len(self.empresas)) * 100
+                os.chdir(f'{self.pasta_de_certidões}/{(emp)}')
+                origem = f'{self.pasta_de_certidões}/{emp}'
+                for imagem in os.listdir(origem):
+                    if imagem.endswith(".jpg"):
+                        certidao = pytesseract.image_to_string(
+                            Image.open(f'{origem}/{imagem}'),
+                            lang='por'
+                        )
+                        for frase in IDENTIFICADOR_DE_CERTIDAO:
+                            if frase in certidao:
+                                self.percentual += (25 / len(self.empresas))
+                                print(
+                                    (
+                                        f'{emp} - certidão '
+                                        f'{IDENTIFICADOR_TRADUZIDO[frase]} '
+                                        f'renomeada - Total executado: '
+                                        f'{self.percentual:.2f}%\n'
+                                    )
+                                )
+                                if frase == 'GOVERNO DO DISTRITO FEDERAL':
+                                    try:
+                                        data = re.compile(
+                                            IDENTIFICADOR_DE_VALIDADE_2[frase]
+                                        )
+                                        procura = data.search(certidao)
+                                        datanome = procura.group()
+                                        separa = datanome.split('/')
+                                        junta = '-'.join(separa)
+                                    except AttributeError:
+                                        data = re.compile(
+                                            IDENTIFICADOR_DE_VALIDADE[frase]
+                                        )
+                                        procura = data.search(certidao)
+                                        datanome = procura.group()
+                                        separa = datanome.split('/')
+                                        junta = '-'.join(separa)
+                                else:
+                                    data = re.compile(
+                                        IDENTIFICADOR_DE_VALIDADE[frase]
+                                    )
+                                    procura = data.search(certidao)
+                                    datanome = procura.group()
+                                    separa = datanome.split('/')
+                                    junta = '-'.join(separa)
+                                if ':' in junta:
+                                    retira = junta.split(':')
+                                    volta = ' '.join(retira)
+                                    junta = volta
+                                shutil.move(
+                                    f'{origem}/{imagem[0:-4]}.pdf',
+                                    (
+                                        f'{IDENTIFICADOR_TRADUZIDO[frase]} - '
+                                        f'{junta}.pdf'
+                                    )
+                                )
+                self.valor_da_barra(self.renomeadas)
+            print(RENOMEACAO_EXECUTADA[2])
+        finally:
+            self.destruir_barra_de_progresso()
+
+    def rotina_de_renomeacao_geral(self):
+        self.analisa_referencia()
+        self.pega_fornecedores()
+        self.apaga_imagem()
+        self.pdf_para_jpg_renomeacao_geral()
+        self.gera_nome()
+        self.apaga_imagem()
+
+        messagebox.showinfo(
+            RENOMEACAO_EXECUTADA[0],
+            RENOMEACAO_EXECUTADA[1]
+        )
+
+    def rotina_de_transferencia_de_certidoes(self):
+        self.analisa_referencia()
+        self.pega_fornecedores()
+        self.cria_certidoes_para_pagamento()
 
     def merge(self):
         nomes_errados = []
@@ -661,6 +886,11 @@ class Certidao(Log, Conexao, Barra):
                 DIGITALIZADOS_MESCLADOS[1]
             )
             print(nomes_errados)
+
+    def rotina_de_mesclagem(self):
+        self.analisa_referencia()
+        self.pega_fornecedores()
+        self.merge()
 
     def apaga_imagem(self):
         for emp in self.empresas:
