@@ -369,7 +369,6 @@ class Analisador(Certidao):
 
             messagebox.showinfo(ANALISE_EXECUTADA[0], ANALISE_EXECUTADA[1])
 
-        finally:
             tempo_final = time.time()
             tempo_de_execução = int((tempo_final - tempo_inicial))
 
@@ -381,6 +380,8 @@ class Analisador(Certidao):
 
             analise.mensagem_de_log_simples(
                 LINHA_FINAL, analise.caminho_de_log)
+
+        finally:
             self.habilita_botoes_de_execucao()
 
     def analisar_certidoes(self):
@@ -672,41 +673,6 @@ class Analisador(Certidao):
             row=6, column=2, columnspan=1, padx=15, pady=10, ipadx=10,
             ipady=13
         )
-
-    # def caminho_de_pastas(self):
-    #     pasta = 'Nenhuma pasta selecionada'
-    #     self.pasta_selecionada = filedialog.askdirectory(
-    #         initialdir=f'{self.caminho_do_arquivo()}/Certidões'
-    #     )
-    #
-    #     if (
-    #             os.path.isdir(self.pasta_selecionada)
-    #             and self.pasta_selecionada != (
-    #             f'{self.caminho_do_arquivo()}/Certidões')
-    #     ):
-    #
-    #         pasta = self.pasta_selecionada
-    #         self.caminho_da_pasta = Label(
-    #             self.frame_renomear, text=os.path.basename(pasta), pady=0,
-    #             padx=0, bg='white', fg='gray', font=('Helvetica', 9, 'bold')
-    #         )
-    #
-    #         self.caminho_da_pasta.grid(
-    #             row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0,
-    #             ipady=8, sticky=W+E
-    #         )
-    #
-    #     else:
-    #         self.caminho_da_pasta = Label(
-    #             self.frame_renomear, text=pasta, pady=0, padx=0, bg='white',
-    #             fg='gray', font=('Helvetica', 9, 'bold')
-    #         )
-    #
-    #         self.caminho_da_pasta.grid(
-    #             row=1, column=2, columnspan=1, padx=5, pady=0, ipadx=0,
-    #             ipady=8, sticky=W+E
-    #         )
-
 
 if __name__ == '__main__':
     tela = Tk()

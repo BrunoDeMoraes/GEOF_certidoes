@@ -51,12 +51,6 @@ class Certidao(Log, Conexao, Barra):
 
         self.lista_de_urls = self.consulta_urls()
 
-        self.caminho_xls = self.lista_de_urls[0][1]
-        self.wb = openpyxl.load_workbook(self.caminho_xls)
-        self.checagem_de_planilhas()
-        self.forn = self.wb[PLANILHAS[0]]
-        self.pag = self.wb[PLANILHAS[1]]
-
         self.listareferencia = []
         self.empresas = {}
         self.percentual = 0
@@ -67,17 +61,25 @@ class Certidao(Log, Conexao, Barra):
 
         self.pasta_de_certidões = self.lista_de_urls[1][1]
         self.caminho_de_log = (
-            f'{self.lista_de_urls[2][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}.txt'
+            f'{self.lista_de_urls[2][1]}/{self.ano_c}-{self.mes_c}-'
+            f'{self.dia_c}.txt'
         )
         self.comprovantes_de_pagamento = (
-            f'{self.lista_de_urls[3][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}'
+            f'{self.lista_de_urls[3][1]}/{self.ano_c}-{self.mes_c}-'
+            f'{self.dia_c}'
         )
         self.certidões_para_pagamento = (
-            f'{self.lista_de_urls[4][1]}/{self.ano_c}-{self.mes_c}-{self.dia_c}'
+            f'{self.lista_de_urls[4][1]}/{self.ano_c}-{self.mes_c}-'
+            f'{self.dia_c}'
         )
+        self.caminho_xls = self.lista_de_urls[0][1]
+        self.wb = openpyxl.load_workbook(self.caminho_xls)
+        self.checagem_de_planilhas()
+        self.forn = self.wb[PLANILHAS[0]]
+        self.pag = self.wb[PLANILHAS[1]]
 
     def checagem_de_planilhas(self):
-        if (PLANILHAS[0] and PLANILHAS[1]) not in self.wb.sheetnames:
+        if (PLANILHAS[0] or PLANILHAS[1]) not in self.wb.sheetnames:
             messagebox.showerror(PLANILHAS[2], PLANILHAS[3])
 
     def checa_pasta_de_comprovantes(self):
@@ -104,34 +106,39 @@ class Certidao(Log, Conexao, Barra):
                     self.listareferencia.append(celula.coordinate)
         return self.listareferencia
 
+    def referencia_vazia(self):
+        self.mensagem_de_log_completa(
+            DATA_NAO_ENCONTRADA[1],
+            self.caminho_de_log
+        )
+        messagebox.showerror(
+            DATA_NAO_ENCONTRADA[0],
+            DATA_NAO_ENCONTRADA[1]
+        )
+        raise Exception(DATA_NAO_ENCONTRADA[1])
+
+    def referencia_multipla(self):
+        mensagem_de_erro = (
+            f'{DATAS_MULTIPLAS[1]}\n\n'
+            f'{self.listareferencia}\n'
+            f'{DATAS_MULTIPLAS[2]}'
+        )
+        self.mensagem_de_log_completa(
+            mensagem_de_erro,
+            self.caminho_de_log
+        )
+        messagebox.showerror(
+            DATAS_MULTIPLAS[0],
+            mensagem_de_erro
+        )
+        raise Exception(mensagem_de_erro)
+
     def analisa_referencia(self):
         self.pega_referencia()
         if len(self.listareferencia) == 0:
-            self.mensagem_de_log_completa(
-                DATA_NAO_ENCONTRADA[1],
-                self.caminho_de_log
-            )
-            messagebox.showerror(
-                DATA_NAO_ENCONTRADA[0],
-                DATA_NAO_ENCONTRADA[1]
-            )
-            raise Exception(DATA_NAO_ENCONTRADA[1])
-
+            self.referencia_vazia()
         elif len(self.listareferencia) > 1:
-            mensagem_de_erro = (
-                    f'{DATAS_MULTIPLAS[1]}\n\n'
-                    f'{self.listareferencia}\n'
-                    f'{DATAS_MULTIPLAS[2]}'
-                 )
-            self.mensagem_de_log_completa(
-                mensagem_de_erro,
-                self.caminho_de_log
-            )
-            messagebox.showerror(
-                DATAS_MULTIPLAS[0],
-                mensagem_de_erro
-            )
-            raise Exception(mensagem_de_erro)
+            self.referencia_multipla()
         else:
             self.mensagem_de_log_completa(
                 f'\n{REFERENCIA}{self.listareferencia[0]}',
@@ -167,7 +174,9 @@ class Certidao(Log, Conexao, Barra):
                                 celula_de_cnpj == None
                                 or padrão_cnpj.search(celula_de_cnpj) == None
                         ):
-                            messagebox.showerror(CNPJ_VAZIO[0], f'{emp} - {CNPJ_VAZIO[1]}')
+                            messagebox.showerror(
+                                CNPJ_VAZIO[0], f'{emp} - {CNPJ_VAZIO[1]}'
+                            )
                             raise Exception(f'{emp} - {CNPJ_VAZIO[1]}')
                         else:
                             self.empresas[emp].append(
@@ -258,6 +267,19 @@ class Certidao(Log, Conexao, Barra):
             self.caminho_de_log
         )
 
+    def mensagens_da_função_cria_certidoes(self):
+        self.mensagem_de_log_simples(
+            (
+                f'{CERTIDOES_TRANSFERIDAS[1]}{self.dia_c}/{self.mes_c}/'
+                f'{self.ano_c}'
+            ),
+            self.caminho_de_log
+        )
+        messagebox.showinfo(
+            CERTIDOES_TRANSFERIDAS[0],
+            CERTIDOES_TRANSFERIDAS[1]
+        )
+
     def cria_certidoes_para_pagamento(self):
         if os.path.exists(f'{self.certidões_para_pagamento}'):
             print(PASTA_DE_PAGAMENTO)
@@ -277,17 +299,7 @@ class Certidao(Log, Conexao, Barra):
                             (f'{self.certidões_para_pagamento}/{emp}/'
                              f'{pdf_file}')
                         )
-            self.mensagem_de_log_simples(
-                (
-                    f'{CERTIDOES_TRANSFERIDAS[1]}{self.dia_c}/{self.mes_c}/'
-                    f'{self.ano_c}'
-                ),
-                self.caminho_de_log
-            )
-            messagebox.showinfo(
-                CERTIDOES_TRANSFERIDAS[0],
-                CERTIDOES_TRANSFERIDAS[1]
-            )
+            self.mensagens_da_função_cria_certidoes()
 
     def certidoes_n_encontradas(self):
         total_faltando = 0
@@ -324,7 +336,9 @@ class Certidao(Log, Conexao, Barra):
             raise Exception(CERTIDOES_FALTANDO[1])
         else:
             self.imagens_criadas = 0
-            self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
+            self.thread_barra_de_progresso(
+                'Criando imagens', self.imagens_criadas
+            )
 
     def pdf_para_jpg_analise(self):
         for emp in self.empresas:
@@ -333,27 +347,6 @@ class Certidao(Log, Conexao, Barra):
             for pdf_file in os.listdir(
                     f'{self.pasta_de_certidões}/{str(emp)}'
             ):
-                if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(
-                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
-                    ):
-                        os.makedirs(
-                            f'{self.pasta_de_certidões}/{str(emp)}/Merge'
-                        )
-                        shutil.move(
-                            pdf_file,
-                            (
-                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                                f'{pdf_file}')
-                        )
-                    else:
-                        shutil.move(
-                            pdf_file,
-                            (
-                                f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                                f'{pdf_file}'
-                            )
-                        )
                 if (
                         pdf_file.endswith(".pdf")
                         and pdf_file.split()[0] in ORGAOS
@@ -365,8 +358,9 @@ class Certidao(Log, Conexao, Barra):
                     self.valor_da_barra(self.imagens_criadas)
 
     def analisa_certidoes(self, lista_de_objetos):
-        self.thread_barra_de_progresso('Analisando certidões', self.percentual)
-        lista_objetos = lista_de_objetos
+        self.thread_barra_de_progresso(
+            'Analisando certidões', self.percentual
+        )
         self.mensagem_de_log_completa(INICIO_DA_ANALISE, self.caminho_de_log)
         print(f'Total executado: {self.percentual:.2f}%')
 
@@ -382,7 +376,9 @@ class Certidao(Log, Conexao, Barra):
                 print(f'   Total executado: {self.percentual:.2f}%')
                 self.valor_da_barra(self.percentual)
                 try:
-                    val, cnpj_para_comparação = objeto.confere_data(certidao, emp)
+                    val, cnpj_para_comparação = objeto.confere_data(
+                        certidao, emp
+                    )
                 except:
                     self.destruir_barra_de_progresso()
                     raise
@@ -499,11 +495,42 @@ class Certidao(Log, Conexao, Barra):
                                 cnpj_tratado
                             )
 
+    def opcao_de_identificador_1(self, frase, documento):
+        try:
+            data = re.compile(
+                IDENTIFICADOR_DE_VALIDADE_2[frase]
+            )
+            procura = data.search(documento)
+            datanome = procura.group()
+            separa = datanome.split('/')
+            junta = '-'.join(separa)
+        except AttributeError:
+            data = re.compile(
+                IDENTIFICADOR_DE_VALIDADE[frase]
+            )
+            procura = data.search(documento)
+            datanome = procura.group()
+            separa = datanome.split('/')
+            junta = '-'.join(separa)
+        return junta
+
+    def opcao_de_identificador_2(self,frase, documento):
+        data = re.compile(
+            IDENTIFICADOR_DE_VALIDADE[frase]
+        )
+        procura = data.search(documento)
+        datanome = procura.group()
+        separa = datanome.split('/')
+        junta = '-'.join(separa)
+        return junta
+
     def pdf_para_jpg_para_renomear_arquivos(self, arquivo_selecionado):
         print(CRIANDO_IMAGENS[0])
 
         self.renomeadas = 0
-        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        self.thread_barra_de_progresso(
+            'Renomeando certidões', self.renomeadas
+        )
 
         try:
             certidão_pdf = list(arquivo_selecionado)
@@ -529,24 +556,9 @@ class Certidao(Log, Conexao, Barra):
                 for frase in IDENTIFICADOR_DE_CERTIDAO:
                     if frase in certidao_jpg:
                         if frase == 'GOVERNO DO DISTRITO FEDERAL':
-                            try:
-                                data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
-                                procura = data.search(certidao_jpg)
-                                datanome = procura.group()
-                                separa = datanome.split('/')
-                                junta = '-'.join(separa)
-                            except AttributeError:
-                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
-                                procura = data.search(certidao_jpg)
-                                datanome = procura.group()
-                                separa = datanome.split('/')
-                                junta = '-'.join(separa)
+                            junta = self.opcao_de_identificador_1(frase, certidao_jpg)
                         else:
-                            data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
-                            procura = data.search(certidao_jpg)
-                            datanome = procura.group()
-                            separa = datanome.split('/')
-                            junta = '-'.join(separa)
+                            junta = self.opcao_de_identificador_2(frase, certidao_jpg)
                         if ':' in junta:
                             retira = junta.split(':')
                             volta = ' '.join(retira)
@@ -575,29 +587,16 @@ class Certidao(Log, Conexao, Barra):
 
     def pdf_para_jpg_renomear_conteudo_da_pasta(self):
         self.renomeadas = 0
-        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        self.thread_barra_de_progresso(
+            'Renomeando certidões', self.renomeadas
+        )
         try:
             print(CRIANDO_IMAGENS[0])
             os.chdir(self.pasta_selecionada)
 
             for pdf_file in os.listdir(self.pasta_selecionada):
 
-                if '00.MERGE' in pdf_file:
-                    if not os.path.isdir(
-                            f'{self.pasta_selecionada}/Mesclados'
-                    ):
-                        os.makedirs(f'{self.pasta_selecionada}/Mesclados')
-                        shutil.move(
-                            pdf_file,
-                            f'{self.pasta_selecionada}/Mesclados/{pdf_file}'
-                        )
-                    else:
-                        shutil.move(
-                            pdf_file,
-                            f'{self.pasta_selecionada}/Mesclados/{pdf_file}'
-                        )
-
-                elif pdf_file.endswith(".pdf"):
+                if pdf_file.endswith(".pdf"):
                     print(pdf_file[:-4])
                     pages = convert_from_path(pdf_file, 300, last_page=1)
                     pdf_file = pdf_file[:-4]
@@ -624,31 +623,17 @@ class Certidao(Log, Conexao, Barra):
                     for frase in IDENTIFICADOR_DE_CERTIDAO:
                         if frase in certidao:
                             if frase == IDENTIFICADOR_DE_CERTIDAO[4]:
-                                try:
-                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE_2[frase])
-                                    procura = data.search(certidao)
-                                    datanome = procura.group()
-                                    separa = datanome.split('/')
-                                    junta = '-'.join(separa)
-                                except AttributeError:
-                                    data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
-                                    procura = data.search(certidao)
-                                    datanome = procura.group()
-                                    separa = datanome.split('/')
-                                    junta = '-'.join(separa)
+                                junta = self.opcao_de_identificador_1(frase, certidao)
                             else:
-                                data = re.compile(IDENTIFICADOR_DE_VALIDADE[frase])
-                                procura = data.search(certidao)
-                                datanome = procura.group()
-                                separa = datanome.split('/')
-                                junta = '-'.join(separa)
+                                junta = self.opcao_de_identificador_2(frase, certidao)
                             if ':' in junta:
                                 retira = junta.split(':')
                                 volta = ' '.join(retira)
                                 junta = volta
                             shutil.move(
                                 f'{origem}/{imagem[0:-4]}.pdf',
-                                f'{IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf'
+                                f'{IDENTIFICADOR_TRADUZIDO[frase]} - '
+                                f'{junta}.pdf'
                             )
                             print(imagem.split()[0])
 
@@ -664,7 +649,9 @@ class Certidao(Log, Conexao, Barra):
 
     def pdf_para_jpg_renomeacao_geral(self):
         self.imagens_criadas = 0
-        self.thread_barra_de_progresso('Criando imagens', self.imagens_criadas)
+        self.thread_barra_de_progresso(
+            'Criando imagens', self.imagens_criadas
+        )
         try:
             print(CRIANDO_IMAGENS[0])
             for emp in self.empresas:
@@ -673,35 +660,15 @@ class Certidao(Log, Conexao, Barra):
                 for pdf_file in os.listdir(
                         f'{self.pasta_de_certidões}/{str(emp)}'
                 ):
-                    if '00.MERGE' in pdf_file:
-                        if not os.path.isdir(
-                                f'{self.pasta_de_certidões}/{str(emp)}/Merge'
-                        ):
-                            os.makedirs(
-                                f'{self.pasta_de_certidões}/{str(emp)}/Merge'
-                            )
-                            shutil.move(
-                                pdf_file,
-                                (
-                                    f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                                    f'{pdf_file}'
-                                )
-                            )
-                        else:
-                            shutil.move(
-                                pdf_file,
-                                (f'{self.pasta_de_certidões}/{str(emp)}/Merge/'
-                                 f'{pdf_file}'
-                                 )
-                            )
-
-
-                    elif pdf_file.endswith(".pdf"):
+                    if pdf_file.endswith(".pdf"):
                         pages = convert_from_path(pdf_file, 300, last_page=1)
                         pdf_file = pdf_file[:-4]
                         pages[0].save(f"{pdf_file}.jpg", "JPEG")
                         self.percentual += (25 / len(self.empresas))
-                        print(f'Total de imagens criadas: {self.percentual:.2f}%')
+                        print(
+                            f'Total de imagens criadas: '
+                            f'{self.percentual:.2f}%'
+                        )
                         self.valor_da_barra(self.percentual)
             self.mensagem_de_log_completa(
                 CRIANDO_IMAGENS[1],
@@ -714,7 +681,9 @@ class Certidao(Log, Conexao, Barra):
     def gera_nome(self):
         self.percentual = 0
         self.renomeadas = 0
-        self.thread_barra_de_progresso('Renomeando certidões', self.renomeadas)
+        self.thread_barra_de_progresso(
+            'Renomeando certidões', self.renomeadas
+        )
         try:
             print('\nRenomeando certidões:\n\n')
             for emp in self.empresas:
@@ -724,7 +693,7 @@ class Certidao(Log, Conexao, Barra):
                 for imagem in os.listdir(origem):
                     if imagem.endswith(".jpg"):
                         certidao = pytesseract.image_to_string(
-                            Image.open(f'{origem}/{imagem}'),
+                            PIL.Image.open(f'{origem}/{imagem}'),
                             lang='por'
                         )
                         for frase in IDENTIFICADOR_DE_CERTIDAO:
@@ -739,30 +708,13 @@ class Certidao(Log, Conexao, Barra):
                                     )
                                 )
                                 if frase == 'GOVERNO DO DISTRITO FEDERAL':
-                                    try:
-                                        data = re.compile(
-                                            IDENTIFICADOR_DE_VALIDADE_2[frase]
-                                        )
-                                        procura = data.search(certidao)
-                                        datanome = procura.group()
-                                        separa = datanome.split('/')
-                                        junta = '-'.join(separa)
-                                    except AttributeError:
-                                        data = re.compile(
-                                            IDENTIFICADOR_DE_VALIDADE[frase]
-                                        )
-                                        procura = data.search(certidao)
-                                        datanome = procura.group()
-                                        separa = datanome.split('/')
-                                        junta = '-'.join(separa)
-                                else:
-                                    data = re.compile(
-                                        IDENTIFICADOR_DE_VALIDADE[frase]
+                                    junta = self.opcao_de_identificador_1(
+                                        frase, certidao
                                     )
-                                    procura = data.search(certidao)
-                                    datanome = procura.group()
-                                    separa = datanome.split('/')
-                                    junta = '-'.join(separa)
+                                else:
+                                    junta = self.opcao_de_identificador_2(
+                                        frase, certidao
+                                    )
                                 if ':' in junta:
                                     retira = junta.split(':')
                                     volta = ' '.join(retira)

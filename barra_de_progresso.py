@@ -17,19 +17,25 @@ class Barra:
         )
         self.barra.pack(padx=20, pady=10)
 
-        self.valor_executado = Label(self.janela_da_barra_de_progresso, text=f'Total executado {base:.2f}%')
+        self.valor_executado = Label(
+            self.janela_da_barra_de_progresso,
+            text=f'Total executado {base:.2f}%'
+        )
         self.valor_executado.pack()
 
     def valor_da_barra(self, base):
         self.barra['value'] = base
         self.valor_executado.destroy()
-        self.valor_executado = Label(self.janela_da_barra_de_progresso, text=f'Total executado {base:.2f}%')
+        self.valor_executado = Label(
+            self.janela_da_barra_de_progresso,
+            text=f'Total executado {base:.2f}%'
+        )
         self.valor_executado.pack()
 
     def thread_barra_de_progresso(self, titulo, base):
-        threading.Thread(target=lambda: self.barra_de_progresso(titulo, base)).start()
+        threading.Thread(
+            target=lambda: self.barra_de_progresso(titulo, base)
+        ).start()
 
     def destruir_barra_de_progresso(self):
         self.janela_da_barra_de_progresso.destroy()
-
-
