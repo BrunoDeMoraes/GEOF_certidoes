@@ -12,6 +12,7 @@ from constantes import CNPJ_NAO_ENCONTRADO
 from constantes import CNPJ_NULO
 from constantes import DATA_NACIONAL
 from constantes import EMISSAO_VENCIMENTO
+from constantes import INVALIDA_PARA_LICITACAO
 from constantes import ARQUIVOS_INVALIDOS
 from constantes import PADRAO_CNPJ
 from constantes import PADRAO_FGTS

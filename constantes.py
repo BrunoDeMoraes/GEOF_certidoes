@@ -53,6 +53,10 @@ INICIO_DA_ANALISE = (
     '\nInicio da conferência de datas de emissão e vencimento:'
 )
 
+INVALIDA_PARA_LICITACAO = (
+    'Obs: Esta certidão não tem validade para licitação,'
+)
+
 LINHA_FINAL = (
     '\n\n===================================================================='
     '========================================================================'
