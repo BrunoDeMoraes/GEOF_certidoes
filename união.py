@@ -1,5 +1,8 @@
 import os
 import time
+
+from datetime import date
+
 from tkinter import *
 from tkinter import messagebox
 
@@ -76,8 +79,21 @@ class Uniao(Certidao):
                 f'{emp} - UNIÃO\n{EMISSAO_VENCIMENTO[1]}'
             )
             raise Exception(f'{emp} - UNIÃO\n{EMISSAO_VENCIMENTO[1]}')
+
+        hoje = date.today()
+        emissao_convertida = int(texto[0][-4:])
+        vencimento_convertido = int(texto[1][-4:])
+        anos_anteriores = [2022, 2023]
+        anos = [2027, 2028]
         emissao = texto[0]
-        vencimento = texto[1]
+
+        if vencimento_convertido == 2028 and hoje.year not in anos:
+            vencimento = texto[1][0:6] + '2023'
+        elif vencimento_convertido == 2028 and hoje.year in anos and emissao_convertida in anos_anteriores:
+            vencimento = texto[1][0:6] + '2023'
+        else:
+            vencimento = texto[1]
+
         data_de_emissao = time.strptime(emissao, DATA_NACIONAL)
         data_de_vencimento = time.strptime(vencimento, DATA_NACIONAL)
         payday = f'{self.dia_c}/{self.mes_c}/{self.ano_c}'
