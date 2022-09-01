@@ -95,7 +95,7 @@ class Certidao(Log, Conexao, Barra):
             f'CERTIDÕES PARA {self.dia_c}/{self.mes_c}/{self.ano_c}'
         )
 
-        for linha in self.pag['A1':'F500']:
+        for linha in self.pag['A1':'F1000']:
             for celula in linha:
                 if celula.value != data_para_pagamento:
                     continue
@@ -163,7 +163,7 @@ class Certidao(Log, Conexao, Barra):
 
     def inclui_cnpj_em_fornecedores(self):
         for emp in self.empresas:
-            for linha in self.forn['A6':'A500']:
+            for linha in self.forn['A6':'A1000']:
                 for celula in linha:
                     if celula.value != self.empresas[emp][0]:
                         continue
@@ -226,7 +226,7 @@ class Certidao(Log, Conexao, Barra):
 
     def listar_cnpjs(self):
         for emp in self.empresas:
-            for linha in self.forn['F6':'F500']:
+            for linha in self.forn['F6':'F1000']:
                 for celula in linha:
                     if celula.value == None:
                         continue
@@ -241,7 +241,7 @@ class Certidao(Log, Conexao, Barra):
 
     def listar_cnpjs_exceções(self):
         for emp in self.empresas:
-            for linha in self.forn['M6':'M500']:
+            for linha in self.forn['M6':'M1000']:
                 for celula in linha:
                     if celula.value == None:
                         continue
@@ -468,7 +468,7 @@ class Certidao(Log, Conexao, Barra):
     def pega_cnpj(self):
         self.atualizar()
         for emp in self.empresas_a_atualizar:
-            for linha in self.forn['A6':'A500']:
+            for linha in self.forn['A6':'A1000']:
                 for celula in linha:
                     if celula.value == None:
                         continue
