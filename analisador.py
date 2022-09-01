@@ -2,6 +2,7 @@ import os
 import sqlite3
 import threading
 import time
+from datetime import date
 from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
