@@ -1,5 +1,6 @@
 import os
 import shutil
+from datetime import date
 from tkinter import *
 from tkinter import messagebox
 
@@ -514,13 +515,20 @@ class Certidao(Log, Conexao, Barra):
             junta = '-'.join(separa)
         return junta
 
-    def opcao_de_identificador_2(self,frase, documento):
+    def opcao_de_identificador_2(self, frase, documento):
         data = re.compile(
             IDENTIFICADOR_DE_VALIDADE[frase]
         )
         procura = data.search(documento)
         datanome = procura.group()
         separa = datanome.split('/')
+        print(f'Esse é o resultado de separa {separa}')
+        print(f'Separa -1 : {separa[-1]}')
+        hoje = date.today()
+
+        if separa[-1] == '2028' and int(hoje.year) not in [2027, 2028]:
+            separa[-1] = '2023'
+        print(f'Novo separa-1; {separa[-1]}')
         junta = '-'.join(separa)
         return junta
 
