@@ -522,13 +522,10 @@ class Certidao(Log, Conexao, Barra):
         procura = data.search(documento)
         datanome = procura.group()
         separa = datanome.split('/')
-        print(f'Esse é o resultado de separa {separa}')
-        print(f'Separa -1 : {separa[-1]}')
         hoje = date.today()
 
         if separa[-1] == '2028' and int(hoje.year) not in [2027, 2028]:
             separa[-1] = '2023'
-        print(f'Novo separa-1; {separa[-1]}')
         junta = '-'.join(separa)
         return junta
 
