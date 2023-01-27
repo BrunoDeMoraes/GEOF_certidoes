@@ -261,8 +261,7 @@ class Certidao(Log, Conexao, Barra):
             if os.path.isdir(f'{self.pasta_de_certidões}/{str(emp)}'):
                 continue
             else:
-                os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Vencidas')
-                os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}/Imagens')
+                os.makedirs(f'{self.pasta_de_certidões}/{str(emp)}')
                 novos_dir.append(emp)
         self.mensagem_de_log_completa(
             (f'\n{PASTA_CRIADA[1]}{len(novos_dir)} - {novos_dir}.'),
