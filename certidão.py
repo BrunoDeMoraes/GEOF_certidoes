@@ -792,10 +792,10 @@ class Certidao(Log, Conexao, Barra):
                                 contador += 1
                         if 'falha' not in validação_de_partes_do_nome:
                             print(emp)
-                            pdf_temporário = PyPDF2.PdfFileWriter()
+                            pdf_temporário = PyPDF2.PdfWriter()
                             pagamento = open(arquivo_pdf, 'rb')
                             try:
-                                pagamento_lido = PyPDF2.PdfFileReader(
+                                pagamento_lido = PyPDF2.PdfReader(
                                     pagamento, strict=False
                                 )
                             except:
@@ -804,9 +804,9 @@ class Certidao(Log, Conexao, Barra):
                                     f'{ARQUIVO_CORROMPIDO[1]}{arquivo_pdf}'
                                 )
                                 self.destruir_barra_de_progresso()
-                            for página in range(pagamento_lido.numPages):
-                                objeto_pagina = pagamento_lido.getPage(página)
-                                pdf_temporário.addPage(objeto_pagina)
+                            for página in range(len(pagamento_lido.pages)):
+                                objeto_pagina = pagamento_lido.pages[página]
+                                pdf_temporário.add_page(objeto_pagina)
                             pasta_da_empresa = (
                                 f'{self.certidões_para_pagamento}/{emp}'
                             )
@@ -816,16 +816,16 @@ class Certidao(Log, Conexao, Barra):
                             ):
                                 if '00.MERGE' not in arquivo_certidão:
                                     certidão = open(arquivo_certidão, 'rb')
-                                    certidão_lida = PyPDF2.PdfFileReader(
+                                    certidão_lida = PyPDF2.PdfReader(
                                         certidão
                                     )
                                     for página_da_certidão in range(
-                                            certidão_lida.numPages
+                                            len(certidão_lida.pages)
                                     ):
-                                        pagina_lida = certidão_lida.getPage(
+                                        pagina_lida = certidão_lida.pages[
                                             página_da_certidão
-                                        )
-                                        pdf_temporário.addPage(pagina_lida)
+                                        ]
+                                        pdf_temporário.add_page(pagina_lida)
                             compilado = open(
                                 (
                                     f'{self.comprovantes_de_pagamento}/'
