@@ -45,7 +45,7 @@ class Tst(Certidao):
                 CNPJ_NAO_ENCONTRADO[0],
                 f'TST - {emp}\n{CNPJ_NAO_ENCONTRADO[1]}'
             )
-            raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[1]}.')
+            raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[2]}.')
         texto = []
         padrao = re.compile(PADRAO_TST[0])
         emissao_string = padrao.search(certidao)

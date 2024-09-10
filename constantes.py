@@ -65,6 +65,10 @@ LINHA_FINAL = (
 
 PADRAO_CNPJ = '(\d\d).(\d\d\d).(\d\d\d)/(\d\d\d\d)-(\d\d)'
 
+PADRAO_CGU = (
+    'dia (\d\d)/(\d\d)/(\d\d\d\d)',
+    'com validade até o dia (\d\d)/(\d\d)/(\d\d\d\d)')
+
 PADRAO_FGTS = '(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)'
 
 PADRAO_GDF = (
@@ -177,7 +181,8 @@ ARQUIVOS_INVALIDOS = (
     'arquivo da certidão FGTS da empresa inválido',
     'arquivo da certidão GDF da empresa inválido',
     'arquivo da certidão TST da empresa inválido',
-    'arquivo da certidão UNIÃO da empresa inválido'
+    'arquivo da certidão UNIÃO da empresa inválido',
+    'arquivo da certidão CGU da empresa inválido'
 )
 
 ATUALIZAR_CAMINHOS = (
@@ -284,7 +289,8 @@ IDENTIFICADOR_DE_CERTIDAO = (
     'Brasília,',
     'JUSTIÇA DO TRABALHO',
     'MINISTÉRIO DA FAZENDA',
-    'GOVERNO DO DISTRITO FEDERAL'
+    'GOVERNO DO DISTRITO FEDERAL',
+    'Corregedoria-Geral da União'
 )
 
 LOG_INEXISTENTE = (
@@ -306,7 +312,7 @@ OPCOES_DE_RENOMEAR_VAZIA = (
     'Nenhuma opção selecionada!'
 )
 
-ORGAOS = ('UNIÃO', 'TST', 'FGTS', 'GDF')
+ORGAOS = ('UNIÃO', 'TST', 'FGTS', 'GDF', 'CGU')
 
 PASTA_DE_MESCLAGEM_EXISTENTE = (
     'FICA CALMO!!!',
@@ -356,7 +362,8 @@ IDENTIFICADOR_TRADUZIDO = {
     'Brasília,': 'GDF',
     'JUSTIÇA DO TRABALHO': 'TST',
     'MINISTÉRIO DA FAZENDA': 'UNIÃO',
-    'GOVERNO DO DISTRITO FEDERAL': 'GDF'
+    'GOVERNO DO DISTRITO FEDERAL': 'GDF',
+    'Corregedoria-Geral da União': 'CGU'
 }
 
 IDENTIFICADOR_DE_VALIDADE = {
@@ -375,7 +382,9 @@ IDENTIFICADOR_DE_VALIDADE = {
         'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(J'
         'unho)?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(j'
         'aneiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
-        '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)')
+        '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'),
+
+    'Corregedoria-Geral da União': 'com validade até o dia (\d\d)/(\d\d)/(\d\d\d\d)'
 }
 
 IDENTIFICADOR_DE_VALIDADE_2 = {

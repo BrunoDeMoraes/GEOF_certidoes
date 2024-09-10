@@ -26,6 +26,7 @@ from fgts import Fgts
 from gdf import Gdf
 from tst import Tst
 from união import Uniao
+from cgu import Cgu
 
 
 class Analisador(Certidao):
@@ -340,7 +341,8 @@ class Analisador(Certidao):
         objTst = Tst(self.dia.get(), self.mes.get(), self.ano.get())
         objFgts = Fgts(self.dia.get(), self.mes.get(), self.ano.get())
         objGdf = Gdf(self.dia.get(), self.mes.get(), self.ano.get())
-        lista_de_objetos = [objUniao, objTst, objFgts, objGdf]
+        objCgu = Cgu(self.dia.get(), self.mes.get(), self.ano.get())
+        lista_de_objetos = [objUniao, objTst, objFgts, objGdf, objCgu]
         return lista_de_objetos
 
     def cabecalho_de_execucao(self, corpo_da_funcao):
