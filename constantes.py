@@ -73,7 +73,7 @@ PADRAO_CGU = (
 PADRAO_FGTS = '(\d\d)/(\d\d)/(\d\d\d\d) a (\d\d)/(\d\d)/(\d\d\d\d)'
 
 PADRAO_GDF = (
-    'Brasília, antiga (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)'
+    'Brasília, (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(Junho)'
     '?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)?(janeiro)?('
     'fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?(setembro)?(o'
     'utubro)?(novembro)?(dezembro)? de (\d\d\d\d)'
@@ -287,7 +287,7 @@ EMISSAO_VENCIMENTO = (
 
 IDENTIFICADOR_DE_CERTIDAO = (
     'FGTS - CRF',
-    'Brasília, antiga',
+    'SECRETARIA DE ESTADO DE FAZENDA',
     'JUSTIÇA DO TRABALHO',
     'MINISTÉRIO DA FAZENDA',
     'GOVERNO DO DISTRITO FEDERAL',
@@ -360,7 +360,7 @@ RENOMEACAO_EXECUTADA = (
 
 IDENTIFICADOR_TRADUZIDO = {
     'FGTS - CRF': 'FGTS',
-    'Brasília, antiga': 'GDF',
+    'SECRETARIA DE ESTADO DE FAZENDA': 'GDF',
     'JUSTIÇA DO TRABALHO': 'TST',
     'MINISTÉRIO DA FAZENDA': 'UNIÃO',
     'GOVERNO DO DISTRITO FEDERAL': 'GDF',
@@ -370,7 +370,7 @@ IDENTIFICADOR_TRADUZIDO = {
 IDENTIFICADOR_DE_VALIDADE = {
     'FGTS - CRF': 'a (\d\d)/(\d\d)/(\d\d\d\d)',
 
-    'Brasília, antiga': (
+    'SECRETARIA DE ESTADO DE FAZENDA': (
         'Válida até (\d\d) de (Janeiro)?(Fevereiro)?(Março)?(Abril)?(Maio)?(J'
         'unho)?(Julho)?(Agosto)?(Setembro)?(Outubro)?(Novembro)?(Dezembro)? d'
         'e (\d\d\d\d)'),

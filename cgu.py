@@ -64,7 +64,6 @@ class Cgu(Certidao):
         padrao = re.compile(PADRAO_CGU[1])
         vencimento_string = padrao.search(certidao)
         try:
-            print(vencimento_string)
             texto.append(vencimento_string.group().split()[3])
         except AttributeError:
             self.mensagem_de_log_completa(
