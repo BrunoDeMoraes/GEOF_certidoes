@@ -64,7 +64,7 @@ class Cgu(Certidao):
         padrao = re.compile(PADRAO_CGU[1])
         vencimento_string = padrao.search(certidao)
         try:
-            texto.append(vencimento_string.group().split()[1])
+            texto.append(vencimento_string.group().split()[5])
         except AttributeError:
             self.mensagem_de_log_completa(
                 f'{emp} - CGU\n{EMISSAO_VENCIMENTO[1]}',
@@ -82,7 +82,7 @@ class Cgu(Certidao):
         payday = f'{self.dia_c}/{self.mes_c}/{self.ano_c}'
         data_do_pagamento = time.strptime(payday, DATA_NACIONAL)
         self.mensagem_de_log_sem_data(
-            f'    CGU   - emissão: {emissao}; válida até: {vencimento}',
+            f'    CGU - emissão: {emissao}; válida até: {vencimento}',
             self.caminho_de_log
         )
         if validação_de_cnpj in self.lista_de_cnpj:

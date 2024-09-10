@@ -516,7 +516,6 @@ class Certidao(Log, Conexao, Barra):
         return junta
 
     def opcao_de_identificador_2(self, frase, documento):
-        print(f'Tentando achar frase {frase} no documento {documento}')
         data = re.compile(
             IDENTIFICADOR_DE_VALIDADE[frase]
         )
@@ -551,30 +550,22 @@ class Certidao(Log, Conexao, Barra):
 
                 imagem_da_certidao = f'{arquivo_a_renomear[:-4]}.jpg'
                 pages[0].save(imagem_da_certidao, "JPEG")
-                print(imagem_da_certidao)
-
                 certidao_jpg = pytesseract.image_to_string(
                     PIL.Image.open(imagem_da_certidao), lang='por'
                 )
                 self.renomeadas += (1 / len(certidão_pdf)) * 100
                 self.valor_da_barra(self.renomeadas)
 
-                print(f'Conteúdo da certidão\n\n{certidao_jpg}')
-
                 for frase in IDENTIFICADOR_DE_CERTIDAO:
-                    print(f'tem frase? {frase in certidao_jpg}')
                     if frase in certidao_jpg:
-                        print(f'fA frase é: {frase}')
                         if frase == 'GOVERNO DO DISTRITO FEDERAL':
                             junta = self.opcao_de_identificador_1(frase, certidao_jpg)
                         else:
                             junta = self.opcao_de_identificador_2(frase, certidao_jpg)
-                            print(f'Junta 1 {junta}')
                         if ':' in junta:
                             retira = junta.split(':')
                             volta = ' '.join(retira)
                             junta = volta
-                            print(f'Junta 2 {junta}')
                         print(f'Resultado {IDENTIFICADOR_TRADUZIDO[frase]} - {junta}.pdf')
                         shutil.move(
                             f'{imagem_da_certidao[0:-4]}.pdf',

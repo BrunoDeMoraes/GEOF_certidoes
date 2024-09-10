@@ -82,7 +82,7 @@ class Tst(Certidao):
         payday = f'{self.dia_c}/{self.mes_c}/{self.ano_c}'
         data_do_pagamento = time.strptime(payday, DATA_NACIONAL)
         self.mensagem_de_log_sem_data(
-            f'    TST   - emissão: {emissao}; válida até: {vencimento}',
+            f'    TST - emissão: {emissao}; válida até: {vencimento}',
             self.caminho_de_log
         )
         if validação_de_cnpj in self.lista_de_cnpj:
