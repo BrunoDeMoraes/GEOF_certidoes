@@ -561,6 +561,8 @@ class Certidao(Log, Conexao, Barra):
                         if frase == 'GOVERNO DO DISTRITO FEDERAL':
                             junta = self.opcao_de_identificador_1(frase, certidao_jpg)
                         else:
+                            print(f'A frase: {frase}')
+                            print(f'A certidão:\n{certidao_jpg}')
                             junta = self.opcao_de_identificador_2(frase, certidao_jpg)
                         if ':' in junta:
                             retira = junta.split(':')
