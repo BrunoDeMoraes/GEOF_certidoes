@@ -47,9 +47,6 @@ class Cgu(Certidao):
             )
             raise Exception(f'{emp} - {ARQUIVOS_INVALIDOS[5]}.')
         texto = []
-
-        print(f'É certidão que tu quer?\n\n{certidao}\n\n')
-
         padrao = re.compile(PADRAO_CGU[0])
         emissao_string = padrao.search(certidao)
         try:
