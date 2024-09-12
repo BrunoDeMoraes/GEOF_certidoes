@@ -385,7 +385,9 @@ IDENTIFICADOR_DE_VALIDADE = {
         'aneiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
         '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'),
 
-    'CONTROLADORIA-GERAL DA UNIÃO': 'até o dia (\d\d)/(\d\d)/(\d\d\d\d)'
+    'CONTROLADORIA-GERAL DA UNIÃO': 'até o dia (\d\d)/(\d\d)/(\d\d\d\d)',
+
+    'consulta consolidada': 'Data consulta: (\d\d)/(\d\d)/(\d\d\d\d)'
 }
 
 IDENTIFICADOR_DE_VALIDADE_2 = {

@@ -507,22 +507,18 @@ class Certidao(Log, Conexao, Barra):
         return validade
 
     def opcao_de_identificador_2(self, frase, documento):
-        if frase == 'CONTROLADORIA-GERAL DA UNIÃO':
-            if 'Data consulta' in documento:
-                print('Tá lá')
-
         validade_separada = self.buscar_data(frase, documento, IDENTIFICADOR_DE_VALIDADE)
         hoje = date.today()
         if validade_separada[-1] == '2028' and int(hoje.year) not in [2027, 2028]:
             validade_separada[-1] = '2023'
-        validade = '-'.join(data_separada)
+        validade = '-'.join(validade_separada)
         return validade
 
 
     def buscar_data(self, frase, documento, id_validade):
-        data = re.compile(
-            id_validade[frase]
-        )
+        if frase == 'CONTROLADORIA-GERAL DA UNIÃO' and 'Data consulta' in documento:
+            frase = 'consulta consolidada'
+        data = re.compile(id_validade[frase])
         procura = data.search(documento)
         datanome = procura.group()
         separa = datanome.split('/')
