@@ -291,7 +291,7 @@ IDENTIFICADOR_DE_CERTIDAO = (
     'JUSTIÇA DO TRABALHO',
     'MINISTÉRIO DA FAZENDA',
     'GOVERNO DO DISTRITO FEDERAL',
-    'Corregedoria-Geral da União'
+    'CONTROLADORIA-GERAL DA UNIÃO'
 )
 
 LOG_INEXISTENTE = (
@@ -364,7 +364,7 @@ IDENTIFICADOR_TRADUZIDO = {
     'JUSTIÇA DO TRABALHO': 'TST',
     'MINISTÉRIO DA FAZENDA': 'UNIÃO',
     'GOVERNO DO DISTRITO FEDERAL': 'GDF',
-    'Corregedoria-Geral da União': 'CGU'
+    'CONTROLADORIA-GERAL DA UNIÃO': 'CGU'
 }
 
 IDENTIFICADOR_DE_VALIDADE = {
@@ -385,7 +385,7 @@ IDENTIFICADOR_DE_VALIDADE = {
         'aneiro)?(fevereiro)?(março)?(abril)?(maio)?(junho)?(julho)?(agosto)?'
         '(setembro)?(outubro)?(novembro)?(dezembro)? de (\d\d\d\d)'),
 
-    'Corregedoria-Geral da União': 'até o dia (\d\d)/(\d\d)/(\d\d\d\d)'
+    'CONTROLADORIA-GERAL DA UNIÃO': 'até o dia (\d\d)/(\d\d)/(\d\d\d\d)'
 }
 
 IDENTIFICADOR_DE_VALIDADE_2 = {

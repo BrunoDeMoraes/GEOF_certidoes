@@ -405,6 +405,7 @@ class Certidao(Log, Conexao, Barra):
                         f'empresa: {emp}\n\n{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
                     )
 
+                print(f' Não sei o que é empresa[emp] - {self.empresas[emp]}')
                 if len(self.empresas[emp]) > 3:
                     if val and cnpj_para_comparação == self.empresas[emp][3]:
                         empresadic[ORGAOS[index]] = 'OK-MATRIZ'
@@ -498,36 +499,35 @@ class Certidao(Log, Conexao, Barra):
 
     def opcao_de_identificador_1(self, frase, documento):
         try:
-            data = re.compile(
-                IDENTIFICADOR_DE_VALIDADE_2[frase]
-            )
-            procura = data.search(documento)
-            datanome = procura.group()
-            separa = datanome.split('/')
-            junta = '-'.join(separa)
+            validade_separada = self.buscar_data(frase, documento, IDENTIFICADOR_DE_VALIDADE_2)
+            validade = '-'.join(validade_separada)
         except AttributeError:
-            data = re.compile(
-                IDENTIFICADOR_DE_VALIDADE[frase]
-            )
-            procura = data.search(documento)
-            datanome = procura.group()
-            separa = datanome.split('/')
-            junta = '-'.join(separa)
-        return junta
+            validade_separada = self.buscar_data(frase, documento, IDENTIFICADOR_DE_VALIDADE)
+            validade = '-'.join(validade_separada)
+        return validade
 
     def opcao_de_identificador_2(self, frase, documento):
+        if frase == 'CONTROLADORIA-GERAL DA UNIÃO':
+            if 'Data consulta' in documento:
+                print('Tá lá')
+
+        validade_separada = self.buscar_data(frase, documento, IDENTIFICADOR_DE_VALIDADE)
+        hoje = date.today()
+        if validade_separada[-1] == '2028' and int(hoje.year) not in [2027, 2028]:
+            validade_separada[-1] = '2023'
+        validade = '-'.join(data_separada)
+        return validade
+
+
+    def buscar_data(self, frase, documento, id_validade):
         data = re.compile(
-            IDENTIFICADOR_DE_VALIDADE[frase]
+            id_validade[frase]
         )
         procura = data.search(documento)
         datanome = procura.group()
         separa = datanome.split('/')
-        hoje = date.today()
+        return separa
 
-        if separa[-1] == '2028' and int(hoje.year) not in [2027, 2028]:
-            separa[-1] = '2023'
-        junta = '-'.join(separa)
-        return junta
 
     def pdf_para_jpg_para_renomear_arquivos(self, arquivo_selecionado):
         print(CRIANDO_IMAGENS[0])
