@@ -376,7 +376,7 @@ class Certidao(Log, Conexao, Barra):
                 if certidao == 'Restrição':
                     empresadic[ORGAOS[index]] = 'RESTRIÇÃO'
                 else:
-                    self.percentual += (25 / len(self.empresas))
+                    self.percentual += (20 / len(self.empresas))
                     print(f'   Total executado: {self.percentual:.2f}%')
                     self.valor_da_barra(self.percentual)
                     try:
@@ -666,7 +666,7 @@ class Certidao(Log, Conexao, Barra):
                         pages = convert_from_path(pdf_file, 300, last_page=1)
                         pdf_file = pdf_file[:-4]
                         pages[0].save(f"{pdf_file}.jpg", "JPEG")
-                        self.percentual += (25 / len(self.empresas))
+                        self.percentual += (20 / len(self.empresas))
                         print(
                             f'Total de imagens criadas: '
                             f'{self.percentual:.2f}%'
@@ -700,7 +700,7 @@ class Certidao(Log, Conexao, Barra):
                         )
                         for frase in IDENTIFICADOR_DE_CERTIDAO:
                             if frase in certidao:
-                                self.percentual += (25 / len(self.empresas))
+                                self.percentual += (20 / len(self.empresas))
                                 print(
                                     (
                                         f'{emp} - certidão '
