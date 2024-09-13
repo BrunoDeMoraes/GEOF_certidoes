@@ -26,10 +26,13 @@ class Cgu(Certidao):
         os.chdir(f'{self.pasta_de_certidões}/{str(emp)}')
         for imagem in os.listdir(f'{self.pasta_de_certidões}/{str(emp)}'):
             if imagem.endswith(".jpg") and imagem.split()[0] == 'CGU':
-                certidao = pytesseract.image_to_string(
-                    Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
-                    lang='por')
-                return certidao
+                if 'Data consulta' in imagem:
+                    return 'Restrição'
+                else:
+                    certidao = pytesseract.image_to_string(
+                        Image.open(f'{self.pasta_de_certidões}/{emp}/{imagem}'),
+                        lang='por')
+                    return certidao
 
     def confere_data(self, certidao, emp):
         self.listar_cnpjs()

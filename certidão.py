@@ -373,61 +373,62 @@ class Certidao(Log, Conexao, Barra):
                 objeto.empresas = self.empresas
                 objeto.lista_de_cnpj = self.lista_de_cnpj
                 certidao = objeto.pega_string(emp)
-                self.percentual += (25 / len(self.empresas))
-                print(f'   Total executado: {self.percentual:.2f}%')
-                self.valor_da_barra(self.percentual)
-                try:
-                    val, cnpj_para_comparação = objeto.confere_data(
-                        certidao, emp
-                    )
-                except:
-                    self.destruir_barra_de_progresso()
-                    raise
-                try:
-                    self.empresas[emp][1]
-                except IndexError:
-                    messagebox.showerror(
-                        DADOS_DO_FORNECEDOR_COM_ERRO[0],
-                        (
-                            f'empresa: {emp}\n\n'
-                            f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
-                        )
-                    )
-                    self.mensagem_de_log_completa(
-                        (
-                            f'empresa: {emp}\n\n'
-                            f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
-                        ),
-                        self.caminho_de_log
-                    )
-                    self.destruir_barra_de_progresso()
-                    raise Exception(
-                        f'empresa: {emp}\n\n{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
-                    )
-
-                print(f' Não sei o que é empresa[emp] - {self.empresas[emp]}')
-                if len(self.empresas[emp]) > 3:
-                    if val and cnpj_para_comparação == self.empresas[emp][3]:
-                        empresadic[ORGAOS[index]] = 'OK-MATRIZ'
-                    elif (
-                            val
-                            and cnpj_para_comparação == self.empresas[emp][1]
-                    ):
-                        empresadic[ORGAOS[index]] = 'OK'
-                    elif (
-                            cnpj_para_comparação != self.empresas[emp][1]
-                            and cnpj_para_comparação != self.empresas[emp][3]
-                    ):
-                        empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
-                    else:
-                        empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
+                if certidao == 'Restrição':
+                    empresadic[ORGAOS[index]] = 'RESTRIÇÃO'
                 else:
-                    if val and cnpj_para_comparação == self.empresas[emp][1]:
-                        empresadic[ORGAOS[index]] = 'OK'
-                    elif cnpj_para_comparação != self.empresas[emp][1]:
-                        empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
+                    self.percentual += (25 / len(self.empresas))
+                    print(f'   Total executado: {self.percentual:.2f}%')
+                    self.valor_da_barra(self.percentual)
+                    try:
+                        val, cnpj_para_comparação = objeto.confere_data(
+                            certidao, emp
+                        )
+                    except:
+                        self.destruir_barra_de_progresso()
+                        raise
+                    try:
+                        self.empresas[emp][1]
+                    except IndexError:
+                        messagebox.showerror(
+                            DADOS_DO_FORNECEDOR_COM_ERRO[0],
+                            (
+                                f'empresa: {emp}\n\n'
+                                f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                            )
+                        )
+                        self.mensagem_de_log_completa(
+                            (
+                                f'empresa: {emp}\n\n'
+                                f'{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                            ),
+                            self.caminho_de_log
+                        )
+                        self.destruir_barra_de_progresso()
+                        raise Exception(
+                            f'empresa: {emp}\n\n{DADOS_DO_FORNECEDOR_COM_ERRO[1]}'
+                        )
+                    if len(self.empresas[emp]) > 3:
+                        if val and cnpj_para_comparação == self.empresas[emp][3]:
+                            empresadic[ORGAOS[index]] = 'OK-MATRIZ'
+                        elif (
+                                val
+                                and cnpj_para_comparação == self.empresas[emp][1]
+                        ):
+                            empresadic[ORGAOS[index]] = 'OK'
+                        elif (
+                                cnpj_para_comparação != self.empresas[emp][1]
+                                and cnpj_para_comparação != self.empresas[emp][3]
+                        ):
+                            empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
+                        else:
+                            empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
                     else:
-                        empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
+                        if val and cnpj_para_comparação == self.empresas[emp][1]:
+                            empresadic[ORGAOS[index]] = 'OK'
+                        elif cnpj_para_comparação != self.empresas[emp][1]:
+                            empresadic[ORGAOS[index]] = 'CNPJ-ERRO'
+                        else:
+                            empresadic[ORGAOS[index]] = 'INCOMPATÍVEL'
                 index += 1
             self.empresasdic[emp] = empresadic
 
