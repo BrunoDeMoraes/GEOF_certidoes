@@ -375,6 +375,13 @@ class Certidao(Log, Conexao, Barra):
                 certidao = objeto.pega_string(emp)
                 if certidao == 'Restrição':
                     empresadic[ORGAOS[index]] = 'RESTRIÇÃO'
+                    self.percentual += (20 / len(self.empresas))
+                    print(f'   Total executado: {self.percentual:.2f}%')
+                    self.valor_da_barra(self.percentual)
+                    self.mensagem_de_log_sem_data(
+                        f'    CGU - Resultado de consulta consolidada',
+                        self.caminho_de_log
+                    )
                 else:
                     self.percentual += (20 / len(self.empresas))
                     print(f'   Total executado: {self.percentual:.2f}%')
