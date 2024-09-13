@@ -463,6 +463,7 @@ class Certidao(Log, Conexao, Barra):
                 if (
                         self.empresasdic[emp][orgao] == 'INCOMPATÍVEL'
                         or self.empresasdic[emp][orgao] == 'CNPJ-ERRO'
+                        or self.empresasdic[emp][orgao] == 'RESTRIÇÃO'
                 ):
                     certidoes_a_atualizar.append(orgao)
             if len(certidoes_a_atualizar) > 0:
